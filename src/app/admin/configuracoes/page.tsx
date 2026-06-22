@@ -429,8 +429,6 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
