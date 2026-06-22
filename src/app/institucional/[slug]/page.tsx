@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
-const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
+const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+const PAGES_COL_ID = (process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages").trim();
 
 async function getPageData(slug: string) {
   try {
