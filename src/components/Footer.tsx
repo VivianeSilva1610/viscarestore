@@ -136,7 +136,7 @@ export default function Footer() {
             </h5>
             <ul className="space-y-3">
               {[
-                { label: "Sobre a Aura", href: "#" },
+                { label: "Sobre a VisCaree", href: "#" },
                 { label: "Nossa Missão", href: "#" },
                 { label: "Autenticidade", href: "#" },
                 { label: "App Skincare (Cuidado)", href: "https://viscare.vercel.app/", external: true },
