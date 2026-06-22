@@ -17,6 +17,7 @@ interface Product {
   volume?: string;
   activeIngredient?: string;
   sizes?: string[];
+  inStock?: boolean;
 }
 
 export default function ProductGrid() {
@@ -37,6 +38,7 @@ export default function ProductGrid() {
       description: "Alta Perfumaria • 100ml",
       details: "Notas Olfativas: Jasmin Imperial, Sândalo de Mysore e Bergamota da Calábria. Uma fragrância marcante e sofisticada desenvolvida sob medida para a alma contemporânea.",
       volume: "100ml",
+      inStock: false,
     },
     {
       id: "prod_serum",
@@ -47,6 +49,7 @@ export default function ProductGrid() {
       description: "Alta Tecnologia • 30ml",
       details: "Indicação Técnica: Ácido Hialurônico Concentrado 2% + Niacinamida 5%. Estimula a regeneração celular profunda, devolvendo viço, elasticidade e luminosidade natural à pele.",
       activeIngredient: "Ácido Hialurônico",
+      inStock: false,
     },
     {
       id: "prod_dress",
@@ -57,6 +60,7 @@ export default function ProductGrid() {
       description: "Seda Pura 100%",
       details: "Vestido fluído drapeado em seda pura na cor Nude Rosé. Modelagem premium que abraça as curvas com leveza, toque aveludado e movimento sofisticado.",
       sizes: ["P", "M", "G"],
+      inStock: false,
     },
     {
       id: "prod_bag",
@@ -66,6 +70,7 @@ export default function ProductGrid() {
       image: "/images/handbag.png",
       description: "Couro Legítimo Italiano",
       details: "Design atemporal estruturado em couro nobre cor areia, com fecho e detalhes finos em metal banhado a ouro suave. Perfeita para finalizar visuais elegantes.",
+      inStock: false,
     },
   ];
 
@@ -155,7 +160,12 @@ export default function ProductGrid() {
                 />
 
                 {/* Details Floating Badge (Volume or Active Ingredient) */}
-                <div className="absolute top-4 left-4 z-10">
+                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 items-start">
+                  {product.inStock === false && (
+                    <span className="bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
+                      Esgotado
+                    </span>
+                  )}
                   {product.volume && (
                     <span className="glass-card text-[9px] font-sans-premium tracking-widest text-neutral-800 uppercase px-2.5 py-1 rounded-full font-semibold">
                       {product.volume}
@@ -209,10 +219,17 @@ export default function ProductGrid() {
 
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="w-full py-3 bg-neutral-900 text-white font-sans-premium text-[10px] tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-lg rounded-xl flex items-center justify-center space-x-2"
+                    disabled={product.inStock === false}
+                    className="w-full py-3 bg-neutral-900 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-sans-premium text-[10px] tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-lg rounded-xl flex items-center justify-center space-x-2"
                   >
-                    <Plus size={14} />
-                    <span>Adicionar à Sacola</span>
+                    {product.inStock === false ? (
+                      <span>Esgotado</span>
+                    ) : (
+                      <>
+                        <Plus size={14} />
+                        <span>Adicionar à Sacola</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -330,10 +347,17 @@ export default function ProductGrid() {
                         handleAddToCart(selectedProductDetails);
                         setSelectedProductDetails(null);
                       }}
-                      className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-md rounded-xl flex items-center justify-center space-x-2"
+                      disabled={selectedProductDetails.inStock === false}
+                      className="w-full py-4 bg-neutral-900 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-md rounded-xl flex items-center justify-center space-x-2"
                     >
-                      <Plus size={14} />
-                      <span>Adicionar à Sacola</span>
+                      {selectedProductDetails.inStock === false ? (
+                        <span>Esgotado</span>
+                      ) : (
+                        <>
+                          <Plus size={14} />
+                          <span>Adicionar à Sacola</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
