@@ -6,6 +6,7 @@ export interface CartItem {
   id: string;
   name: string;
   price: number;
+  weight_kg: number;
   image: string;
   quantity: number;
   size?: string;
@@ -21,6 +22,7 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  cartTotalWeight: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
 }
@@ -99,6 +101,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const cartTotalWeight = cart.reduce((total, item) => total + (item.weight_kg || 0.5) * item.quantity, 0);
 
   return (
     <CartContext.Provider
@@ -110,6 +113,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         cartCount,
         cartTotal,
+        cartTotalWeight,
         isCartOpen,
         setIsCartOpen,
       }}

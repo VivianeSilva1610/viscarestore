@@ -15,6 +15,7 @@ export default function CartDrawer() {
     updateQuantity,
     removeFromCart,
     cartTotal,
+    cartTotalWeight,
     cartCount,
   } = useCart();
   const { user, profile } = useAuth();
@@ -210,46 +211,121 @@ export default function CartDrawer() {
               </div>
 
               {/* Checkout Panel Footer */}
-              {cart.length > 0 && (
-                <div className="px-6 py-6 border-t border-dourado-suave/10 bg-white/50 space-y-4">
-                  <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
-                    <span>Subtotal</span>
-                    <span className="text-neutral-900 font-semibold">
-                      R$ {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </span>
+              {cart.length > 0 && (() => {
+                const [shippingCountry, setShippingCountry] = useState<"BR" | "IT" | "">("");
+                const [shippingMethod, setShippingMethod] = useState<"PAC" | "SEDEX" | "POSTE" | "">("");
+                
+                const getPosteItalianeRateEUR = (weight: number) => {
+                  if (weight <= 1) return 32.80;
+                  if (weight <= 3) return 40.35;
+                  if (weight <= 5) return 64.00;
+                  if (weight <= 10) return 84.40;
+                  if (weight <= 15) return 109.15;
+                  return 132.25;
+                };
+
+                const EUR_TO_BRL = 6.00; // Fixed conversion rate for MVP
+
+                let shippingCost = 0;
+                let shippingName = "A calcular";
+
+                if (shippingCountry === "BR") {
+                  if (shippingMethod === "PAC") {
+                    shippingCost = cartTotal >= freeShippingThreshold ? 0 : 25.00;
+                    shippingName = "Correios PAC";
+                  } else if (shippingMethod === "SEDEX") {
+                    shippingCost = 45.00;
+                    shippingName = "Correios SEDEX";
+                  } else if (shippingMethod === "POSTE") {
+                    shippingCost = getPosteItalianeRateEUR(cartTotalWeight) * EUR_TO_BRL;
+                    shippingName = "Poste Italiane (Internacional)";
+                  }
+                } else if (shippingCountry === "IT") {
+                  shippingCost = 10.00 * EUR_TO_BRL; // €10 fixed for Italy
+                  shippingName = "Poste Italiane (Local)";
+                }
+
+                const finalTotal = cartTotal + shippingCost;
+
+                return (
+                  <div className="px-6 py-6 border-t border-dourado-suave/10 bg-white/50 space-y-4">
+                    
+                    {/* Shipping Calculator UI */}
+                    <div className="bg-[#F8F5F2] p-4 rounded-xl border border-dourado-suave/20 space-y-3">
+                      <h4 className="font-sans-premium text-[10px] tracking-widest text-neutral-800 uppercase font-bold">
+                        Calcule seu Frete
+                      </h4>
+                      <p className="font-sans-premium text-[9px] text-neutral-500">
+                        Peso total: <span className="font-semibold text-neutral-700">{cartTotalWeight.toFixed(2)} kg</span>
+                      </p>
+                      
+                      <select 
+                        className="w-full text-xs font-sans-premium p-2 rounded-lg border border-neutral-200 focus:border-dourado-suave focus:outline-none"
+                        value={shippingCountry}
+                        onChange={(e) => {
+                          setShippingCountry(e.target.value as any);
+                          setShippingMethod("");
+                        }}
+                      >
+                        <option value="">Selecione o País de Destino...</option>
+                        <option value="BR">Brasil 🇧🇷</option>
+                        <option value="IT">Itália 🇮🇹</option>
+                      </select>
+
+                      {shippingCountry === "BR" && (
+                        <select 
+                          className="w-full text-xs font-sans-premium p-2 rounded-lg border border-neutral-200 focus:border-dourado-suave focus:outline-none"
+                          value={shippingMethod}
+                          onChange={(e) => setShippingMethod(e.target.value as any)}
+                        >
+                          <option value="">Selecione o método de envio...</option>
+                          <option value="PAC">Correios PAC (Nacional)</option>
+                          <option value="SEDEX">Correios SEDEX (Nacional)</option>
+                          <option value="POSTE">Poste Italiane (Internacional &rarr; Brasil)</option>
+                        </select>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600 pt-2">
+                      <span>Subtotal</span>
+                      <span className="text-neutral-900 font-semibold">
+                        R$ {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
+                      <span>Frete</span>
+                      <span className="text-dourado-suave font-semibold text-[10px] text-right">
+                        {shippingCost === 0 && shippingMethod ? "GRATUITO" : shippingCost > 0 ? `R$ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
+                        {shippingMethod === "POSTE" && <span className="block text-[8px] text-neutral-400 normal-case mt-0.5">(Aprox. €{getPosteItalianeRateEUR(cartTotalWeight).toFixed(2)})</span>}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-dashed border-dourado-suave/10 pt-4 flex justify-between font-serif-premium text-lg tracking-wide text-neutral-900">
+                      <span>Total Estimado</span>
+                      <span className="font-sans-premium text-base font-bold">
+                        R$ {finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+
+                    <p className="font-sans-premium text-[9px] text-neutral-400 leading-relaxed text-center tracking-wide">
+                      Transação de alta segurança • Embalagem exclusiva de presente VisCaree inclusa.
+                    </p>
+
+                    <button
+                      onClick={handleCheckout}
+                      disabled={isCheckingOut || (!shippingCountry)}
+                      className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave disabled:opacity-70 disabled:hover:bg-neutral-900 font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center space-x-2"
+                    >
+                      {isCheckingOut ? (
+                        <><Loader2 size={16} className="animate-spin" /> <span>Processando...</span></>
+                      ) : (
+                        <span>{!shippingCountry ? "Calcule o Frete para Finalizar" : "Finalizar Pedido"}</span>
+                      )}
+                    </button>
                   </div>
-
-                  <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
-                    <span>Frete</span>
-                    <span className="text-dourado-suave font-semibold text-[10px]">
-                      {cartTotal >= freeShippingThreshold ? "GRATUITO (VIP)" : "A calcular"}
-                    </span>
-                  </div>
-
-                  <div className="border-t border-dashed border-dourado-suave/10 pt-4 flex justify-between font-serif-premium text-lg tracking-wide text-neutral-900">
-                    <span>Valor Estimado</span>
-                    <span className="font-sans-premium text-base font-bold">
-                      R$ {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-
-                  <p className="font-sans-premium text-[9px] text-neutral-400 leading-relaxed text-center tracking-wide">
-                    Transação de alta segurança • Embalagem exclusiva de presente VisCaree inclusa.
-                  </p>
-
-                  <button
-                    onClick={handleCheckout}
-                    disabled={isCheckingOut}
-                    className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave disabled:opacity-70 disabled:hover:bg-neutral-900 font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center space-x-2"
-                  >
-                    {isCheckingOut ? (
-                      <><Loader2 size={16} className="animate-spin" /> <span>Processando...</span></>
-                    ) : (
-                      <span>Finalizar Pedido</span>
-                    )}
-                  </button>
-                </div>
-              )}
+                );
+              })()}
             </motion.div>
           </div>
 

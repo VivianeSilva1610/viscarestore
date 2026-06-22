@@ -21,6 +21,7 @@ interface Product {
   name_it: string;
   category: string;
   price: number;
+  weight_kg?: number;
   image: string;
   description_pt: string;
   description_it: string;
@@ -89,6 +90,7 @@ export default function ProductGrid() {
             name_it: doc.name_it || "",
             category: doc.category || "geral",
             price: doc.price || 0,
+            weight_kg: doc.weight_kg ?? 0.5,
             image: imageUrl,
             description_pt: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
             description_it: doc.description_it ? doc.description_it.substring(0, 50) + "..." : "",
@@ -127,6 +129,7 @@ export default function ProductGrid() {
       id: product.id,
       name: getProductName(product),
       price: product.price,
+      weight_kg: product.weight_kg ?? 0.5,
       image: product.image,
       category: product.category,
       description: "",

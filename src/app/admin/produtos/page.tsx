@@ -29,6 +29,7 @@ interface Product {
   description_pt: string;
   description_it: string;
   price: number;
+  weight_kg: number;
   category: string;
   image_id?: string;
   in_stock: boolean;
@@ -42,6 +43,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   description_pt: "",
   description_it: "",
   price: 0,
+  weight_kg: 0.5,
   category: "perfumes",
   image_id: "",
   in_stock: true,
@@ -122,6 +124,7 @@ export default function AdminProdutosPage() {
       description_pt: product.description_pt,
       description_it: product.description_it,
       price: product.price,
+      weight_kg: product.weight_kg ?? 0.5,
       category: product.category,
       image_id: product.image_id,
       in_stock: product.in_stock,
@@ -156,7 +159,7 @@ export default function AdminProdutosPage() {
         imageId = uploaded.$id;
       }
 
-      const data = { ...form, image_id: imageId, price: Number(form.price) };
+      const data = { ...form, image_id: imageId, price: Number(form.price), weight_kg: Number(form.weight_kg) };
 
       if (editingProduct) {
         await databases.updateDocument(DB_ID, COLLECTION_ID, editingProduct.$id, data);
@@ -472,8 +475,8 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                 </div>
               </div>
 
-              {/* Price, Category */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Price, Weight, Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
                     Preço (R$) *
@@ -487,6 +490,21 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                     onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                     placeholder="0,00"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Peso (Kg) *
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.weight_kg}
+                    onChange={(e) => setForm({ ...form, weight_kg: parseFloat(e.target.value) })}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="0.5"
                   />
                 </div>
                 <div>
