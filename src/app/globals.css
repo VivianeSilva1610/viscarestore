@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nude-rose: #F1E7E2;
+  --color-bege-rosado: #E7D8D0;
+  --color-dourado-suave: #C8A97E;
+  
+  --font-serif-premium: var(--font-cormorant-garamond);
+  --font-sans-premium: var(--font-montserrat);
+}
+
+:root {
+  --background: #F1E7E2;
+  --foreground: #1A1A1A;
+}
+
+/* Smooth Scrolling & Premium Scrollbars */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1E7E2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C8A97E;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b59469;
+}
+
+/* Custom glassmorphism and premium effects */
+.glass-nav {
+  background: rgba(241, 231, 226, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(200, 169, 126, 0.15);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(200, 169, 126, 0.1);
+}
+
+/* Subtle image zoom transition */
+.zoom-image {
+  transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.zoom-image:hover {
+  transform: scale(1.06);
+}
+
+/* Luxury button transitions */
+.luxury-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.luxury-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-dourado-suave);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.luxury-btn:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
