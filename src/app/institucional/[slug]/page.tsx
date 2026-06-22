@@ -5,8 +5,10 @@ import { databases } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import { notFound } from "next/navigation";
 
-// Forcing dynamic rendering
+// Forcing dynamic rendering and disabling fetch cache
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
 const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
