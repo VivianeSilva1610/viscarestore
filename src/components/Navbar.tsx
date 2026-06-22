@@ -42,6 +42,7 @@ export default function Navbar() {
     { name: "Skincare", href: "#skincare" },
     { name: "Vestidos", href: "#dresses" },
     { name: "Acessórios", href: "#accessories" },
+    { name: "Rotina Skincare", href: "https://viscare.vercel.app/", external: true },
   ];
 
   return (
@@ -62,6 +63,8 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
                   className="font-sans-premium text-xs tracking-[0.2em] text-neutral-800 hover:text-dourado-suave uppercase transition-colors duration-300 font-medium"
                 >
                   {link.name}
@@ -96,7 +99,13 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="font-sans-premium text-xs tracking-[0.2em] text-neutral-800 hover:text-dourado-suave uppercase transition-colors duration-300 font-medium"
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
+                  className={`font-sans-premium text-xs tracking-[0.2em] uppercase transition-colors duration-300 font-medium ${
+                    link.external
+                      ? "text-dourado-suave border-b border-dourado-suave/20 hover:border-dourado-suave pb-0.5"
+                      : "text-neutral-800 hover:text-dourado-suave"
+                  }`}
                 >
                   {link.name}
                 </a>
@@ -219,8 +228,14 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="font-sans-premium text-sm tracking-[0.2em] text-neutral-800 hover:text-dourado-suave uppercase font-medium border-b border-neutral-900/5 pb-2 inline-block transition-all duration-300"
+                  className={`font-sans-premium text-sm tracking-[0.2em] uppercase font-medium border-b border-neutral-900/5 pb-2 inline-block transition-all duration-300 ${
+                    link.external
+                      ? "text-dourado-suave font-semibold"
+                      : "text-neutral-800 hover:text-dourado-suave"
+                  }`}
                 >
                   {link.name}
                 </a>

@@ -135,10 +135,21 @@ export default function Footer() {
               Informações
             </h5>
             <ul className="space-y-3">
-              {["Sobre a Aura", "Nossa Missão", "Autenticidade", "Sustentabilidade", "Contato"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
-                    {item}
+              {[
+                { label: "Sobre a Aura", href: "#" },
+                { label: "Nossa Missão", href: "#" },
+                { label: "Autenticidade", href: "#" },
+                { label: "App Skincare (Cuidado)", href: "https://viscare.vercel.app/", external: true },
+                { label: "Contato", href: "#" }
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light"
+                  >
+                    {item.label}
                   </a>
                 </li>
               ))}
