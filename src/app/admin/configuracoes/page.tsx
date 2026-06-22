@@ -13,7 +13,20 @@ import {
   Store,
   Save,
   Key,
+  FileText,
 } from "lucide-react";
+import { databases, isAppwriteConfigured } from "../../../lib/appwrite";
+import { ID, Query } from "appwrite";
+
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
+
+interface PageDoc {
+  $id: string;
+  slug: string;
+  title: string;
+  content: string;
+}
 
 interface Diagnostics {
   appwrite: {
@@ -57,7 +70,21 @@ export default function AdminSettingsPage() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Fetch connectivity status
+  // Institutional Pages State
+  const [pages, setPages] = useState<PageDoc[]>([]);
+  const [selectedPageSlug, setSelectedPageSlug] = useState<string>("sobre-a-viscaree");
+  const [pageContent, setPageContent] = useState("");
+  const [isSavingPage, setIsSavingPage] = useState(false);
+  const [isLoadingPages, setIsLoadingPages] = useState(true);
+
+  const availablePages = [
+    { slug: "sobre-a-viscaree", title: "Sobre a VisCaree" },
+    { slug: "nossa-missao", title: "Nossa Missão" },
+    { slug: "politicas-de-frete", title: "Políticas de Frete" },
+    { slug: "devolucoes-e-trocas", title: "Devoluções & Trocas" },
+  ];
+
+  // Fetch connectivity status and pages
   const fetchDiagnostics = async () => {
     try {
       const res = await fetch("/api/admin/check-config");
@@ -72,9 +99,22 @@ export default function AdminSettingsPage() {
     }
   };
 
-  // Load store info from localStorage (demonstration/mock)
+  const fetchPages = async () => {
+    if (!isAppwriteConfigured()) { setIsLoadingPages(false); return; }
+    try {
+      const res = await databases.listDocuments(DB_ID, PAGES_COL_ID, [Query.limit(100)]);
+      setPages(res.documents as unknown as PageDoc[]);
+    } catch {
+      console.error("Erro ao carregar páginas.");
+    } finally {
+      setIsLoadingPages(false);
+    }
+  };
+
   useEffect(() => {
     fetchDiagnostics();
+    fetchPages();
+    
     const localStoreName = localStorage.getItem("viscare_store_name");
     const localEmail = localStorage.getItem("viscare_contact_email");
     const localPhone = localStorage.getItem("viscare_contact_phone");
@@ -87,6 +127,12 @@ export default function AdminSettingsPage() {
     if (localFreeShipping) setFreeShippingMin(Number(localFreeShipping));
     if (localInstagram) setInstagramUrl(localInstagram);
   }, []);
+
+  // Update editor content when selecting a different page
+  useEffect(() => {
+    const p = pages.find((page) => page.slug === selectedPageSlug);
+    setPageContent(p ? p.content : "");
+  }, [selectedPageSlug, pages]);
 
   // Save general store settings
   const handleSaveStoreSettings = (e: React.FormEvent) => {
@@ -122,6 +168,35 @@ export default function AdminSettingsPage() {
       showToast("error", err.message || "Erro ao atualizar senha. Verifique a senha atual.");
     } finally {
       setIsUpdatingPassword(false);
+    }
+  };
+
+  // Save Institutional Page
+  const handleSavePage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAppwriteConfigured()) return showToast("error", "Appwrite não configurado.");
+    
+    setIsSavingPage(true);
+    const existingPage = pages.find((p) => p.slug === selectedPageSlug);
+    const title = availablePages.find((p) => p.slug === selectedPageSlug)?.title || "Página";
+
+    try {
+      if (existingPage) {
+        await databases.updateDocument(DB_ID, PAGES_COL_ID, existingPage.$id, { content: pageContent });
+      } else {
+        await databases.createDocument(DB_ID, PAGES_COL_ID, ID.unique(), {
+          slug: selectedPageSlug,
+          title,
+          content: pageContent,
+        });
+      }
+      showToast("success", "Página salva com sucesso!");
+      fetchPages();
+    } catch (err) {
+      showToast("error", "Erro ao salvar a página.");
+      console.error(err);
+    } finally {
+      setIsSavingPage(false);
     }
   };
 
@@ -304,6 +379,74 @@ export default function AdminSettingsPage() {
                     <>
                       <Key size={14} />
                       Atualizar Senha
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Card 3: Institutional Pages Editor */}
+          <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-neutral-100 flex items-center gap-3 bg-neutral-50">
+              <FileText size={18} className="text-neutral-600" />
+              <h2 className="text-sm font-semibold text-neutral-800 tracking-wider uppercase">Páginas Institucionais (Rodapé)</h2>
+            </div>
+
+            <form onSubmit={handleSavePage} className="p-6 space-y-5">
+              <div>
+                <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                  Selecione a Página para Editar
+                </label>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {availablePages.map((page) => (
+                    <button
+                      key={page.slug}
+                      type="button"
+                      onClick={() => setSelectedPageSlug(page.slug)}
+                      className={`whitespace-nowrap px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                        selectedPageSlug === page.slug
+                          ? "bg-neutral-900 text-white"
+                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                      }`}
+                    >
+                      {page.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                  Conteúdo da Página
+                </label>
+                {isLoadingPages ? (
+                  <div className="w-full h-64 border border-neutral-200 rounded-xl flex items-center justify-center bg-neutral-50">
+                    <Loader2 size={24} className="animate-spin text-neutral-300" />
+                  </div>
+                ) : (
+                  <textarea
+                    value={pageContent}
+                    onChange={(e) => setPageContent(e.target.value)}
+                    rows={12}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-y bg-white"
+                    placeholder="Escreva o texto que vai aparecer no site aqui... (Aceita parágrafos e texto simples)"
+                  />
+                )}
+              </div>
+
+              <div className="flex justify-end pt-3 border-t border-neutral-100">
+                <button
+                  type="submit"
+                  disabled={isSavingPage || isLoadingPages}
+                  className="flex items-center gap-2 px-6 py-3 bg-[#C8A97E] hover:bg-[#b0946d] disabled:opacity-50 text-white text-xs tracking-widest uppercase font-semibold rounded-xl transition-colors duration-300"
+                >
+                  {isSavingPage ? (
+                    <><Loader2 size={14} className="animate-spin" /> Salvando...</>
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      Salvar Página
                     </>
                   )}
                 </button>

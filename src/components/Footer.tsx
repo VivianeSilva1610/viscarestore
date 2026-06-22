@@ -136,8 +136,8 @@ export default function Footer() {
             </h5>
             <ul className="space-y-3">
               {[
-                { label: "Sobre a VisCaree", href: "#" },
-                { label: "Nossa Missão", href: "#" },
+                { label: "Sobre a VisCaree", href: "/institucional/sobre-a-viscaree" },
+                { label: "Nossa Missão", href: "/institucional/nossa-missao" },
                 { label: "Autenticidade", href: "#" },
                 { label: "App Skincare (Cuidado)", href: "https://viscare.vercel.app/", external: true },
                 { label: "Contato", href: "#" }
@@ -162,10 +162,16 @@ export default function Footer() {
               Ajuda & Suporte
             </h5>
             <ul className="space-y-3">
-              {["Dúvidas Frequentes", "Políticas de Frete", "Devoluções & Trocas", "Guia de Notas Olfativas", "Tabela de Medidas"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
-                    {item}
+              {[
+                { label: "Dúvidas Frequentes", href: "#" },
+                { label: "Políticas de Frete", href: "/institucional/politicas-de-frete" },
+                { label: "Devoluções & Trocas", href: "/institucional/devolucoes-e-trocas" },
+                { label: "Guia de Notas Olfativas", href: "#" },
+                { label: "Tabela de Medidas", href: "#" }
+              ].map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
+                    {item.label}
                   </a>
                 </li>
               ))}
