@@ -134,7 +134,7 @@ export default function ProductGrid() {
               Coleção Modelo
             </span>
             <h2 className="font-serif-premium text-3xl sm:text-4xl tracking-wide text-neutral-900 font-light">
-              Nossa Curadoria Exclusiva
+              Uma seleção pensada para você
             </h2>
           </div>
           
