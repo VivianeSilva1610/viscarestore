@@ -26,7 +26,8 @@ async function getPageData(slug: string) {
 }
 
 export default async function InstitutionalPage({ params }: { params: { slug: string } }) {
-  const page = await getPageData(params.slug);
+  const normalizedSlug = decodeURIComponent(params.slug).replace(/\s+/g, '-').toLowerCase();
+  const page = await getPageData(normalizedSlug);
 
   if (!page) {
     notFound();
