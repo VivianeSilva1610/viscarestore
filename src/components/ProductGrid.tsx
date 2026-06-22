@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus, Loader2 } from "lucide-react";
+import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
+import { Query } from "appwrite";
+
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID || "";
+const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "";
+const CATEGORIES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
 
 interface Product {
   id: string;
@@ -28,51 +35,68 @@ export default function ProductGrid() {
   const [activeTab, setActiveTab] = useState<string>("todos");
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
 
-  const products: Product[] = [
-    {
-      id: "prod_perfume",
-      name: "L'Élixir d'Aura",
-      category: "Perfumes",
-      price: 890.0,
-      image: "/images/perfume.png",
-      description: "Alta Perfumaria • 100ml",
-      details: "Notas Olfativas: Jasmin Imperial, Sândalo de Mysore e Bergamota da Calábria. Uma fragrância marcante e sofisticada desenvolvida sob medida para a alma contemporânea.",
-      volume: "100ml",
-      inStock: false,
-    },
-    {
-      id: "prod_serum",
-      name: "Sérum Facial Regenerador",
-      category: "Skincare",
-      price: 420.0,
-      image: "/images/serum.png",
-      description: "Alta Tecnologia • 30ml",
-      details: "Indicação Técnica: Ácido Hialurônico Concentrado 2% + Niacinamida 5%. Estimula a regeneração celular profunda, devolvendo viço, elasticidade e luminosidade natural à pele.",
-      activeIngredient: "Ácido Hialurônico",
-      inStock: false,
-    },
-    {
-      id: "prod_dress",
-      name: "Vestido Fluído em Seda Nude",
-      category: "Vestidos",
-      price: 1850.0,
-      image: "/images/dress.png",
-      description: "Seda Pura 100%",
-      details: "Vestido fluído drapeado em seda pura na cor Nude Rosé. Modelagem premium que abraça as curvas com leveza, toque aveludado e movimento sofisticado.",
-      sizes: ["P", "M", "G"],
-      inStock: false,
-    },
-    {
-      id: "prod_bag",
-      name: "Bolsa Estruturada Minimalista",
-      category: "Acessórios",
-      price: 2400.0,
-      image: "/images/handbag.png",
-      description: "Couro Legítimo Italiano",
-      details: "Design atemporal estruturado em couro nobre cor areia, com fecho e detalhes finos em metal banhado a ouro suave. Perfeita para finalizar visuais elegantes.",
-      inStock: false,
-    },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{label: string, value: string}[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch products and categories from Appwrite
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (!isAppwriteConfigured()) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          databases.listDocuments(DB_ID, COLLECTION_ID, [
+            Query.orderDesc("$createdAt"),
+            Query.limit(100),
+          ]),
+          databases.listDocuments(DB_ID, CATEGORIES_COL_ID, [
+            Query.limit(50),
+          ]),
+        ]);
+
+        const formattedCategories = catRes.documents.map((c: any) => ({
+          label: c.label,
+          value: c.value,
+        }));
+        setCategories(formattedCategories);
+
+        const formattedProducts = prodRes.documents.map((doc: any): Product => {
+          let imageUrl = "/images/perfume.png"; // Fallback image
+          if (doc.image_id) {
+            imageUrl = storage.getFilePreview(BUCKET_ID, doc.image_id).toString();
+          }
+
+          let sizesArr = undefined;
+          if (doc.sizes && doc.sizes.trim() !== "") {
+            sizesArr = doc.sizes.split(",").map((s: string) => s.trim());
+          }
+
+          return {
+            id: doc.$id,
+            name: doc.name_pt || "Sem nome",
+            category: doc.category || "geral",
+            price: doc.price || 0,
+            image: imageUrl,
+            description: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
+            details: doc.description_pt || "",
+            sizes: sizesArr,
+            inStock: doc.in_stock,
+          };
+        });
+        
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error("Error fetching data from Appwrite", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSizes((prev) => ({
@@ -116,16 +140,31 @@ export default function ProductGrid() {
           
           {/* Navigation Filter Tabs */}
           <div className="flex flex-wrap gap-2 sm:gap-4 border-b border-neutral-900/5 pb-2">
-            {["todos", "perfumes", "skincare", "vestidos", "acessórios"].map((tab) => (
+            <button
+              onClick={() => setActiveTab("todos")}
+              className={`font-sans-premium text-[10px] sm:text-xs tracking-[0.2em] uppercase py-2 px-3 transition-colors duration-300 font-medium relative ${
+                activeTab === "todos" ? "text-dourado-suave" : "text-neutral-500 hover:text-neutral-800"
+              }`}
+            >
+              Todos
+              {activeTab === "todos" && (
+                <motion.div
+                  layoutId="activeTabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-dourado-suave"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+            </button>
+            {categories.map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
                 className={`font-sans-premium text-[10px] sm:text-xs tracking-[0.2em] uppercase py-2 px-3 transition-colors duration-300 font-medium relative ${
-                  activeTab === tab ? "text-dourado-suave" : "text-neutral-500 hover:text-neutral-800"
+                  activeTab === tab.value ? "text-dourado-suave" : "text-neutral-500 hover:text-neutral-800"
                 }`}
               >
-                {tab}
-                {activeTab === tab && (
+                {tab.label}
+                {activeTab === tab.value && (
                   <motion.div
                     layoutId="activeTabIndicator"
                     className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-dourado-suave"
@@ -138,6 +177,15 @@ export default function ProductGrid() {
         </div>
 
         {/* Products Grid */}
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin text-dourado-suave" size={32} />
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-neutral-400 font-sans-premium tracking-wide">Nenhum produto encontrado nesta categoria.</p>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {filteredProducts.map((product) => (
             <motion.div
@@ -255,6 +303,7 @@ export default function ProductGrid() {
             </motion.div>
           ))}
         </div>
+        )}
       </div>
 
       {/* Product Details Modal (Quick View) */}
