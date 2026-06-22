@@ -20,6 +20,7 @@ import {
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
 const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID || "";
 const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "";
+const CATEGORIES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
 
 interface Product {
   $id: string;
@@ -48,15 +49,16 @@ const emptyProduct: Omit<Product, "$id"> = {
   sizes: "",
 };
 
-const categories = [
-  { value: "perfumes", label: "Alta Perfumaria" },
-  { value: "skincare", label: "Cosméticos & Skincare" },
-  { value: "vestidos", label: "Vestidos" },
-  { value: "acessorios", label: "Acessórios & Bolsas" },
-];
+// Categories will be fetched from Appwrite
+interface Category {
+  $id: string;
+  label: string;
+  value: string;
+}
 
 export default function AdminProdutosPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -77,13 +79,21 @@ export default function AdminProdutosPage() {
   const fetchProducts = async () => {
     if (!configured) { setIsLoading(false); return; }
     try {
-      const res = await databases.listDocuments(DB_ID, COLLECTION_ID, [
-        Query.orderDesc("$createdAt"),
-        Query.limit(100),
+      // Fetch both products and categories in parallel
+      const [productsRes, categoriesRes] = await Promise.all([
+        databases.listDocuments(DB_ID, COLLECTION_ID, [
+          Query.orderDesc("$createdAt"),
+          Query.limit(100),
+        ]),
+        databases.listDocuments(DB_ID, CATEGORIES_COL_ID, [
+          Query.orderDesc("$createdAt"),
+          Query.limit(100),
+        ])
       ]);
-      setProducts(res.documents as unknown as Product[]);
+      setProducts(productsRes.documents as unknown as Product[]);
+      setCategories(categoriesRes.documents as unknown as Category[]);
     } catch {
-      showToast("error", "Erro ao carregar produtos.");
+      showToast("error", "Erro ao carregar dados.");
     } finally {
       setIsLoading(false);
     }
@@ -343,6 +353,7 @@ export default function AdminProdutosPage() {
 NEXT_PUBLIC_APPWRITE_PROJECT_ID=seu_project_id_aqui
 NEXT_PUBLIC_APPWRITE_DATABASE_ID=seu_database_id_aqui
 NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID=seu_collection_id_aqui
+NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID=categories
 NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
         </pre>
         <p className="text-neutral-500 text-xs mt-4">
@@ -487,8 +498,9 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
                   >
+                      <option value="" disabled>Selecione uma categoria...</option>
                     {categories.map((c) => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
+                      <option key={c.$id} value={c.value}>{c.label}</option>
                     ))}
                   </select>
                 </div>
