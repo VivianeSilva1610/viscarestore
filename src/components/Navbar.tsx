@@ -3,20 +3,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { ShoppingBag, Search, User, Menu, X, LogOut, ChevronDown } from "lucide-react";
+import { ShoppingBag, Search, User, Menu, X, LogOut, ChevronDown, Globe } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
+import { dictionary } from "../locales/dictionary";
 
 export default function Navbar() {
   const { setIsCartOpen, cartCount } = useCart();
   const { isLoggedIn, profile, logout } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setIsUserMenuOpen(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setIsLangMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -36,13 +44,15 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const t = dictionary[language].nav;
+
   const navLinks = [
-    { name: "Novidades", href: "#new-arrivals" },
-    { name: "Perfumes", href: "#perfumes" },
-    { name: "Skincare", href: "#skincare" },
-    { name: "Vestidos", href: "#dresses" },
-    { name: "Acessórios", href: "#accessories" },
-    { name: "Rotina Skincare", href: "https://viscare.vercel.app/", external: true },
+    { name: t.novidades, href: "#new-arrivals" },
+    { name: t.perfumes, href: "#perfumes" },
+    { name: t.skincare, href: "#skincare" },
+    { name: t.vestidos, href: "#dresses" },
+    { name: t.acessorios, href: "#accessories" },
+    { name: t.rotina_skincare, href: "https://viscare.vercel.app/", external: true },
   ];
 
   return (
@@ -114,6 +124,34 @@ export default function Navbar() {
 
             {/* Icons Actions - Right Side */}
             <div className="flex items-center space-x-4 sm:space-x-6">
+              {/* Language Switcher */}
+              <div className="relative" ref={langMenuRef}>
+                <button
+                  onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  className="flex items-center gap-1 text-neutral-800 hover:text-dourado-suave p-1.5 transition-colors duration-300"
+                  aria-label="Idioma"
+                >
+                  <Globe size={18} strokeWidth={1.5} />
+                  <span className="text-xs font-semibold uppercase">{language}</span>
+                </button>
+                {isLangMenuOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-32 bg-white rounded-xl shadow-xl border border-neutral-100 py-2 z-50 overflow-hidden">
+                    <button
+                      onClick={() => { setLanguage("pt"); setIsLangMenuOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${language === "pt" ? "text-dourado-suave font-bold bg-[#F1E7E2]" : "text-neutral-700 hover:bg-neutral-50"}`}
+                    >
+                      🇧🇷 PT-BR
+                    </button>
+                    <button
+                      onClick={() => { setLanguage("it"); setIsLangMenuOpen(false); }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${language === "it" ? "text-dourado-suave font-bold bg-[#F1E7E2]" : "text-neutral-700 hover:bg-neutral-50"}`}
+                    >
+                      🇮🇹 IT
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button
                 className="text-neutral-800 hover:text-dourado-suave p-1.5 transition-colors duration-300"
                 aria-label="Buscar"

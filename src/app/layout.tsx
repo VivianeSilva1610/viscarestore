@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   keywords: "perfume de luxo, skincare premium, vestidos de seda, moda minimalista, alta perfumaria, viscaree, aura",
 };
 
+import { LanguageProvider } from "@/context/LanguageContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +34,9 @@ export default function RootLayout({
       className={`${cormorantGaramond.variable} ${montserrat.variable} h-full antialiasedScroll`}
     >
       <body className="min-h-full flex flex-col bg-[#F1E7E2] text-neutral-800 font-sans-premium overflow-x-hidden">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

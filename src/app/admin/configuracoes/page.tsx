@@ -73,7 +73,10 @@ export default function AdminSettingsPage() {
   // Institutional Pages State
   const [pages, setPages] = useState<PageDoc[]>([]);
   const [selectedPageSlug, setSelectedPageSlug] = useState<string>("sobre-a-viscaree");
+  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitleIt, setPageTitleIt] = useState("");
   const [pageContent, setPageContent] = useState("");
+  const [pageContentIt, setPageContentIt] = useState("");
   const [isSavingPage, setIsSavingPage] = useState(false);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
 
@@ -130,8 +133,11 @@ export default function AdminSettingsPage() {
 
   // Update editor content when selecting a different page
   useEffect(() => {
-    const p = pages.find((page) => page.slug === selectedPageSlug);
+    const p = pages.find((page) => page.slug === selectedPageSlug) as any;
+    setPageTitle(p ? p.title : availablePages.find(ap => ap.slug === selectedPageSlug)?.title || "");
+    setPageTitleIt(p && p.title_it ? p.title_it : "");
     setPageContent(p ? p.content : "");
+    setPageContentIt(p && p.content_it ? p.content_it : "");
   }, [selectedPageSlug, pages]);
 
   // Save general store settings
@@ -178,16 +184,23 @@ export default function AdminSettingsPage() {
     
     setIsSavingPage(true);
     const existingPage = pages.find((p) => p.slug === selectedPageSlug);
-    const title = availablePages.find((p) => p.slug === selectedPageSlug)?.title || "Página";
+    const title = pageTitle || availablePages.find((p) => p.slug === selectedPageSlug)?.title || "Página";
 
     try {
       if (existingPage) {
-        await databases.updateDocument(DB_ID, PAGES_COL_ID, existingPage.$id, { content: pageContent });
+        await databases.updateDocument(DB_ID, PAGES_COL_ID, existingPage.$id, { 
+          title,
+          content: pageContent,
+          title_it: pageTitleIt,
+          content_it: pageContentIt
+        });
       } else {
         await databases.createDocument(DB_ID, PAGES_COL_ID, ID.unique(), {
           slug: selectedPageSlug,
           title,
           content: pageContent,
+          title_it: pageTitleIt,
+          content_it: pageContentIt
         });
       }
       showToast("success", "Página salva com sucesso!");
@@ -418,21 +431,68 @@ export default function AdminSettingsPage() {
 
               <div>
                 <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                  Conteúdo da Página
-                </label>
-                {isLoadingPages ? (
-                  <div className="w-full h-64 border border-neutral-200 rounded-xl flex items-center justify-center bg-neutral-50">
-                    <Loader2 size={24} className="animate-spin text-neutral-300" />
-                  </div>
-                ) : (
-                  <textarea
-                    value={pageContent}
-                    onChange={(e) => setPageContent(e.target.value)}
-                    rows={12}
-                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-y bg-white"
-                    placeholder="Escreva o texto que vai aparecer no site aqui... (Aceita parágrafos e texto simples)"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Título da Página (PT)
+                  </label>
+                  <input
+                    type="text"
+                    value={pageTitle}
+                    onChange={(e) => setPageTitle(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                   />
-                )}
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Título da Página (IT)
+                  </label>
+                  <input
+                    type="text"
+                    value={pageTitleIt}
+                    onChange={(e) => setPageTitleIt(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Conteúdo da Página (PT)
+                  </label>
+                  {isLoadingPages ? (
+                    <div className="w-full h-64 border border-neutral-200 rounded-xl flex items-center justify-center bg-neutral-50">
+                      <Loader2 size={24} className="animate-spin text-neutral-300" />
+                    </div>
+                  ) : (
+                    <textarea
+                      value={pageContent}
+                      onChange={(e) => setPageContent(e.target.value)}
+                      rows={12}
+                      className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-y bg-white"
+                      placeholder="Conteúdo em Português..."
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Conteúdo da Página (IT)
+                  </label>
+                  {isLoadingPages ? (
+                    <div className="w-full h-64 border border-neutral-200 rounded-xl flex items-center justify-center bg-neutral-50">
+                      <Loader2 size={24} className="animate-spin text-neutral-300" />
+                    </div>
+                  ) : (
+                    <textarea
+                      value={pageContentIt}
+                      onChange={(e) => setPageContentIt(e.target.value)}
+                      rows={12}
+                      className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-y bg-white"
+                      placeholder="Contenuto in Italiano..."
+                    />
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end pt-3 border-t border-neutral-100">

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
+import { dictionary } from "../locales/dictionary";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, Plus, Loader2 } from "lucide-react";
@@ -15,12 +17,15 @@ const CATEGORIES_COL_ID = (process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTIO
 
 interface Product {
   id: string;
-  name: string;
+  name_pt: string;
+  name_it: string;
   category: string;
   price: number;
   image: string;
-  description: string;
-  details: string;
+  description_pt: string;
+  description_it: string;
+  details_pt: string;
+  details_it: string;
   volume?: string;
   activeIngredient?: string;
   sizes?: string[];
@@ -29,6 +34,9 @@ interface Product {
 
 export default function ProductGrid() {
   const { addToCart } = useCart();
+  const { language } = useLanguage();
+  const t = dictionary[language].grid;
+
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({
     prod_dress: "M", // Default size for the dress
   });
@@ -36,7 +44,7 @@ export default function ProductGrid() {
   const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{label: string, value: string}[]>([]);
+  const [categories, setCategories] = useState<{label: string, label_it?: string, value: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch products and categories from Appwrite
@@ -59,6 +67,7 @@ export default function ProductGrid() {
 
         const formattedCategories = catRes.documents.map((c: any) => ({
           label: c.label,
+          label_it: c.name_it || "",
           value: c.value,
         }));
         setCategories(formattedCategories);
@@ -76,12 +85,15 @@ export default function ProductGrid() {
 
           return {
             id: doc.$id,
-            name: doc.name_pt || "Sem nome",
+            name_pt: doc.name_pt || "Sem nome",
+            name_it: doc.name_it || "",
             category: doc.category || "geral",
             price: doc.price || 0,
             image: imageUrl,
-            description: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
-            details: doc.description_pt || "",
+            description_pt: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
+            description_it: doc.description_it ? doc.description_it.substring(0, 50) + "..." : "",
+            details_pt: doc.description_pt || "",
+            details_it: doc.description_it || "",
             sizes: sizesArr,
             inStock: doc.in_stock,
           };
@@ -98,6 +110,10 @@ export default function ProductGrid() {
     fetchData();
   }, []);
 
+  const getProductName = (p: Product) => language === "it" && p.name_it ? p.name_it : p.name_pt;
+  const getProductDesc = (p: Product) => language === "it" && p.description_it ? p.description_it : p.description_pt;
+  const getProductDetails = (p: Product) => language === "it" && p.details_it ? p.details_it : p.details_pt;
+
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSizes((prev) => ({
       ...prev,
@@ -109,36 +125,33 @@ export default function ProductGrid() {
     const size = product.sizes ? selectedSizes[product.id] : undefined;
     addToCart({
       id: product.id,
-      name: product.name,
+      name: getProductName(product),
       price: product.price,
       image: product.image,
       category: product.category,
-      description: product.description,
-      size,
+      description: "",
+      size: size
     });
   };
 
-  const filteredProducts =
-    activeTab === "todos"
-      ? products
-      : products.filter((p) => p.category.toLowerCase() === activeTab);
+  const filteredProducts = activeTab === "todos"
+    ? products
+    : products.filter(p => p.category === activeTab);
 
   return (
-    <section className="py-24 bg-white" id="new-arrivals">
+    <section className="py-24 bg-white" id="products-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div>
-            <span className="font-sans-premium text-[10px] tracking-[0.3em] uppercase text-dourado-suave font-semibold block mb-4">
-              Coleção Modelo
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 space-y-8 md:space-y-0">
+          <div className="max-w-2xl">
+            <span className="text-dourado-suave font-sans-premium text-xs tracking-[0.3em] uppercase font-bold mb-4 block">
+              {t.colecao_modelo}
             </span>
             <h2 className="font-serif-premium text-3xl sm:text-4xl tracking-wide text-neutral-900 font-light">
-              Uma seleção pensada para você
+              {t.selecao_pensada}
             </h2>
           </div>
           
-          {/* Navigation Filter Tabs */}
           <div className="flex flex-wrap gap-2 sm:gap-4 border-b border-neutral-900/5 pb-2">
             <button
               onClick={() => setActiveTab("todos")}
@@ -146,7 +159,7 @@ export default function ProductGrid() {
                 activeTab === "todos" ? "text-dourado-suave" : "text-neutral-500 hover:text-neutral-800"
               }`}
             >
-              Todos
+              {t.todos}
               {activeTab === "todos" && (
                 <motion.div
                   layoutId="activeTabIndicator"
@@ -163,7 +176,7 @@ export default function ProductGrid() {
                   activeTab === tab.value ? "text-dourado-suave" : "text-neutral-500 hover:text-neutral-800"
                 }`}
               >
-                {tab.label}
+                {language === "it" && tab.label_it ? tab.label_it : tab.label}
                 {activeTab === tab.value && (
                   <motion.div
                     layoutId="activeTabIndicator"
@@ -183,7 +196,7 @@ export default function ProductGrid() {
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-neutral-400 font-sans-premium tracking-wide">Nenhum produto encontrado nesta categoria.</p>
+            <p className="text-neutral-400 font-sans-premium tracking-wide">{t.nenhum_produto}</p>
           </div>
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -201,7 +214,7 @@ export default function ProductGrid() {
               <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden mb-5 border border-[#C8A97E]/10 group shadow-sm hover:shadow-md transition-shadow duration-500">
                 <Image
                   src={product.image}
-                  alt={product.name}
+                  alt={getProductName(product)}
                   fill
                   sizes="(max-w-768px) 100vw, 25vw"
                   className="object-cover zoom-image mix-blend-multiply"
@@ -211,7 +224,7 @@ export default function ProductGrid() {
                 <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 items-start">
                   {product.inStock === false && (
                     <span className="bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
-                      Esgotado
+                      {t.esgotado}
                     </span>
                   )}
                   {product.volume && (
@@ -271,11 +284,11 @@ export default function ProductGrid() {
                     className="w-full py-3 bg-neutral-900 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-sans-premium text-[10px] tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-lg rounded-xl flex items-center justify-center space-x-2"
                   >
                     {product.inStock === false ? (
-                      <span>Esgotado</span>
+                      <span>{t.esgotado}</span>
                     ) : (
                       <>
                         <Plus size={14} />
-                        <span>Adicionar à Sacola</span>
+                        <span>{t.adicionar_sacola}</span>
                       </>
                     )}
                   </button>
@@ -285,15 +298,15 @@ export default function ProductGrid() {
               {/* Product Info Description */}
               <div className="text-center px-1">
                 <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-1">
-                  {product.category}
+                  {categories.find((c) => c.value === product.category)?.label || product.category}
                 </span>
                 
                 <h3 className="font-serif-premium text-lg sm:text-xl text-neutral-900 font-light tracking-wide hover:text-dourado-suave transition-colors duration-300 cursor-pointer" onClick={() => setSelectedProductDetails(product)}>
-                  {product.name}
+                  {getProductName(product)}
                 </h3>
                 
                 <p className="font-sans-premium text-[10px] text-neutral-500 tracking-wider font-light mt-1.5 mb-2.5">
-                  {product.description}
+                  {getProductDesc(product)}
                 </p>
 
                 <p className="font-sans-premium text-sm font-semibold tracking-widest text-neutral-900">
@@ -340,7 +353,7 @@ export default function ProductGrid() {
                 <div className="relative aspect-[3/4] bg-[#F1E7E2]">
                   <Image
                     src={selectedProductDetails.image}
-                    alt={selectedProductDetails.name}
+                    alt={getProductName(selectedProductDetails)}
                     fill
                     className="object-cover mix-blend-multiply"
                   />
@@ -350,10 +363,10 @@ export default function ProductGrid() {
                 <div className="p-8 sm:p-10 flex flex-col justify-between">
                   <div>
                     <span className="font-sans-premium text-[10px] tracking-[0.25em] text-dourado-suave font-semibold uppercase block mb-2">
-                      {selectedProductDetails.category}
+                      {categories.find((c) => c.value === selectedProductDetails.category)?.label || selectedProductDetails.category}
                     </span>
                     <h3 className="font-serif-premium text-2xl sm:text-3xl text-neutral-900 tracking-wide font-light mb-4">
-                      {selectedProductDetails.name}
+                      {getProductName(selectedProductDetails)}
                     </h3>
                     <p className="font-sans-premium text-base font-semibold tracking-wider text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
                       R$ {selectedProductDetails.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
@@ -361,7 +374,7 @@ export default function ProductGrid() {
                     
                     <div className="space-y-4 mb-6">
                       <p className="font-sans-premium text-xs text-neutral-600 leading-relaxed font-light tracking-wide">
-                        {selectedProductDetails.details}
+                        {getProductDetails(selectedProductDetails)}
                       </p>
                     </div>
 
@@ -400,11 +413,11 @@ export default function ProductGrid() {
                       className="w-full py-4 bg-neutral-900 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-md rounded-xl flex items-center justify-center space-x-2"
                     >
                       {selectedProductDetails.inStock === false ? (
-                        <span>Esgotado</span>
+                        <span>{t.esgotado}</span>
                       ) : (
                         <>
                           <Plus size={14} />
-                          <span>Adicionar à Sacola</span>
+                          <span>{t.adicionar_sacola}</span>
                         </>
                       )}
                     </button>
