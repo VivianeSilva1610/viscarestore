@@ -19,7 +19,7 @@ import {
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
 const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID || "";
-const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "";
+const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
 const CATEGORIES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
 
 interface Product {

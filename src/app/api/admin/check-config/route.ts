@@ -4,7 +4,7 @@ export async function GET() {
   const appwriteEndpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "";
   const appwriteProjectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "";
   const appwriteDatabaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
-  const appwriteBucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "";
+  const appwriteBucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
 
   const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";

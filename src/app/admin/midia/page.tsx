@@ -7,7 +7,7 @@ import { Video, UploadCloud, Trash2, Edit2, Loader2, PlayCircle, Save, X } from 
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
 const VIDEOS_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_VIDEOS_COLLECTION_ID || "videos";
-const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "";
+const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
 
 interface AppwriteVideo {
   $id: string;
