@@ -3,7 +3,7 @@ import { Client, Account, Databases, Storage } from 'appwrite';
 const client = new Client();
 
 const endpoint = "https://fra.cloud.appwrite.io/v1";
-const projectId = "viscareelojavirtual1610";
+const projectId: string = "viscareelojavirtual1610";
 
 client
     .setEndpoint(endpoint)
