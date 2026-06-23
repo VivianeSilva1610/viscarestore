@@ -208,7 +208,7 @@ export default function Footer() {
                 { label: t.duvidas_frequentes, href: "#", isFaq: true },
                 { label: t.politicas_frete, href: "/institucional/politicas-de-frete" },
                 { label: t.devolucoes_trocas, href: "/institucional/devolucoes-e-trocas" },
-                { label: t.guia_notas, href: "#" },
+                { label: t.guia_notas, href: "/guia-notas-olfativas" },
                 { label: t.tabela_medidas, href: "/tabela-de-medidas" }
               ].map((item) => (
                 <li key={item.label}>
