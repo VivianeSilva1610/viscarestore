@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, ShieldCheck, HelpCircle, Truck, RefreshCw } from "lucide-react";
+import { ArrowRight, ShieldCheck, HelpCircle, Truck, RefreshCw, Loader2 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
 import { databases } from "../lib/appwrite";
@@ -48,11 +48,27 @@ export default function Footer() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email) return;
+    setIsSubscribing(true);
+    try {
+      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+      const NEWSLETTER_COL_ID = "newsletter";
+      
+      await databases.createDocument(DB_ID, NEWSLETTER_COL_ID, ID.unique(), {
+        email: email,
+        status: "active"
+      });
       alert("Inscrição realizada com sucesso! Bem-vindo(a) ao Club VisCaree.");
       setEmail("");
+    } catch (error: any) {
+      console.error("Error subscribing to newsletter:", error);
+      alert("Você já está inscrito(a) ou ocorreu um erro. Tente novamente.");
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -143,10 +159,11 @@ export default function Footer() {
                 />
                 <button
                   type="submit"
-                  className="bg-neutral-900 text-white hover:bg-dourado-suave px-5 flex items-center justify-center rounded-r-lg transition-colors duration-300"
+                  disabled={isSubscribing}
+                  className="bg-neutral-900 text-white disabled:bg-neutral-500 hover:bg-dourado-suave px-5 flex items-center justify-center rounded-r-lg transition-colors duration-300"
                   aria-label="Inscrever email"
                 >
-                  <ArrowRight size={16} />
+                  {isSubscribing ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                 </button>
               </div>
               <p className="font-sans-premium text-[9px] text-neutral-400">
