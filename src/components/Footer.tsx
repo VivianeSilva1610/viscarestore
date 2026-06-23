@@ -145,7 +145,7 @@ export default function Footer() {
                 { label: t.nossa_missao, href: "/institucional/nossa-missao" },
                 { label: t.autenticidade, href: "#" },
                 { label: t.app_skincare, href: "https://viscare.vercel.app/", external: true },
-                { label: t.contato, href: "#" }
+                { label: t.contato, href: "/contato" }
               ].map((item) => (
                 <li key={item.label}>
                   <a
