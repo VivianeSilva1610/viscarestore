@@ -305,7 +305,7 @@ export default function AdminProdutosPage() {
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-sm font-semibold text-neutral-800">
-                        R$ {Number(product.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        € {Number(product.price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </p>
                     </td>
                     <td className="px-4 py-4 hidden sm:table-cell">
@@ -479,7 +479,7 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                    Preço (R$) *
+                    Preço (€) *
                   </label>
                   <input
                     required

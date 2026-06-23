@@ -46,7 +46,7 @@ export default function CartDrawer() {
     }
   };
 
-  // Premium feature: Free shipping for orders above R$ 1500
+  // Premium feature: Free shipping for orders above € 1500
   const freeShippingThreshold = 1500;
   const progressToFreeShipping = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
   const remainingForFreeShipping = freeShippingThreshold - cartTotal;
@@ -102,7 +102,7 @@ export default function CartDrawer() {
                       </span>
                     ) : (
                       <span>
-                        Faltam <span className="font-semibold text-neutral-800">R$ {remainingForFreeShipping.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span> para desbloquear o <span className="text-dourado-suave">Frete Cortesia</span>.
+                        Faltam <span className="font-semibold text-neutral-800">€ {remainingForFreeShipping.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span> para desbloquear o <span className="text-dourado-suave">Frete Cortesia</span>.
                       </span>
                     )}
                   </p>
@@ -201,7 +201,7 @@ export default function CartDrawer() {
                           </div>
 
                           <p className="font-sans-premium text-xs font-semibold tracking-wider text-neutral-900">
-                            R$ {(item.price * item.quantity).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            € {(item.price * item.quantity).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                           </p>
                         </div>
                       </div>
@@ -224,7 +224,7 @@ export default function CartDrawer() {
                   return 132.25;
                 };
 
-                const EUR_TO_BRL = 6.00; // Fixed conversion rate for MVP
+                // No conversion needed since store is in Euro
 
                 let shippingCost = 0;
                 let shippingName = "A calcular";
@@ -237,11 +237,11 @@ export default function CartDrawer() {
                     shippingCost = 45.00;
                     shippingName = "Correios SEDEX";
                   } else if (shippingMethod === "POSTE") {
-                    shippingCost = getPosteItalianeRateEUR(cartTotalWeight) * EUR_TO_BRL;
+                    shippingCost = getPosteItalianeRateEUR(cartTotalWeight);
                     shippingName = "Poste Italiane (Internacional)";
                   }
                 } else if (shippingCountry === "IT") {
-                  shippingCost = 10.00 * EUR_TO_BRL; // €10 fixed for Italy
+                  shippingCost = 10.00; // €10 fixed for Italy
                   shippingName = "Poste Italiane (Local)";
                 }
 
@@ -289,14 +289,14 @@ export default function CartDrawer() {
                     <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600 pt-2">
                       <span>Subtotal</span>
                       <span className="text-neutral-900 font-semibold">
-                        R$ {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        € {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
 
                     <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
                       <span>Frete</span>
                       <span className="text-dourado-suave font-semibold text-[10px] text-right">
-                        {shippingCost === 0 && shippingMethod ? "GRATUITO" : shippingCost > 0 ? `R$ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
+                        {shippingCost === 0 && shippingMethod ? "GRATUITO" : shippingCost > 0 ? `€ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
                         {shippingMethod === "POSTE" && <span className="block text-[8px] text-neutral-400 normal-case mt-0.5">(Aprox. €{getPosteItalianeRateEUR(cartTotalWeight).toFixed(2)})</span>}
                       </span>
                     </div>
@@ -304,7 +304,7 @@ export default function CartDrawer() {
                     <div className="border-t border-dashed border-dourado-suave/10 pt-4 flex justify-between font-serif-premium text-lg tracking-wide text-neutral-900">
                       <span>Total Estimado</span>
                       <span className="font-sans-premium text-base font-bold">
-                        R$ {finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        € {finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </span>
                     </div>
 

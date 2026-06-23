@@ -125,7 +125,7 @@ export default function PedidosPage() {
                   <div className="text-right hidden md:block">
                     <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Valor Total</p>
                     <p className="text-base font-serif-premium text-neutral-900">
-                      {(order.amountTotal / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      {(order.amountTotal / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'EUR' })}
                     </p>
                   </div>
                   

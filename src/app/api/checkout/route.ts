@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
       return {
         price_data: {
-          currency: "brl",
+          currency: "eur",
           product_data: {
             name: item.name,
             ...(validImages.length > 0 && { images: validImages }),

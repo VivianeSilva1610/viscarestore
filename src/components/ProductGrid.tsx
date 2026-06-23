@@ -339,7 +339,7 @@ export default function ProductGrid() {
                 </p>
 
                 <p className="font-sans-premium text-sm font-semibold tracking-widest text-neutral-900">
-                  R$ {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  € {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </p>
               </div>
             </motion.div>
@@ -398,7 +398,7 @@ export default function ProductGrid() {
                       {getProductName(selectedProductDetails)}
                     </h3>
                     <p className="font-sans-premium text-base font-semibold tracking-wider text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
-                      R$ {selectedProductDetails.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      € {selectedProductDetails.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </p>
                     
                     <div className="space-y-4 mb-6">

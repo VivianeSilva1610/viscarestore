@@ -311,7 +311,7 @@ export default function AdminSettingsPage() {
                 </div>
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                    Frete Grátis a partir de (R$)
+                    Frete Grátis a partir de (€)
                   </label>
                   <input
                     type="number"
