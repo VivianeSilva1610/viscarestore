@@ -6,6 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
 import { databases } from "../lib/appwrite";
 import { ID } from "appwrite";
+import Link from "next/link";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -180,9 +181,9 @@ export default function Footer() {
             <ul className="space-y-3">
               {[tn.novidades, t.alta_perfumaria, t.skincare_biologico, t.vestidos_seda, t.acessorios_ouro].map((item) => (
                 <li key={item}>
-                  <a href="#" className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
+                  <Link href="#" className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -202,14 +203,14 @@ export default function Footer() {
                 { label: t.contato, href: "/contato" }
               ].map((item) => (
                 <li key={item.label}>
-                  <a
+                  <Link
                     href={item.href}
                     target={item.external ? "_blank" : undefined}
                     rel={item.external ? "noopener noreferrer" : undefined}
                     className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -237,9 +238,9 @@ export default function Footer() {
                       {item.label}
                     </button>
                   ) : (
-                    <a href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
+                    <Link href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
                       {item.label}
-                    </a>
+                    </Link>
                   )}
                 </li>
               ))}
@@ -254,12 +255,12 @@ export default function Footer() {
             {t.direitos}
           </p>
           <div className="flex space-x-6">
-            <a href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
+            <Link href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
               {t.termos_uso}
-            </a>
-            <a href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
+            </Link>
+            <Link href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
               {t.politicas_privacidade}
-            </a>
+            </Link>
           </div>
         </div>
 
