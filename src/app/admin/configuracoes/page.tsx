@@ -323,6 +323,8 @@ export default function AdminSettingsPage() {
                   className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                   placeholder="https://instagram.com/sualoja"
                 />
+              </div>
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
