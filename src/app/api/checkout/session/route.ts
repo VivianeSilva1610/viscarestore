@@ -24,7 +24,7 @@ export async function GET(req: Request) {
       customer_name: session.customer_details?.name || session.metadata?.customerName || "Cliente",
       amount_total: session.amount_total,
       payment_status: session.payment_status,
-      shipping_details: session.shipping_details,
+      shipping_details: (session as any).shipping_details || (session as any).shipping,
       line_items: session.line_items?.data,
     });
   } catch (error: any) {
