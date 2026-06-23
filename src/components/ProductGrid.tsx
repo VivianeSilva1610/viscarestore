@@ -51,12 +51,27 @@ export default function ProductGrid() {
   const [customTitle, setCustomTitle] = useState("");
   const [customSubtitle, setCustomSubtitle] = useState("");
 
-  // Load custom titles from localStorage
+  // Load custom titles from Appwrite
   React.useEffect(() => {
-    const localGridTitle = localStorage.getItem("viscare_grid_title");
-    const localGridSubtitle = localStorage.getItem("viscare_grid_subtitle");
-    if (localGridTitle) setCustomTitle(localGridTitle);
-    if (localGridSubtitle) setCustomSubtitle(localGridSubtitle);
+    const fetchSettings = async () => {
+      try {
+        const { databases, isAppwriteConfigured } = await import("../lib/appwrite");
+        const { Query } = await import("appwrite");
+        if (!isAppwriteConfigured()) return;
+        
+        const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+        const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
+        const res = await databases.listDocuments(DB_ID, PAGES_COL_ID, [Query.equal("slug", "global-settings")]);
+        if (res.documents.length > 0) {
+          const settings = JSON.parse(res.documents[0].content);
+          if (settings.gridTitle) setCustomTitle(settings.gridTitle);
+          if (settings.gridSubtitle) setCustomSubtitle(settings.gridSubtitle);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configurações", err);
+      }
+    };
+    fetchSettings();
   }, []);
 
   // Fetch products and categories from Appwrite

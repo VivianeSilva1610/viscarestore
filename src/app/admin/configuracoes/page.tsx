@@ -119,44 +119,57 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     fetchDiagnostics();
     fetchPages();
-    
-    const localStoreName = localStorage.getItem("viscare_store_name");
-    const localEmail = localStorage.getItem("viscare_contact_email");
-    const localPhone = localStorage.getItem("viscare_contact_phone");
-    const localFreeShipping = localStorage.getItem("viscare_free_shipping_min");
-    const localInstagram = localStorage.getItem("viscare_instagram_url");
-    const localGridTitle = localStorage.getItem("viscare_grid_title");
-    const localGridSubtitle = localStorage.getItem("viscare_grid_subtitle");
-
-    if (localStoreName) setStoreName(localStoreName);
-    if (localEmail) setContactEmail(localEmail);
-    if (localPhone) setContactPhone(localPhone);
-    if (localFreeShipping) setFreeShippingMin(Number(localFreeShipping));
-    if (localInstagram) setInstagramUrl(localInstagram);
-    if (localGridTitle) setGridTitle(localGridTitle);
-    if (localGridSubtitle) setGridSubtitle(localGridSubtitle);
   }, []);
 
-  // Update editor content when selecting a different page
+  // Use the fetched pages to populate the global settings
   useEffect(() => {
     const p = pages.find((page) => page.slug === selectedPageSlug) as any;
     setPageTitle(p ? p.title : availablePages.find(ap => ap.slug === selectedPageSlug)?.title || "");
     setPageTitleIt(p && p.title_it ? p.title_it : "");
     setPageContent(p ? p.content : "");
     setPageContentIt(p && p.content_it ? p.content_it : "");
+
+    // Load global settings
+    const settingsPage = pages.find((page) => page.slug === "global-settings");
+    if (settingsPage) {
+      try {
+        const settings = JSON.parse(settingsPage.content);
+        if (settings.storeName) setStoreName(settings.storeName);
+        if (settings.contactEmail) setContactEmail(settings.contactEmail);
+        if (settings.contactPhone) setContactPhone(settings.contactPhone);
+        if (settings.freeShippingMin) setFreeShippingMin(Number(settings.freeShippingMin));
+        if (settings.instagramUrl) setInstagramUrl(settings.instagramUrl);
+        if (settings.gridTitle) setGridTitle(settings.gridTitle);
+        if (settings.gridSubtitle) setGridSubtitle(settings.gridSubtitle);
+      } catch (e) {
+        console.error("Error parsing global settings", e);
+      }
+    }
   }, [selectedPageSlug, pages]);
 
   // Save general store settings
-  const handleSaveStoreSettings = (e: React.FormEvent) => {
+  const handleSaveStoreSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("viscare_store_name", storeName);
-    localStorage.setItem("viscare_contact_email", contactEmail);
-    localStorage.setItem("viscare_contact_phone", contactPhone);
-    localStorage.setItem("viscare_free_shipping_min", String(freeShippingMin));
-    localStorage.setItem("viscare_instagram_url", instagramUrl);
-    localStorage.setItem("viscare_grid_title", gridTitle);
-    localStorage.setItem("viscare_grid_subtitle", gridSubtitle);
-    showToast("success", "Configurações da loja salvas com sucesso (Local)!");
+    const settingsStr = JSON.stringify({
+      storeName, contactEmail, contactPhone, freeShippingMin, instagramUrl, gridTitle, gridSubtitle
+    });
+    
+    try {
+      const existingPage = pages.find((p) => p.slug === "global-settings");
+      if (existingPage) {
+        await databases.updateDocument(DB_ID, PAGES_COL_ID, existingPage.$id, { content: settingsStr });
+      } else {
+        await databases.createDocument(DB_ID, PAGES_COL_ID, ID.unique(), {
+          slug: "global-settings",
+          title: "Global Settings",
+          content: settingsStr
+        });
+      }
+      showToast("success", "Configurações da loja salvas com sucesso!");
+      fetchPages(); // refresh
+    } catch (err) {
+      showToast("error", "Erro ao salvar as configurações.");
+    }
   };
 
   // Update password in Appwrite
