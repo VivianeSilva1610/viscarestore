@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { databases, storage, isAppwriteConfigured } from "../../../lib/appwrite";
 import { Query, ID } from "appwrite";
+import MediaRenderer from "@/components/MediaRenderer";
 import { Video, UploadCloud, Trash2, Edit2, Loader2, PlayCircle, Save, X } from "lucide-react";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
@@ -207,23 +208,12 @@ export default function MidiaPage() {
             return (
               <div key={video.$id} className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden group">
                 <div className="relative bg-neutral-950 aspect-video flex items-center justify-center">
-                  {videoUrl.match(/\.(mp4|webm|mov|avi|ogg)/i) ? (
-                    <video 
-                      src={videoUrl} 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                      controls
-                      preload="metadata"
-                    />
-                  ) : (
-                    <img 
-                      src={videoUrl} 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                      alt={video.title}
-                    />
-                  )}
-                  <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md">
-                    {videoUrl.match(/\.(mp4|webm|mov|avi|ogg)/i) ? "Vídeo" : "Imagem"}
-                  </div>
+                  <MediaRenderer
+                    src={videoUrl}
+                    alt={video.title}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    showBadge={true}
+                  />
                 </div>
                 
                 <div className="p-5">

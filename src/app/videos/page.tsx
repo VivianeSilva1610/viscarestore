@@ -5,6 +5,7 @@ import { databases, storage, isAppwriteConfigured } from "@/lib/appwrite";
 import { Query } from "appwrite";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MediaRenderer from "@/components/MediaRenderer";
 import { useLanguage } from "@/context/LanguageContext";
 import { PlayCircle, Loader2 } from "lucide-react";
 import { AuthProvider } from "@/context/AuthContext";
@@ -95,21 +96,11 @@ export default function VideosPage() {
                     return (
                       <div key={video.$id} className="group flex flex-col items-center">
                         <div className="w-full bg-black rounded-xl overflow-hidden shadow-md aspect-[9/16] relative transition-transform duration-500 group-hover:-translate-y-1 group-hover:shadow-xl">
-                          {videoUrl.match(/\.(mp4|webm|mov|avi|ogg)/i) ? (
-                            <video 
-                              src={videoUrl} 
-                              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
-                              controls
-                              preload="metadata"
-                              controlsList="nodownload"
-                            />
-                          ) : (
-                            <img 
-                              src={videoUrl} 
-                              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
-                              alt={video.title}
-                            />
-                          )}
+                          <MediaRenderer
+                            src={videoUrl}
+                            alt={video.title}
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+                          />
                         </div>
                         <div className="mt-6 text-center w-full px-2">
                           <h3 className="font-serif-premium text-lg text-neutral-900 group-hover:text-dourado-suave transition-colors duration-300">
