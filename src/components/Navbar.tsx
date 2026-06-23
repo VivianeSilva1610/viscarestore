@@ -97,7 +97,7 @@ export default function Navbar() {
             {/* Logo - Centered */}
             <div className="flex-1 lg:flex-none text-center">
               <a
-                href="#"
+                href="/"
                 className="font-serif-premium text-3xl sm:text-4xl md:text-5xl tracking-[0.25em] text-neutral-900 hover:text-dourado-suave transition-colors duration-500 font-normal italic inline-block"
               >
                 VisCaree
