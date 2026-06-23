@@ -54,11 +54,11 @@ export default function MidiaPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      if (file.type.startsWith("video/")) {
+      if (file.type.startsWith("video/") || file.type.startsWith("image/")) {
         setSelectedFile(file);
         if (!newTitle) setNewTitle(file.name.replace(/\.[^/.]+$/, ""));
       } else {
-        alert("Por favor, selecione um arquivo de vídeo (mp4, webm, etc).");
+        alert("Por favor, selecione um arquivo de vídeo ou imagem.");
       }
     }
   };
@@ -148,7 +148,7 @@ export default function MidiaPage() {
             </label>
             <input 
               type="file" 
-              accept="video/*"
+              accept="video/*,image/*"
               onChange={handleFileChange}
               required
               className="w-full text-sm text-neutral-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#C8A97E]/10 file:text-[#C8A97E] hover:file:bg-[#C8A97E]/20"
@@ -156,7 +156,7 @@ export default function MidiaPage() {
           </div>
           <div className="flex-1 w-full">
             <label className="block text-[10px] font-bold tracking-widest uppercase text-neutral-500 mb-1">
-              Título do Vídeo
+              Título do Arquivo
             </label>
             <input 
               type="text" 
@@ -207,14 +207,22 @@ export default function MidiaPage() {
             return (
               <div key={video.$id} className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden group">
                 <div className="relative bg-neutral-950 aspect-video flex items-center justify-center">
-                  <video 
-                    src={videoUrl} 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                    controls
-                    preload="metadata"
-                  />
+                  {videoUrl.match(/\.(mp4|webm|mov|avi|ogg)/i) ? (
+                    <video 
+                      src={videoUrl} 
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      controls
+                      preload="metadata"
+                    />
+                  ) : (
+                    <img 
+                      src={videoUrl} 
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      alt={video.title}
+                    />
+                  )}
                   <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded backdrop-blur-md">
-                    Vídeo
+                    {videoUrl.match(/\.(mp4|webm|mov|avi|ogg)/i) ? "Vídeo" : "Imagem"}
                   </div>
                 </div>
                 
