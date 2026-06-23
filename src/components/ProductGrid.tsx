@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, Plus, Loader2 } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
@@ -241,12 +240,11 @@ export default function ProductGrid() {
             >
               {/* Product Card Container */}
               <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden mb-5 border border-[#C8A97E]/10 group shadow-sm hover:shadow-md transition-shadow duration-500">
-                <Image
+                <img
                   src={product.image}
                   alt={getProductName(product)}
-                  fill
-                  sizes="(max-w-768px) 100vw, 25vw"
-                  className="object-cover zoom-image mix-blend-multiply"
+                  className="w-full h-full object-cover zoom-image mix-blend-multiply"
+                  loading="lazy"
                 />
 
                 {/* Details Floating Badge (Volume or Active Ingredient) */}
@@ -380,11 +378,10 @@ export default function ProductGrid() {
               <div className="grid grid-cols-1 md:grid-cols-2">
                 {/* Image Panel */}
                 <div className="relative aspect-[3/4] bg-[#F1E7E2]">
-                  <Image
+                  <img
                     src={selectedProductDetails.image}
                     alt={getProductName(selectedProductDetails)}
-                    fill
-                    className="object-cover mix-blend-multiply"
+                    className="w-full h-full object-cover mix-blend-multiply"
                   />
                 </div>
 
