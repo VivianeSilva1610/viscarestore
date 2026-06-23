@@ -61,12 +61,6 @@ export default function Hero() {
               >
                 Descobrir Coleção
               </a>
-              <a
-                href="#skincare"
-                className="w-full sm:w-auto text-center px-8 py-4 border border-neutral-900/10 hover:border-dourado-suave text-neutral-800 font-sans-premium text-xs tracking-[0.25em] uppercase hover:text-dourado-suave transition-all duration-300 font-medium"
-              >
-                Conhecer Ativos
-              </a>
             </motion.div>
             
           </div>
