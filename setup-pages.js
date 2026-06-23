@@ -24,12 +24,14 @@ async function setupPages() {
         } catch(e) { console.log('Collection might exist:', e.message); }
 
         console.log('Creating attributes...');
-        try {
-            await databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'slug', 255, true);
-            await databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'title', 255, true);
-            await databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'content', 100000, true);
-            console.log('Attributes created/initiated.');
-        } catch(e) { console.log('Attributes might exist:', e.message); }
+        const createAttr = async (fn) => { try { await fn(); } catch(e) { console.log('Attr might exist:', e.message); } };
+        
+        await createAttr(() => databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'slug', 255, true));
+        await createAttr(() => databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'title', 255, true));
+        await createAttr(() => databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'content', 100000, true));
+        await createAttr(() => databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'title_it', 255, false));
+        await createAttr(() => databases.createStringAttribute(DB_ID, PAGES_COL_ID, 'content_it', 100000, false));
+        console.log('Attributes created/initiated.');
 
         console.log('Setup finished successfully!');
     } catch(error) {
