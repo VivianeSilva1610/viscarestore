@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { X, Plus, Minus, Trash2, ShoppingBag, Loader2 } from "lucide-react";
-import Image from "next/image";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CartDrawer() {
@@ -149,12 +149,10 @@ export default function CartDrawer() {
                     >
                       {/* Product Thumbnail */}
                       <div className="relative w-20 h-24 bg-[#F1E7E2] rounded-lg overflow-hidden flex-shrink-0 border border-neutral-900/5">
-                        <Image
+                        <img
                           src={item.image}
                           alt={item.name}
-                          fill
-                          sizes="80px"
-                          className="object-cover mix-blend-multiply"
+                          className="w-full h-full object-cover mix-blend-multiply"
                         />
                       </div>
 
