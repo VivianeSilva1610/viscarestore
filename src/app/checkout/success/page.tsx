@@ -5,25 +5,87 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useCart } from "../../../context/CartContext";
 import { CheckCircle, Package, ArrowRight, Loader2 } from "lucide-react";
 
+import { databases, isAppwriteConfigured } from "../../../lib/appwrite";
+import { ID, Query } from "appwrite";
+
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const ORDERS_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID || "orders";
+
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { clearCart } = useCart();
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     const session = searchParams.get("session_id");
-    if (session) {
-      setSessionId(session);
-      // Esvazia o carrinho apenas quando a compra for confirmada e retornar do Stripe
-      clearCart();
-    }
+    if (!session) return;
+    
+    setSessionId(session);
+    
+    const saveOrder = async () => {
+      try {
+        if (!isAppwriteConfigured()) {
+          console.warn("Appwrite not configured, skipping order save");
+          setIsProcessing(false);
+          clearCart();
+          return;
+        }
+
+        // 1. Check if order already exists
+        const existing = await databases.listDocuments(DB_ID, ORDERS_COL_ID, [
+          Query.equal("sessionId", session)
+        ]);
+
+        if (existing.total > 0) {
+          console.log("Order already processed");
+          setIsProcessing(false);
+          clearCart();
+          return;
+        }
+
+        // 2. Fetch session details from Stripe securely via our API route
+        const res = await fetch(`/api/checkout/session?session_id=${session}`);
+        if (!res.ok) throw new Error("Failed to fetch session from Stripe");
+        const data = await res.json();
+
+        // 3. Save order to Appwrite
+        const address = data.shipping_details?.address 
+          ? `${data.shipping_details.address.line1 || ''}, ${data.shipping_details.address.city || ''} - ${data.shipping_details.address.state || ''}, ${data.shipping_details.address.postal_code || ''}, ${data.shipping_details.address.country || ''}`
+          : "Não informado";
+
+        const itemsSummary = data.line_items 
+          ? data.line_items.map((i: any) => `${i.quantity}x ${i.description}`).join(", ")
+          : "Produtos não informados";
+
+        await databases.createDocument(DB_ID, ORDERS_COL_ID, ID.unique(), {
+          sessionId: session,
+          customerName: data.customer_name || "Cliente",
+          customerEmail: data.customer_email || "",
+          amountTotal: data.amount_total || 0,
+          shippingAddress: address,
+          products: itemsSummary,
+          status: "pago"
+        });
+
+        console.log("Order saved successfully");
+        clearCart();
+      } catch (error) {
+        console.error("Error processing order:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    saveOrder();
   }, [searchParams, clearCart]);
 
-  if (!sessionId) {
+  if (!sessionId || isProcessing) {
     return (
       <div className="min-h-screen bg-[#F1E7E2] flex flex-col items-center justify-center p-4">
-        <p className="text-neutral-500 mb-4">Redirecionando...</p>
+        <Loader2 size={32} className="animate-spin text-[#C8A97E] mb-4" />
+        <p className="text-neutral-500 mb-4">Processando seu pedido...</p>
         <button onClick={() => router.push("/")} className="text-dourado-suave hover:underline text-sm">
           Voltar para a loja
         </button>
