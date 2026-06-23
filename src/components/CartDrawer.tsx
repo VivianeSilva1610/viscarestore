@@ -20,6 +20,8 @@ export default function CartDrawer() {
   } = useCart();
   const { user, profile } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [shippingCountry, setShippingCountry] = useState<"BR" | "IT" | "">("");
+  const [shippingMethod, setShippingMethod] = useState<"PAC" | "SEDEX" | "POSTE" | "">("");
 
   const handleCheckout = async () => {
     setIsCheckingOut(true);
@@ -210,8 +212,6 @@ export default function CartDrawer() {
 
               {/* Checkout Panel Footer */}
               {cart.length > 0 && (() => {
-                const [shippingCountry, setShippingCountry] = useState<"BR" | "IT" | "">("");
-                const [shippingMethod, setShippingMethod] = useState<"PAC" | "SEDEX" | "POSTE" | "">("");
                 
                 const getPosteItalianeRateEUR = (weight: number) => {
                   if (weight <= 1) return 32.80;
