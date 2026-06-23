@@ -14,6 +14,7 @@ import {
   ImageIcon,
   Tags,
   Users,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { label: "Clientes", href: "/admin/clientes", icon: Users },
   { label: "Mídia", href: "/admin/midia", icon: ImageIcon },
   { label: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
+  { label: "Mensagens", href: "/admin/mensagens", icon: MessageSquare },
   { label: "Configurações", href: "/admin/configuracoes", icon: Settings },
 ];
 

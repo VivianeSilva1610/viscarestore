@@ -4,12 +4,49 @@ import React, { useState } from "react";
 import { ArrowRight, ShieldCheck, HelpCircle, Truck, RefreshCw } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
+import { databases } from "../lib/appwrite";
+import { ID } from "appwrite";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
   const { language } = useLanguage();
   const t = dictionary[language].footer;
   const tn = dictionary[language].nav;
+
+  // FAQ Modal State
+  const [isFaqOpen, setIsFaqOpen] = useState(false);
+  const [faqEmail, setFaqEmail] = useState("");
+  const [faqMessage, setFaqMessage] = useState("");
+  const [isSubmittingFaq, setIsSubmittingFaq] = useState(false);
+  const [faqSuccess, setFaqSuccess] = useState(false);
+
+  const handleFaqSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!faqEmail || !faqMessage) return;
+    setIsSubmittingFaq(true);
+    try {
+      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+      const MESSAGES_COL_ID = (process.env.NEXT_PUBLIC_APPWRITE_MESSAGES_COLLECTION_ID || "messages").trim();
+      
+      await databases.createDocument(DB_ID, MESSAGES_COL_ID, ID.unique(), {
+        email: faqEmail,
+        message: faqMessage,
+        status: "new"
+      });
+      setFaqSuccess(true);
+      setTimeout(() => {
+        setIsFaqOpen(false);
+        setFaqSuccess(false);
+        setFaqEmail("");
+        setFaqMessage("");
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting FAQ:", error);
+      alert("Houve um erro ao enviar sua mensagem. Tente novamente mais tarde.");
+    } finally {
+      setIsSubmittingFaq(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,16 +205,25 @@ export default function Footer() {
             </h5>
             <ul className="space-y-3">
               {[
-                { label: t.duvidas_frequentes, href: "#" },
+                { label: t.duvidas_frequentes, href: "#", isFaq: true },
                 { label: t.politicas_frete, href: "/institucional/politicas-de-frete" },
                 { label: t.devolucoes_trocas, href: "/institucional/devolucoes-e-trocas" },
                 { label: t.guia_notas, href: "#" },
                 { label: t.tabela_medidas, href: "#" }
               ].map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
-                    {item.label}
-                  </a>
+                  {item.isFaq ? (
+                    <button 
+                      onClick={(e) => { e.preventDefault(); setIsFaqOpen(true); }}
+                      className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light"
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <a href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
+                      {item.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -201,6 +247,68 @@ export default function Footer() {
         </div>
 
       </div>
+
+      {/* FAQ Modal */}
+      {isFaqOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-neutral-950/40 backdrop-blur-sm" onClick={() => setIsFaqOpen(false)} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setIsFaqOpen(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-900 transition-colors"
+            >
+              &times;
+            </button>
+            <h3 className="font-serif-premium text-2xl text-neutral-900 mb-2">Envie sua Dúvida</h3>
+            <p className="font-sans-premium text-xs text-neutral-500 mb-6 tracking-wide">
+              Nossa equipe responderá o mais breve possível no seu e-mail.
+            </p>
+
+            {faqSuccess ? (
+              <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl text-center">
+                <p className="font-sans-premium text-sm font-semibold mb-1">Mensagem enviada!</p>
+                <p className="font-sans-premium text-xs">Entraremos em contato em breve.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleFaqSubmit} className="space-y-4">
+                <div>
+                  <label className="font-sans-premium text-[10px] tracking-widest text-neutral-700 uppercase font-semibold block mb-1">
+                    Seu E-mail *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={faqEmail}
+                    onChange={(e) => setFaqEmail(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-200 focus:border-dourado-suave focus:bg-white focus:outline-none px-4 py-3 text-sm font-sans-premium tracking-wide rounded-xl transition-all"
+                    placeholder="voce@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="font-sans-premium text-[10px] tracking-widest text-neutral-700 uppercase font-semibold block mb-1">
+                    Sua Dúvida / Pergunta *
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={faqMessage}
+                    onChange={(e) => setFaqMessage(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-200 focus:border-dourado-suave focus:bg-white focus:outline-none px-4 py-3 text-sm font-sans-premium tracking-wide rounded-xl transition-all resize-none"
+                    placeholder="Como podemos te ajudar?"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmittingFaq}
+                  className="w-full py-3.5 bg-neutral-900 disabled:bg-neutral-400 text-white font-sans-premium text-xs tracking-widest uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 rounded-xl"
+                >
+                  {isSubmittingFaq ? "Enviando..." : "Enviar Pergunta"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </footer>
   );
 }
