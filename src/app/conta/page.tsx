@@ -151,7 +151,7 @@ function ContaContent() {
                       {error && <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl"><AlertCircle size={15} className="flex-shrink-0" /><span>{error}</span></div>}
                       <button type="submit" disabled={isLoading}
                         className="w-full py-4 bg-neutral-900 hover:bg-[#C8A97E] disabled:opacity-60 text-white text-xs tracking-widest uppercase font-semibold rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
-                        {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Enviando...</> : "Enviar link de recuperação"}
+                        {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> <span>Enviando...</span></> : <span>Enviar link de recuperação</span>}
                       </button>
                     </form>
                   )}
@@ -165,7 +165,7 @@ function ContaContent() {
                   {(["login", "cadastro"] as Tab[]).map((t) => (
                     <button key={t} onClick={() => { setTab(t); setError(""); setSuccess(""); }}
                       className={`flex-1 py-3 text-xs tracking-widest uppercase font-semibold rounded-xl transition-all duration-300 ${tab === t ? "bg-neutral-900 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"}`}>
-                      {t === "login" ? "Entrar" : "Criar Conta"}
+                      {t === "login" ? <span>Entrar</span> : <span>Criar Conta</span>}
                     </button>
                   ))}
                 </div>
@@ -208,7 +208,7 @@ function ContaContent() {
                         {error && <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl"><AlertCircle size={15} className="flex-shrink-0" /><span>{error}</span></div>}
                         <button type="submit" disabled={isLoading}
                           className="w-full py-4 bg-neutral-900 hover:bg-[#C8A97E] disabled:opacity-60 text-white text-xs tracking-widest uppercase font-semibold rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
-                          {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> A verificar...</> : "Entrar na Conta"}
+                          {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> <span>A verificar...</span></> : <span>Entrar na Conta</span>}
                         </button>
                         <p className="text-center text-neutral-400 text-xs">
                           Não tem conta?{" "}<button type="button" onClick={() => { setTab("cadastro"); setError(""); }} className="text-[#C8A97E] font-semibold hover:underline">Criar agora</button>
@@ -269,7 +269,7 @@ function ContaContent() {
                         {success && <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl"><CheckCircle size={15} className="flex-shrink-0" /><span>{success}</span></div>}
                         <button type="submit" disabled={isLoading}
                           className="w-full py-4 bg-neutral-900 hover:bg-[#C8A97E] disabled:opacity-60 text-white text-xs tracking-widest uppercase font-semibold rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
-                          {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> A criar...</> : "Criar Minha Conta"}
+                          {isLoading ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> <span>A criar...</span></> : <span>Criar Minha Conta</span>}
                         </button>
                         <p className="text-center text-[9px] text-neutral-400 leading-relaxed">
                           Ao criar uma conta, você concorda com nossa{" "}
