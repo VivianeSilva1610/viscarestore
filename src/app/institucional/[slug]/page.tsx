@@ -8,6 +8,8 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import CartDrawer from "@/components/CartDrawer";
 
+import InstitutionalContent from "@/components/InstitutionalContent";
+
 // Forcing dynamic rendering and disabling fetch cache
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -47,17 +49,7 @@ export default async function InstitutionalPage({ params }: { params: Promise<{ 
 
           <main className="flex-grow pt-32 pb-24">
             <div className="max-w-3xl mx-auto px-6 sm:px-12 lg:px-16">
-              <header className="mb-12 text-center">
-                <h1 className="font-serif-premium text-3xl md:text-4xl text-neutral-900 mb-4">{page.title}</h1>
-                <div className="w-12 h-0.5 bg-dourado-suave mx-auto"></div>
-              </header>
-
-              <article className="prose prose-neutral prose-sm md:prose-base max-w-none prose-headings:font-serif-premium prose-headings:font-normal prose-a:text-dourado-suave hover:prose-a:text-dourado-suave/80 prose-p:font-sans-premium prose-p:font-light prose-p:leading-relaxed prose-p:text-neutral-600">
-                {page.content.split('\n').map((paragraph: string, index: number) => {
-                  if (!paragraph.trim()) return <br key={index} />;
-                  return <p key={index} className="mb-4">{paragraph}</p>;
-                })}
-              </article>
+              <InstitutionalContent page={page as any} />
             </div>
           </main>
 
