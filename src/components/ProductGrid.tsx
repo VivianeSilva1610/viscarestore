@@ -101,7 +101,7 @@ export default function ProductGrid() {
         const formattedProducts = prodRes.documents.map((doc: any): Product => {
           let imageUrl = "/images/perfume.png"; // Fallback image
           if (doc.image_id) {
-            imageUrl = storage.getFilePreview(BUCKET_ID, doc.image_id).toString();
+            imageUrl = storage.getFileView(BUCKET_ID, doc.image_id).toString();
           }
 
           let sizesArr = undefined;

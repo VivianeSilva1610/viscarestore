@@ -104,8 +104,7 @@ export default function AdminProdutosPage() {
   useEffect(() => { fetchProducts(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getImageUrl = (imageId?: string) => {
-    if (!imageId || !configured) return null;
-    return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${imageId}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+    return `https://fra.cloud.appwrite.io/v1/storage/buckets/${BUCKET_ID}/files/${imageId}/view?project=viscareelojavirtual1610`;
   };
 
   const openCreateModal = () => {
