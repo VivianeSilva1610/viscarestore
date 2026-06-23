@@ -17,10 +17,10 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
-const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID || "products";
-const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
-const CATEGORIES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
+const DB_ID = "6a390e430024feb8df57";
+const COLLECTION_ID = "products";
+const BUCKET_ID = "6a391020001d02651b57";
+const CATEGORIES_COL_ID = "categories";
 
 interface Product {
   $id: string;
@@ -159,7 +159,15 @@ export default function AdminProdutosPage() {
         imageId = uploaded.$id;
       }
 
-      const data = { ...form, image_id: imageId, price: Number(form.price), weight_kg: Number(form.weight_kg) };
+      const parsedPrice = Number(form.price);
+      const parsedWeight = Number(form.weight_kg);
+
+      const data = { 
+        ...form, 
+        image_id: imageId, 
+        price: isNaN(parsedPrice) ? 0 : parsedPrice, 
+        weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight 
+      };
 
       if (editingProduct) {
         await databases.updateDocument(DB_ID, COLLECTION_ID, editingProduct.$id, data);
@@ -171,8 +179,9 @@ export default function AdminProdutosPage() {
 
       setIsModalOpen(false);
       fetchProducts();
-    } catch {
-      showToast("error", "Erro ao salvar produto. Verifique as configurações do Appwrite.");
+    } catch (error: any) {
+      console.error("Error saving product:", error);
+      showToast("error", `Erro ao salvar: ${error.message || "Verifique o Appwrite"}`);
     } finally {
       setIsSaving(false);
     }
