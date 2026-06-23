@@ -50,6 +50,16 @@ export default function ProductGrid() {
   const [customTitle, setCustomTitle] = useState("");
   const [customSubtitle, setCustomSubtitle] = useState("");
 
+  // Listen for category change events from other components (like Categories.tsx)
+  React.useEffect(() => {
+    const handleCategoryChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setActiveTab(customEvent.detail);
+    };
+    window.addEventListener('changeCategory', handleCategoryChange);
+    return () => window.removeEventListener('changeCategory', handleCategoryChange);
+  }, []);
+
   // Load custom titles from Appwrite
   React.useEffect(() => {
     const fetchSettings = async () => {

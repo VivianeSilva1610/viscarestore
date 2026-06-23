@@ -38,6 +38,21 @@ export default function Categories() {
     },
   ];
 
+  const handleExplore = (e: React.MouseEvent<HTMLAnchorElement>, categoryId: string) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('changeCategory', { detail: categoryId }));
+    
+    // Slight delay to allow state update before scrolling, for smoother UX
+    setTimeout(() => {
+      const section = document.getElementById('products-section');
+      if (section) {
+        const yOffset = -80; 
+        const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 50);
+  };
+
   return (
     <section className="py-24 bg-[#E7D8D0]/30 relative" id="categories">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,6 +113,7 @@ export default function Categories() {
                   
                   <a
                     href={cat.link}
+                    onClick={(e) => handleExplore(e, cat.id)}
                     className="font-sans-premium text-[10px] tracking-[0.2em] uppercase text-dourado-suave hover:text-white font-medium inline-flex items-center space-x-1.5 transition-colors duration-300 self-start sm:self-auto"
                   >
                     <span>Explorar</span>
