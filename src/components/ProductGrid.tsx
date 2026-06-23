@@ -48,6 +48,17 @@ export default function ProductGrid() {
   const [categories, setCategories] = useState<{label: string, label_it?: string, value: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [customTitle, setCustomTitle] = useState("");
+  const [customSubtitle, setCustomSubtitle] = useState("");
+
+  // Load custom titles from localStorage
+  React.useEffect(() => {
+    const localGridTitle = localStorage.getItem("viscare_grid_title");
+    const localGridSubtitle = localStorage.getItem("viscare_grid_subtitle");
+    if (localGridTitle) setCustomTitle(localGridTitle);
+    if (localGridSubtitle) setCustomSubtitle(localGridSubtitle);
+  }, []);
+
   // Fetch products and categories from Appwrite
   React.useEffect(() => {
     const fetchData = async () => {
@@ -148,10 +159,10 @@ export default function ProductGrid() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 space-y-8 md:space-y-0">
           <div className="max-w-2xl">
             <span className="text-dourado-suave font-sans-premium text-xs tracking-[0.3em] uppercase font-bold mb-4 block">
-              {t.colecao_modelo}
+              {customTitle || t.colecao_modelo}
             </span>
             <h2 className="font-serif-premium text-3xl sm:text-4xl tracking-wide text-neutral-900 font-light">
-              {t.selecao_pensada}
+              {customSubtitle || t.selecao_pensada}
             </h2>
           </div>
           

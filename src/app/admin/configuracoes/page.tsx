@@ -61,6 +61,8 @@ export default function AdminSettingsPage() {
   const [contactPhone, setContactPhone] = useState("(11) 99999-9999");
   const [freeShippingMin, setFreeShippingMin] = useState(1500);
   const [instagramUrl, setInstagramUrl] = useState("https://instagram.com/viscaree");
+  const [gridTitle, setGridTitle] = useState("");
+  const [gridSubtitle, setGridSubtitle] = useState("");
 
   // Notifications State
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -123,12 +125,16 @@ export default function AdminSettingsPage() {
     const localPhone = localStorage.getItem("viscare_contact_phone");
     const localFreeShipping = localStorage.getItem("viscare_free_shipping_min");
     const localInstagram = localStorage.getItem("viscare_instagram_url");
+    const localGridTitle = localStorage.getItem("viscare_grid_title");
+    const localGridSubtitle = localStorage.getItem("viscare_grid_subtitle");
 
     if (localStoreName) setStoreName(localStoreName);
     if (localEmail) setContactEmail(localEmail);
     if (localPhone) setContactPhone(localPhone);
     if (localFreeShipping) setFreeShippingMin(Number(localFreeShipping));
     if (localInstagram) setInstagramUrl(localInstagram);
+    if (localGridTitle) setGridTitle(localGridTitle);
+    if (localGridSubtitle) setGridSubtitle(localGridSubtitle);
   }, []);
 
   // Update editor content when selecting a different page
@@ -148,6 +154,8 @@ export default function AdminSettingsPage() {
     localStorage.setItem("viscare_contact_phone", contactPhone);
     localStorage.setItem("viscare_free_shipping_min", String(freeShippingMin));
     localStorage.setItem("viscare_instagram_url", instagramUrl);
+    localStorage.setItem("viscare_grid_title", gridTitle);
+    localStorage.setItem("viscare_grid_subtitle", gridSubtitle);
     showToast("success", "Configurações da loja salvas com sucesso (Local)!");
   };
 
@@ -315,6 +323,31 @@ export default function AdminSettingsPage() {
                   className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                   placeholder="https://instagram.com/sualoja"
                 />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Título da Coleção na Home (ex: Coleção Modelo)
+                  </label>
+                  <input
+                    type="text"
+                    value={gridTitle}
+                    onChange={(e) => setGridTitle(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="Deixe em branco para o padrão"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Subtítulo da Coleção na Home
+                  </label>
+                  <input
+                    type="text"
+                    value={gridSubtitle}
+                    onChange={(e) => setGridSubtitle(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="Deixe em branco para o padrão"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end pt-3 border-t border-neutral-100">
