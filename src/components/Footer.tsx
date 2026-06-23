@@ -209,7 +209,7 @@ export default function Footer() {
                 { label: t.politicas_frete, href: "/institucional/politicas-de-frete" },
                 { label: t.devolucoes_trocas, href: "/institucional/devolucoes-e-trocas" },
                 { label: t.guia_notas, href: "#" },
-                { label: t.tabela_medidas, href: "#" }
+                { label: t.tabela_medidas, href: "/tabela-de-medidas" }
               ].map((item) => (
                 <li key={item.label}>
                   {item.isFaq ? (
