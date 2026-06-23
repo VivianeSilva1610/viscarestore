@@ -284,7 +284,7 @@ export default function Navbar() {
 
           <div className="border-t border-dourado-suave/15 pt-6 space-y-4">
             <a
-              href="#"
+              href="/conta"
               className="flex items-center space-x-3 text-neutral-800 hover:text-dourado-suave font-sans-premium text-xs tracking-wider uppercase font-medium transition-colors"
             >
               <User size={18} strokeWidth={1.5} />
