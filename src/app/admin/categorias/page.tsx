@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories";
 
 interface Category {

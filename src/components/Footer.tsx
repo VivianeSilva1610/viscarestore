@@ -25,7 +25,7 @@ export default function Footer() {
     if (!faqEmail || !faqMessage) return;
     setIsSubmittingFaq(true);
     try {
-      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57").trim();
       const MESSAGES_COL_ID = (process.env.NEXT_PUBLIC_APPWRITE_MESSAGES_COLLECTION_ID || "messages").trim();
       
       await databases.createDocument(DB_ID, MESSAGES_COL_ID, ID.unique(), {
@@ -55,7 +55,7 @@ export default function Footer() {
     if (!email) return;
     setIsSubscribing(true);
     try {
-      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+      const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57").trim();
       const NEWSLETTER_COL_ID = "newsletter";
       
       await databases.createDocument(DB_ID, NEWSLETTER_COL_ID, ID.unique(), {

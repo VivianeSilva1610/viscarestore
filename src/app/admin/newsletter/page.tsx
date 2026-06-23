@@ -5,7 +5,7 @@ import { databases, isAppwriteConfigured } from "../../../lib/appwrite";
 import { Query } from "appwrite";
 import { Mail, Loader2, Trash2, Copy, Check } from "lucide-react";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const NEWSLETTER_COL_ID = "newsletter";
 
 interface Subscriber {

@@ -6,7 +6,7 @@ import { ID, Query } from "appwrite";
 import { Models } from "appwrite";
 
 const CUSTOMERS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_CUSTOMERS_COLLECTION_ID || "customers";
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 
 export interface CustomerProfile {
   $id: string;

@@ -5,7 +5,7 @@ import { databases, isAppwriteConfigured } from "../../../lib/appwrite";
 import { Query } from "appwrite";
 import { ShoppingBag, Loader2, MapPin, Package, User, Clock, CheckCircle2, Search, ArrowRight } from "lucide-react";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const ORDERS_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID || "orders";
 
 interface OrderDoc {

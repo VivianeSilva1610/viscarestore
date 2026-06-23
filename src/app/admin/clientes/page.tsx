@@ -5,7 +5,7 @@ import { databases } from "../../../lib/appwrite";
 import { Query } from "appwrite";
 import { Search, Users, Mail, Phone, MapPin, ChevronRight, X, Loader2 } from "lucide-react";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const CUSTOMERS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_CUSTOMERS_COLLECTION_ID || "customers";
 
 interface Customer {

@@ -18,7 +18,7 @@ import {
 import { databases, isAppwriteConfigured } from "../../../lib/appwrite";
 import { ID, Query } from "appwrite";
 
-const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
 
 interface PageDoc {

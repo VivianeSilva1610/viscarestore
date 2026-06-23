@@ -10,7 +10,7 @@ import { Eye, Plus, Loader2 } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { Query } from "appwrite";
 
-const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "").trim();
+const DB_ID = (process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57").trim();
 const COLLECTION_ID = (process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID || "").trim();
 const BUCKET_ID = (process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57").trim();
 const CATEGORIES_COL_ID = (process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID || "categories").trim();
@@ -59,7 +59,7 @@ export default function ProductGrid() {
         const { Query } = await import("appwrite");
         if (!isAppwriteConfigured()) return;
         
-        const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "";
+        const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
         const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
         const res = await databases.listDocuments(DB_ID, PAGES_COL_ID, [Query.equal("slug", "global-settings")]);
         if (res.documents.length > 0) {
