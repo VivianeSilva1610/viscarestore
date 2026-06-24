@@ -37,6 +37,7 @@ interface Product {
   sizes?: string;
   ingredients_pt?: string;
   ingredients_it?: string;
+  stock_quantity: number;
 }
 
 const emptyProduct: Omit<Product, "$id"> = {
@@ -53,6 +54,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   sizes: "",
   ingredients_pt: "",
   ingredients_it: "",
+  stock_quantity: 0,
 };
 
 // Categories will be fetched from Appwrite
@@ -135,6 +137,7 @@ export default function AdminProdutosPage() {
       sizes: product.sizes,
       ingredients_pt: product.ingredients_pt || "",
       ingredients_it: product.ingredients_it || "",
+      stock_quantity: product.stock_quantity ?? 0,
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
@@ -166,12 +169,15 @@ export default function AdminProdutosPage() {
 
       const parsedPrice = Number(form.price);
       const parsedWeight = Number(form.weight_kg);
+      const parsedStock = parseInt(form.stock_quantity as any, 10) || 0;
 
       const data = { 
         ...form, 
         image_id: imageId, 
         price: isNaN(parsedPrice) ? 0 : parsedPrice, 
-        weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight 
+        weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
+        stock_quantity: parsedStock,
+        in_stock: parsedStock > 0
       };
 
       if (editingProduct) {
@@ -581,18 +587,29 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                 />
               </div>
 
-              {/* Toggles */}
-              <div className="flex items-center gap-8">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div
-                    onClick={() => setForm({ ...form, in_stock: !form.in_stock })}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${form.in_stock ? "bg-emerald-500" : "bg-neutral-200"}`}
-                  >
-                    <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.in_stock ? "translate-x-5" : ""}`} />
+              {/* Toggles and Stock */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Quantidade em Estoque *
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={form.stock_quantity}
+                      onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
+                      className="w-24 border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors text-center"
+                    />
+                    <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${form.stock_quantity > 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+                      {form.stock_quantity > 0 ? "Em Estoque" : "Esgotado"}
+                    </span>
                   </div>
-                  <span className="text-sm text-neutral-700">Em Estoque</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer mt-4 sm:mt-0">
                   <div
                     onClick={() => setForm({ ...form, featured: !form.featured })}
                     className={`relative w-11 h-6 rounded-full transition-colors ${form.featured ? "bg-[#C8A97E]" : "bg-neutral-200"}`}

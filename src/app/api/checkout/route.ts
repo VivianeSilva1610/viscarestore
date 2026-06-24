@@ -68,6 +68,7 @@ export async function POST(req: Request) {
       },
       metadata: {
         customerName: customerName || "Guest",
+        cartItems: JSON.stringify(items.map((i: any) => ({ id: i.id, qty: i.quantity }))),
       },
     });
 

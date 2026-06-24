@@ -26,6 +26,7 @@ export async function GET(req: Request) {
       payment_status: session.payment_status,
       shipping_details: (session as any).shipping_details || (session as any).shipping,
       line_items: session.line_items?.data,
+      cartItems: session.metadata?.cartItems || "[]",
     });
   } catch (error: any) {
     console.error("Erro ao buscar sessão do Stripe:", error);

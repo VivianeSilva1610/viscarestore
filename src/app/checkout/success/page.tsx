@@ -69,7 +69,27 @@ function CheckoutSuccessContent() {
           status: "pago"
         });
 
-        console.log("Order saved successfully");
+        // 4. Deduct stock quantity
+        try {
+          const cartItems = JSON.parse(data.cartItems || "[]");
+          for (const item of cartItems) {
+            try {
+              const product: any = await databases.getDocument(DB_ID, "products", item.id);
+              const currentStock = product.stock_quantity ?? 0;
+              const newStock = Math.max(0, currentStock - item.qty);
+              await databases.updateDocument(DB_ID, "products", item.id, {
+                stock_quantity: newStock,
+                in_stock: newStock > 0
+              });
+            } catch (err) {
+              console.error(`Failed to update stock for product ${item.id}`, err);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse cart items for stock deduction", e);
+        }
+
+        console.log("Order saved and stock updated successfully");
         clearCart();
       } catch (error) {
         console.error("Error processing order:", error);
