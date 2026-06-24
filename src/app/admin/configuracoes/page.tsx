@@ -62,7 +62,9 @@ export default function AdminSettingsPage() {
   const [freeShippingMin, setFreeShippingMin] = useState(1500);
   const [instagramUrl, setInstagramUrl] = useState("https://instagram.com/viscaree");
   const [gridTitle, setGridTitle] = useState("");
+  const [gridTitleIt, setGridTitleIt] = useState("");
   const [gridSubtitle, setGridSubtitle] = useState("");
+  const [gridSubtitleIt, setGridSubtitleIt] = useState("");
 
   // Notifications State
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -140,7 +142,9 @@ export default function AdminSettingsPage() {
         if (settings.freeShippingMin) setFreeShippingMin(Number(settings.freeShippingMin));
         if (settings.instagramUrl) setInstagramUrl(settings.instagramUrl);
         if (settings.gridTitle) setGridTitle(settings.gridTitle);
+        if (settings.gridTitleIt) setGridTitleIt(settings.gridTitleIt);
         if (settings.gridSubtitle) setGridSubtitle(settings.gridSubtitle);
+        if (settings.gridSubtitleIt) setGridSubtitleIt(settings.gridSubtitleIt);
       } catch (e) {
         console.error("Error parsing global settings", e);
       }
@@ -151,7 +155,7 @@ export default function AdminSettingsPage() {
   const handleSaveStoreSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     const settingsStr = JSON.stringify({
-      storeName, contactEmail, contactPhone, freeShippingMin, instagramUrl, gridTitle, gridSubtitle
+      storeName, contactEmail, contactPhone, freeShippingMin, instagramUrl, gridTitle, gridSubtitle, gridTitleIt, gridSubtitleIt
     });
     
     try {
@@ -353,12 +357,39 @@ export default function AdminSettingsPage() {
                 </div>
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Título da Coleção (Italiano)
+                  </label>
+                  <input
+                    type="text"
+                    value={gridTitleIt}
+                    onChange={(e) => setGridTitleIt(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="Deixe em branco para o padrão"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
                     Subtítulo da Coleção na Home
                   </label>
                   <input
                     type="text"
                     value={gridSubtitle}
                     onChange={(e) => setGridSubtitle(e.target.value)}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="Deixe em branco para o padrão"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Subtítulo da Coleção (Italiano)
+                  </label>
+                  <input
+                    type="text"
+                    value={gridSubtitleIt}
+                    onChange={(e) => setGridSubtitleIt(e.target.value)}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                     placeholder="Deixe em branco para o padrão"
                   />

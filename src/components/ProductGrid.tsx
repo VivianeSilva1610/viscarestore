@@ -50,7 +50,9 @@ export default function ProductGrid() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [customTitle, setCustomTitle] = useState("");
+  const [customTitleIt, setCustomTitleIt] = useState("");
   const [customSubtitle, setCustomSubtitle] = useState("");
+  const [customSubtitleIt, setCustomSubtitleIt] = useState("");
 
   // Listen for category change events from other components (like Categories.tsx)
   React.useEffect(() => {
@@ -86,7 +88,9 @@ export default function ProductGrid() {
         if (res.documents.length > 0) {
           const settings = JSON.parse(res.documents[0].content);
           if (settings.gridTitle) setCustomTitle(settings.gridTitle);
+          if (settings.gridTitleIt) setCustomTitleIt(settings.gridTitleIt);
           if (settings.gridSubtitle) setCustomSubtitle(settings.gridSubtitle);
+          if (settings.gridSubtitleIt) setCustomSubtitleIt(settings.gridSubtitleIt);
         }
       } catch (err) {
         console.error("Erro ao carregar configurações", err);
@@ -198,10 +202,10 @@ export default function ProductGrid() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 space-y-8 md:space-y-0">
           <div className="max-w-2xl">
             <span className="text-dourado-suave font-sans-premium text-xs tracking-[0.3em] uppercase font-bold mb-4 block">
-              {customTitle || t.colecao_modelo}
+              {(language === "it" && customTitleIt) ? customTitleIt : (customTitle || t.colecao_modelo)}
             </span>
             <h2 className="font-serif-premium text-3xl sm:text-4xl tracking-wide text-neutral-900 font-light">
-              {customSubtitle || t.selecao_pensada}
+              {(language === "it" && customSubtitleIt) ? customSubtitleIt : (customSubtitle || t.selecao_pensada)}
             </h2>
           </div>
           
