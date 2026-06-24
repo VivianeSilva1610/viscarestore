@@ -17,11 +17,23 @@ const LanguageContext = createContext<LanguageContextType>({
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>("pt");
 
-  // Load language from localStorage on mount
+  // Load language from localStorage or detect via timezone on mount
   useEffect(() => {
     const savedLang = localStorage.getItem("viscaree_lang") as Language;
     if (savedLang && (savedLang === "pt" || savedLang === "it")) {
       setLanguage(savedLang);
+    } else {
+      try {
+        // Use timezone to detect if user is in Europe or Brazil (Americas)
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (tz && tz.startsWith("Europe")) {
+          setLanguage("it");
+        } else {
+          setLanguage("pt");
+        }
+      } catch (e) {
+        setLanguage("pt");
+      }
     }
   }, []);
 
