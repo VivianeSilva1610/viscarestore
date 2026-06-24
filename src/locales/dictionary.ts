@@ -7,7 +7,13 @@ export const dictionary = {
       skincare: "Skincare",
       vestidos: "Vestidos",
       acessorios: "Acessórios",
-      rotina_skincare: "Rotina Skincare"
+      rotina_skincare: "Rotina Skincare",
+      minha_conta: "Minha Conta",
+      bem_vinda: "Bem-vinda,",
+      meu_perfil: "Meu Perfil",
+      sair: "Sair da conta",
+      entrar: "Entrar na conta",
+      criar_conta: "Criar conta grátis"
     },
     // Hero
     hero: {
@@ -101,7 +107,13 @@ export const dictionary = {
       skincare: "Skincare", // User requested NOT to change "skincare"
       vestidos: "Abiti",
       acessorios: "Accessori",
-      rotina_skincare: "Routine Skincare"
+      rotina_skincare: "Routine Skincare",
+      minha_conta: "Il Mio Account",
+      bem_vinda: "Benvenuta,",
+      meu_perfil: "Il Mio Profilo",
+      sair: "Esci",
+      entrar: "Accedi",
+      criar_conta: "Crea account gratuito"
     },
     // Hero
     hero: {
