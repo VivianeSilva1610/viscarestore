@@ -198,20 +198,20 @@ export default function Navbar() {
                     {isLoggedIn ? (
                       <>
                         <div className="px-4 py-3 border-b border-neutral-50">
-                          <p className="text-xs text-neutral-400 font-light">Bem-vinda,</p>
+                          <p className="text-xs text-neutral-400 font-light">{t.bem_vinda}</p>
                           <p className="text-sm font-semibold text-neutral-800 truncate">{profile?.name}</p>
                         </div>
                         <a href="/conta/perfil"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:bg-[#F1E7E2] hover:text-[#C8A97E] transition-colors">
                           <User size={15} strokeWidth={1.5} />
-                          Meu Perfil
+                          {t.meu_perfil}
                         </a>
                         <button
                           onClick={() => { logout(); setIsUserMenuOpen(false); }}
                           className="w-full flex items-center gap-3 px-4 py-3 text-sm text-neutral-500 hover:bg-red-50 hover:text-red-500 transition-colors">
                           <LogOut size={15} strokeWidth={1.5} />
-                          Sair da conta
+                          {t.sair}
                         </button>
                       </>
                     ) : (
@@ -220,12 +220,12 @@ export default function Navbar() {
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-700 hover:bg-[#F1E7E2] hover:text-[#C8A97E] transition-colors font-medium">
                           <User size={15} strokeWidth={1.5} />
-                          Entrar na conta
+                          {t.entrar}
                         </a>
                         <a href="/conta"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-500 hover:bg-[#F1E7E2] hover:text-[#C8A97E] transition-colors">
-                          Criar conta grátis
+                          {t.criar_conta}
                         </a>
                       </>
                     )}
@@ -312,7 +312,7 @@ export default function Navbar() {
               className="flex items-center space-x-3 text-neutral-800 hover:text-dourado-suave font-sans-premium text-xs tracking-wider uppercase font-medium transition-colors"
             >
               <User size={18} strokeWidth={1.5} />
-              <span>Minha Conta</span>
+              <span>{t.minha_conta}</span>
             </a>
             <p className="text-[10px] text-neutral-500 font-sans-premium tracking-widest uppercase">
               Curadoria de Luxo VisCaree
