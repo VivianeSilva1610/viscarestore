@@ -3,35 +3,40 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useLanguage } from "../context/LanguageContext";
+import { dictionary } from "../locales/dictionary";
 
 export default function Categories() {
+  const { language } = useLanguage();
+  const t = dictionary[language].categories;
+
   const categories = [
     {
       id: "perfumes",
-      title: "Alta Perfumaria",
-      subtitle: "Essências Raras & Notas Olfativas",
-      description: "Uma curadoria exclusiva de acordes complexos, unindo Jasmin Imperial, Bergamota da Calábria e Sândalo de Mysore.",
-      details: "Notas Olfativas: Floral Amadeirado Especiado",
+      title: t.items.perfumes.title,
+      subtitle: t.items.perfumes.subtitle,
+      description: t.items.perfumes.description,
+      details: t.items.perfumes.details,
       image: "/images/cat-perfumes.png",
       link: "#perfumes",
       gridClass: "lg:col-span-8 lg:row-span-1 h-[450px] lg:h-[500px]",
     },
     {
       id: "skincare",
-      title: "Cosméticos & Skincare",
-      subtitle: "Biotecnologia Avançada",
-      description: "Fórmulas dermatológicas de alta performance com ácido hialurônico puro, retinol encapsulado e peptídeos regeneradores.",
-      details: "Indicação Técnica: Regeneração Celular & Hidratação profunda",
+      title: t.items.skincare.title,
+      subtitle: t.items.skincare.subtitle,
+      description: t.items.skincare.description,
+      details: t.items.skincare.details,
       image: "/images/cat-skincare.png",
       link: "#skincare",
       gridClass: "lg:col-span-4 lg:row-span-2 h-[450px] lg:h-[770px]",
     },
     {
       id: "fashion",
-      title: "Moda & Joias",
-      subtitle: "Curadoria Exclusiva",
-      description: "Vestidos fluidos em seda pura, bolsas com design minimalista estruturado e brincos finos banhados a ouro 18k.",
-      details: "Seda Pura & Design Estruturado",
+      title: t.items.fashion.title,
+      subtitle: t.items.fashion.subtitle,
+      description: t.items.fashion.description,
+      details: t.items.fashion.details,
       image: "/images/cat-fashion.png",
       link: "#dresses",
       gridClass: "lg:col-span-8 lg:row-span-1 h-[450px] lg:h-[500px] lg:-mt-[230px]",
@@ -60,10 +65,10 @@ export default function Categories() {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="font-sans-premium text-[10px] tracking-[0.3em] uppercase text-dourado-suave font-semibold block mb-4">
-            Categorias em Destaque
+            {t.destaque}
           </span>
           <h2 className="font-serif-premium text-3xl sm:text-4xl tracking-wide text-neutral-900 font-light">
-            A Sinergia das Nossas Três Curadorias
+            {t.sinergia}
           </h2>
           <div className="h-[1px] w-20 bg-dourado-suave mx-auto mt-6" />
         </div>
@@ -116,7 +121,7 @@ export default function Categories() {
                     onClick={(e) => handleExplore(e, cat.id)}
                     className="font-sans-premium text-[10px] tracking-[0.2em] uppercase text-dourado-suave hover:text-white font-medium inline-flex items-center space-x-1.5 transition-colors duration-300 self-start sm:self-auto"
                   >
-                    <span>Explorar</span>
+                    <span>{t.explorar}</span>
                     <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform duration-300">
                       &rarr;
                     </span>

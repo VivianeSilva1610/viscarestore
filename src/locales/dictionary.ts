@@ -20,6 +20,32 @@ export const dictionary = {
       sinergia: "Sinergia Conceitual",
       edicao: "Edição Limitada 2026"
     },
+    // Categories
+    categories: {
+      destaque: "Categorias em Destaque",
+      sinergia: "A Sinergia das Nossas Três Curadorias",
+      explorar: "Explorar",
+      items: {
+        perfumes: {
+          title: "Alta Perfumaria",
+          subtitle: "Essências Raras & Notas Olfativas",
+          description: "Uma curadoria exclusiva de acordes complexos, unindo Jasmin Imperial, Bergamota da Calábria e Sândalo de Mysore.",
+          details: "Notas Olfativas: Floral Amadeirado Especiado"
+        },
+        skincare: {
+          title: "Cosméticos & Skincare",
+          subtitle: "Biotecnologia Avançada",
+          description: "Fórmulas dermatológicas de alta performance com ácido hialurônico puro, retinol encapsulado e peptídeos regeneradores.",
+          details: "Indicação Técnica: Regeneração Celular & Hidratação profunda"
+        },
+        fashion: {
+          title: "Moda & Joias",
+          subtitle: "Curadoria Exclusiva",
+          description: "Vestidos fluidos em seda pura, bolsas com design minimalista estruturado e brincos finos banhados a ouro 18k.",
+          details: "Seda Pura & Design Estruturado"
+        }
+      }
+    },
     // Product Grid
     grid: {
       colecao_modelo: "Coleção Modelo",
@@ -87,6 +113,32 @@ export const dictionary = {
       botao: "Scopri la Collezione",
       sinergia: "Sinergia Concettuale",
       edicao: "Edizione Limitata 2026"
+    },
+    // Categories
+    categories: {
+      destaque: "Categorie in Evidenza",
+      sinergia: "La Sinergia delle Nostre Tre Curatele",
+      explorar: "Esplora",
+      items: {
+        perfumes: {
+          title: "Alta Profumeria",
+          subtitle: "Essenze Rare & Note Olfattive",
+          description: "Una curatela esclusiva di accordi complessi, che unisce Gelsomino Imperiale, Bergamotto di Calabria e Sandalo di Mysore.",
+          details: "Note Olfattive: Floreale Legnoso Speziato"
+        },
+        skincare: {
+          title: "Cosmetici & Skincare",
+          subtitle: "Biotecnologia Avanzata",
+          description: "Formule dermatologiche ad alte prestazioni con acido ialuronico puro, retinolo incapsulato e peptidi rigeneranti.",
+          details: "Indicazione Tecnica: Rigenerazione Cellulare & Idratazione profonda"
+        },
+        fashion: {
+          title: "Moda & Gioielli",
+          subtitle: "Curatela Esclusiva",
+          description: "Abiti fluidi in pura seta, borse dal design minimalista strutturato e orecchini raffinati placcati oro 18k.",
+          details: "Pura Seta & Design Strutturato"
+        }
+      }
     },
     // Product Grid
     grid: {
