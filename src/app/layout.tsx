@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -35,9 +35,17 @@ export default function RootLayout({
       className={`${cormorantGaramond.variable} ${montserrat.variable} h-full antialiasedScroll`}
     >
       <head>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-1Q5M7GP2P6" strategy="beforeInteractive" />
+        <Script id="google-analytics" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-1Q5M7GP2P6');
+          `}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col bg-[#F1E7E2] text-neutral-800 font-sans-premium overflow-x-hidden">
-        <GoogleAnalytics gaId="G-1Q5M7GP2P6" />
         <LanguageProvider>
           {children}
         </LanguageProvider>
