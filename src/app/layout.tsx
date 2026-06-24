@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export default function RootLayout({
   children,
@@ -36,18 +37,7 @@ export default function RootLayout({
       <head>
       </head>
       <body className="min-h-full flex flex-col bg-[#F1E7E2] text-neutral-800 font-sans-premium overflow-x-hidden">
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-1Q5M7GP2P6"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-
-gtag('config', 'G-1Q5M7GP2P6');
-          `
-        }} />
-
+        <GoogleAnalytics gaId="G-1QSM7GP2P6" />
         <LanguageProvider>
           {children}
         </LanguageProvider>
