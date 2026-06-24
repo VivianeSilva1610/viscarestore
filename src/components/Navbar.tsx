@@ -47,14 +47,33 @@ export default function Navbar() {
   const t = dictionary[language].nav;
 
   const navLinks = [
-    { name: t.novidades, href: "#new-arrivals" },
-    { name: t.perfumes, href: "#perfumes" },
-    { name: t.skincare, href: "#skincare" },
-    { name: t.vestidos, href: "#dresses" },
-    { name: t.acessorios, href: "#accessories" },
+    { name: t.novidades, href: "/#products-section", categoryId: "todos" },
+    { name: t.perfumes, href: "/?category=perfumes#products-section", categoryId: "perfumes" },
+    { name: t.skincare, href: "/?category=skincare#products-section", categoryId: "skincare" },
+    { name: t.vestidos, href: "/?category=moda#products-section", categoryId: "moda" },
+    { name: t.acessorios, href: "/?category=acessorios#products-section", categoryId: "acessorios" },
     { name: language === "pt" ? "VÍDEOS" : "VIDEO", href: "/videos" },
     { name: t.rotina_skincare, href: "https://viscare.vercel.app/", external: true },
   ];
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: any) => {
+    if (link.external || !link.categoryId) return;
+    
+    if (window.location.pathname === "/" || window.location.pathname === "") {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent('changeCategory', { detail: link.categoryId }));
+      setIsMobileMenuOpen(false);
+      
+      setTimeout(() => {
+        const section = document.getElementById('products-section');
+        if (section) {
+          const yOffset = -80; 
+          const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 50);
+    }
+  };
 
   return (
     <>
@@ -76,6 +95,7 @@ export default function Navbar() {
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
+                  onClick={(e) => handleNavClick(e, link)}
                   className="font-sans-premium text-xs tracking-[0.2em] text-neutral-800 hover:text-dourado-suave uppercase transition-colors duration-300 font-medium"
                 >
                   {link.name}
@@ -112,6 +132,7 @@ export default function Navbar() {
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
+                  onClick={(e) => handleNavClick(e, link)}
                   className={`font-sans-premium text-xs tracking-[0.2em] uppercase transition-colors duration-300 font-medium ${
                     link.external
                       ? "text-dourado-suave border-b border-dourado-suave/20 hover:border-dourado-suave pb-0.5"
@@ -269,7 +290,10 @@ export default function Navbar() {
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    if (!link.categoryId && !link.external) setIsMobileMenuOpen(false);
+                    handleNavClick(e, link);
+                  }}
                   className={`font-sans-premium text-sm tracking-[0.2em] uppercase font-medium border-b border-neutral-900/5 pb-2 inline-block transition-all duration-300 ${
                     link.external
                       ? "text-dourado-suave font-semibold"

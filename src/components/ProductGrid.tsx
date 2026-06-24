@@ -30,6 +30,8 @@ interface Product {
   activeIngredient?: string;
   sizes?: string[];
   inStock?: boolean;
+  ingredients_pt?: string;
+  ingredients_it?: string;
 }
 
 export default function ProductGrid() {
@@ -57,6 +59,16 @@ export default function ProductGrid() {
       setActiveTab(customEvent.detail);
     };
     window.addEventListener('changeCategory', handleCategoryChange);
+    
+    // Check URL parameters for category
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cat = urlParams.get("category");
+      if (cat) {
+        setActiveTab(cat);
+      }
+    }
+    
     return () => window.removeEventListener('changeCategory', handleCategoryChange);
   }, []);
 
@@ -133,6 +145,8 @@ export default function ProductGrid() {
             details_it: doc.description_it || "",
             sizes: sizesArr,
             inStock: doc.in_stock,
+            ingredients_pt: doc.ingredients_pt || "",
+            ingredients_it: doc.ingredients_it || "",
           };
         });
         
@@ -150,6 +164,7 @@ export default function ProductGrid() {
   const getProductName = (p: Product) => language === "it" && p.name_it ? p.name_it : p.name_pt;
   const getProductDesc = (p: Product) => language === "it" && p.description_it ? p.description_it : p.description_pt;
   const getProductDetails = (p: Product) => language === "it" && p.details_it ? p.details_it : p.details_pt;
+  const getProductIngredients = (p: Product) => language === "it" && p.ingredients_it ? p.ingredients_it : p.ingredients_pt;
 
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSizes((prev) => ({
@@ -413,6 +428,17 @@ export default function ProductGrid() {
                         {getProductDetails(selectedProductDetails)}
                       </p>
                     </div>
+
+                    {getProductIngredients(selectedProductDetails) && (
+                      <div className="mb-6 bg-[#F1E7E2]/30 p-4 rounded-xl border border-dourado-suave/10">
+                        <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-2 font-semibold">
+                          {language === "it" ? "Ingredienti" : "Ingredientes"}
+                        </span>
+                        <p className="font-sans-premium text-[11px] text-neutral-600 leading-relaxed font-light tracking-wide">
+                          {getProductIngredients(selectedProductDetails)}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Sizelist inside modal */}
                     {selectedProductDetails.sizes && (

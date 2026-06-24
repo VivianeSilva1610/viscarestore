@@ -35,6 +35,8 @@ interface Product {
   in_stock: boolean;
   featured: boolean;
   sizes?: string;
+  ingredients_pt?: string;
+  ingredients_it?: string;
 }
 
 const emptyProduct: Omit<Product, "$id"> = {
@@ -49,6 +51,8 @@ const emptyProduct: Omit<Product, "$id"> = {
   in_stock: true,
   featured: false,
   sizes: "",
+  ingredients_pt: "",
+  ingredients_it: "",
 };
 
 // Categories will be fetched from Appwrite
@@ -129,6 +133,8 @@ export default function AdminProdutosPage() {
       in_stock: product.in_stock,
       featured: product.featured,
       sizes: product.sizes,
+      ingredients_pt: product.ingredients_pt || "",
+      ingredients_it: product.ingredients_it || "",
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
@@ -482,6 +488,35 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                   />
                 </div>
               </div>
+
+              {/* Ingredients (optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Ingredientes (Português) <span className="text-neutral-400 normal-case">(opcional)</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={form.ingredients_pt}
+                    onChange={(e) => setForm({ ...form, ingredients_pt: e.target.value })}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-none"
+                    placeholder="Ingredientes..."
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Ingredientes (Italiano) <span className="text-neutral-400 normal-case">(opcional)</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={form.ingredients_it}
+                    onChange={(e) => setForm({ ...form, ingredients_it: e.target.value })}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors resize-none"
+                    placeholder="Ingredienti..."
+                  />
+                </div>
+              </div>
+
 
               {/* Price, Weight, Category */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

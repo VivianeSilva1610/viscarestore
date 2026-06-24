@@ -69,8 +69,8 @@ export default function VideosPage() {
                 </h1>
                 <div className="w-12 h-0.5 bg-dourado-suave mx-auto mb-8"></div>
                 <p className="font-sans-premium text-sm text-neutral-500 tracking-wide max-w-lg mx-auto leading-relaxed">
-                  {isPt 
-                    ? "Descubra a essência da VisCaree através das nossas campanhas visuais exclusivas." 
+                  {isPt
+                    ? "Descubra a essência da VisCaree através das nossas campanhas visuais exclusivas."
                     : "Scopri l'essenza di VisCaree attraverso le nostre esclusive campagne visive."}
                 </p>
               </header>

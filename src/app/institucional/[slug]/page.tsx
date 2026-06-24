@@ -49,7 +49,12 @@ export default async function InstitutionalPage({ params }: { params: Promise<{ 
 
           <main className="flex-grow pt-32 pb-24">
             <div className="max-w-3xl mx-auto px-6 sm:px-12 lg:px-16">
-              <InstitutionalContent page={page as any} />
+              <InstitutionalContent page={{
+                title: page.title,
+                content: page.content,
+                title_it: page.title_it,
+                content_it: page.content_it
+              }} />
             </div>
           </main>
 
