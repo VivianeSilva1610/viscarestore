@@ -5,7 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Plus, Loader2 } from "lucide-react";
+import { Eye, Plus, Loader2, X } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { Query } from "appwrite";
 
@@ -390,14 +390,14 @@ export default function ProductGrid() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden z-10 border border-dourado-suave/10"
+              className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-y-auto max-h-[90vh] sm:max-h-[85vh] z-10 border border-dourado-suave/10"
             >
               <button
                 onClick={() => setSelectedProductDetails(null)}
-                className="absolute top-5 right-5 z-20 text-neutral-400 hover:text-neutral-900 p-2 transition-colors"
+                className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md text-neutral-900 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
                 aria-label="Fechar modal"
               >
-                &times;
+                <X size={18} />
               </button>
 
               <div className="grid grid-cols-1 md:grid-cols-2">
