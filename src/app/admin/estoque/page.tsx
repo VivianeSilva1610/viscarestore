@@ -58,7 +58,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   ingredients_pt: "",
   ingredients_it: "",
   stock_quantity: 0,
-  status: "published",
+  status: "draft",
   cost_price: 0,
   additional_costs: 0,
 };
@@ -70,7 +70,7 @@ interface Category {
   value: string;
 }
 
-export default function AdminProdutosPage() {
+export default function AdminEstoquePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +96,7 @@ export default function AdminProdutosPage() {
       // Fetch both products and categories in parallel
       const [productsRes, categoriesRes] = await Promise.all([
         databases.listDocuments(DB_ID, COLLECTION_ID, [
-          Query.equal("status", "published"),
+          Query.equal("status", "draft"),
           Query.orderDesc("$createdAt"),
           Query.limit(100),
         ]),
@@ -145,7 +145,7 @@ export default function AdminProdutosPage() {
       ingredients_pt: product.ingredients_pt || "",
       ingredients_it: product.ingredients_it || "",
       stock_quantity: product.stock_quantity ?? 0,
-      status: product.status || "published",
+      status: product.status || "draft",
       cost_price: product.cost_price || 0,
       additional_costs: product.additional_costs || 0,
     });
@@ -180,6 +180,8 @@ export default function AdminProdutosPage() {
       const parsedPrice = Number(form.price);
       const parsedWeight = Number(form.weight_kg);
       const parsedStock = parseInt(form.stock_quantity as any, 10) || 0;
+      const parsedCost = Number(form.cost_price) || 0;
+      const parsedAdditional = Number(form.additional_costs) || 0;
 
       const data = { 
         ...form, 
@@ -187,6 +189,8 @@ export default function AdminProdutosPage() {
         price: isNaN(parsedPrice) ? 0 : parsedPrice, 
         weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
         stock_quantity: parsedStock,
+        cost_price: parsedCost,
+        additional_costs: parsedAdditional,
         in_stock: parsedStock > 0
       };
 
@@ -222,16 +226,16 @@ export default function AdminProdutosPage() {
     }
   };
 
-  const handleMoveToEstoque = async (product: Product) => {
-    if (!confirm(`Mover "${product.name_pt}" para o Estoque? Ele não aparecerá mais no site.`)) return;
+  const handlePublishToSite = async (product: Product) => {
+    if (!confirm(`Publicar "${product.name_pt}" no site principal?`)) return;
     try {
       await databases.updateDocument(DB_ID, COLLECTION_ID, product.$id, {
-        status: "draft"
+        status: "published"
       });
-      showToast("success", "Produto movido para o estoque.");
+      showToast("success", "Produto publicado no site.");
       fetchProducts();
     } catch {
-      showToast("error", "Erro ao mover para o estoque.");
+      showToast("error", "Erro ao publicar no site.");
     }
   };
 
@@ -260,15 +264,15 @@ export default function AdminProdutosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-800 tracking-wide">Produtos</h1>
-          <p className="text-neutral-500 text-sm mt-1">{products.length} produto(s) cadastrado(s)</p>
+          <h1 className="text-2xl font-semibold text-neutral-800 tracking-wide">Estoque (Rascunhos)</h1>
+          <p className="text-neutral-500 text-sm mt-1">{products.length} rascunho(s) salvo(s)</p>
         </div>
         <button
           onClick={openCreateModal}
           className="flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white text-xs tracking-widest uppercase font-semibold rounded-xl hover:bg-[#C8A97E] transition-colors duration-300"
         >
           <Plus size={16} />
-          Novo Produto
+          Novo Rascunho
         </button>
       </div>
 
@@ -316,15 +320,19 @@ export default function AdminProdutosPage() {
               <tr className="border-b border-neutral-100 bg-neutral-50">
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4 w-16">Imagem</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Nome (PT)</th>
-                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Categoria</th>
-                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Preço</th>
-                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden sm:table-cell">Status</th>
+                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Custo Total</th>
+                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Preço Final</th>
+                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden sm:table-cell">Lucro Estimado</th>
                 <th className="text-right text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4">Ações</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.map((product) => {
                 const imgUrl = getImageUrl(product.image_id);
+                const totalCost = (product.cost_price || 0) + (product.additional_costs || 0);
+                const profit = product.price - totalCost;
+                const margin = product.price > 0 ? (profit / product.price) * 100 : 0;
+                
                 return (
                   <tr key={product.$id} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
                     <td className="px-6 py-4">
@@ -339,12 +347,12 @@ export default function AdminProdutosPage() {
                     </td>
                     <td className="px-4 py-4">
                       <p className="font-medium text-sm text-neutral-800">{product.name_pt}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5 italic">{product.name_it}</p>
+                      <p className="text-xs text-neutral-400 mt-0.5 italic">{categories.find((c) => c.value === product.category)?.label || product.category}</p>
                     </td>
                     <td className="px-4 py-4 hidden md:table-cell">
-                      <span className="px-3 py-1 bg-[#F1E7E2] text-[#C8A97E] text-[10px] font-semibold rounded-full uppercase tracking-wider">
-                        {categories.find((c) => c.value === product.category)?.label || product.category}
-                      </span>
+                      <p className="text-sm text-neutral-600">
+                        € {totalCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
                     </td>
                     <td className="px-4 py-4">
                       <p className="text-sm font-semibold text-neutral-800">
@@ -354,22 +362,20 @@ export default function AdminProdutosPage() {
                     <td className="px-4 py-4 hidden sm:table-cell">
                       <span
                         className={`px-3 py-1 text-[10px] font-semibold rounded-full uppercase tracking-wider ${
-                          product.in_stock
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-red-50 text-red-500"
+                          profit > 0 ? "bg-emerald-50 text-emerald-600" : profit < 0 ? "bg-red-50 text-red-500" : "bg-neutral-100 text-neutral-600"
                         }`}
                       >
-                        {product.in_stock ? "Em estoque" : "Sem estoque"}
+                        € {profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} ({margin.toFixed(1)}%)
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleMoveToEstoque(product)}
-                          className="p-2 text-neutral-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"
-                          title="Mover para Estoque"
+                          onClick={() => handlePublishToSite(product)}
+                          className="p-2 text-neutral-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1"
+                          title="Publicar no Site"
                         >
-                          <Package size={15} strokeWidth={1.5} />
+                          <Upload size={15} strokeWidth={1.5} />
                         </button>
                         <button
                           onClick={() => openEditModal(product)}
@@ -424,7 +430,7 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
             {/* Modal Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-neutral-100">
               <h2 className="text-lg font-semibold text-neutral-800">
-                {editingProduct ? "Editar Produto" : "Novo Produto"}
+                {editingProduct ? "Editar Rascunho" : "Novo Rascunho"}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -554,52 +560,85 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
               </div>
 
 
-              {/* Price, Weight, Category */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div>
-                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                    Preço (€) *
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
-                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
-                    placeholder="0,00"
-                  />
+
+              {/* Pricing & Costs Calculation */}
+              <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
+                <h3 className="text-xs font-semibold tracking-widest uppercase text-neutral-600 mb-4 flex items-center gap-2">
+                  <Package size={14} /> Custos e Precificação
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                      Custo Produto (€)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.cost_price}
+                      onChange={(e) => setForm({ ...form, cost_price: parseFloat(e.target.value) || 0 })}
+                      className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
+                      placeholder="Ex: 25.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                      Custos Adicionais (€) <span className="normal-case opacity-70">(Frete, Taxas)</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.additional_costs}
+                      onChange={(e) => setForm({ ...form, additional_costs: parseFloat(e.target.value) || 0 })}
+                      className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
+                      placeholder="Ex: 5.50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-dourado-suave font-bold block mb-2">
+                      Preço de Venda Final (€) *
+                    </label>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                      className="w-full border border-dourado-suave/50 focus:border-[#C8A97E] focus:ring-1 focus:ring-dourado-suave focus:outline-none px-4 py-3 text-sm font-semibold text-neutral-900 rounded-xl transition-all shadow-sm bg-white"
+                      placeholder="Ex: 89.90"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                    Peso (Kg) *
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.weight_kg}
-                    onChange={(e) => setForm({ ...form, weight_kg: parseFloat(e.target.value) })}
-                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
-                    placeholder="0.5"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
-                    Categoria *
-                  </label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
-                  >
-                      <option value="" disabled>Selecione uma categoria...</option>
-                    {categories.map((c) => (
-                      <option key={c.$id} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
+
+                {/* Profit Margin Info */}
+                <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl border border-neutral-100 shadow-sm">
+                  {(() => {
+                    const totalCost = (form.cost_price || 0) + (form.additional_costs || 0);
+                    const profit = (form.price || 0) - totalCost;
+                    const margin = form.price > 0 ? (profit / form.price) * 100 : 0;
+                    return (
+                      <>
+                        <div className="flex items-center gap-6">
+                          <div>
+                            <span className="block text-[10px] uppercase tracking-wider text-neutral-400">Custo Total</span>
+                            <span className="font-semibold text-neutral-700">€ {totalCost.toLocaleString("pt-BR", {minimumFractionDigits: 2})}</span>
+                          </div>
+                          <div className="h-8 w-px bg-neutral-200" />
+                          <div>
+                            <span className="block text-[10px] uppercase tracking-wider text-neutral-400">Lucro Estimado</span>
+                            <span className={`font-bold ${profit > 0 ? 'text-emerald-600' : profit < 0 ? 'text-red-500' : 'text-neutral-500'}`}>
+                              € {profit.toLocaleString("pt-BR", {minimumFractionDigits: 2})}
+                            </span>
+                          </div>
+                        </div>
+                        <div className={`mt-4 sm:mt-0 px-4 py-2 rounded-lg text-sm font-bold ${profit > 0 ? 'bg-emerald-50 text-emerald-700' : profit < 0 ? 'bg-red-50 text-red-600' : 'bg-neutral-100 text-neutral-600'}`}>
+                          Margem: {margin.toFixed(1)}%
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -633,10 +672,39 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                       onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
                       className="w-24 border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors text-center"
                     />
-                    <span className={`text-xs font-semibold px-3 py-1.5 rounded-lg ${form.stock_quantity > 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
-                      {form.stock_quantity > 0 ? "Em Estoque" : "Esgotado"}
-                    </span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Peso (Kg) *
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.weight_kg}
+                    onChange={(e) => setForm({ ...form, weight_kg: parseFloat(e.target.value) || 0.5 })}
+                    className="w-24 border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="0.5"
+                  />
+                </div>
+                
+                <div className="flex-grow">
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Categoria *
+                  </label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
+                  >
+                      <option value="" disabled>Selecione uma categoria...</option>
+                    {categories.map((c) => (
+                      <option key={c.$id} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <label className="flex items-center gap-3 cursor-pointer mt-4 sm:mt-0">
@@ -667,7 +735,7 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                   {isSaving ? (
                     <><Loader2 size={14} className="animate-spin" /> A guardar...</>
                   ) : (
-                    editingProduct ? "Salvar Alterações" : "Criar Produto"
+                    editingProduct ? "Salvar Alterações no Estoque" : "Salvar no Estoque"
                   )}
                 </button>
               </div>

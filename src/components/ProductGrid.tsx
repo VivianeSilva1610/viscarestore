@@ -109,6 +109,7 @@ export default function ProductGrid() {
       try {
         const [prodRes, catRes] = await Promise.all([
           databases.listDocuments(DB_ID, COLLECTION_ID, [
+            Query.equal("status", "published"),
             Query.orderDesc("$createdAt"),
             Query.limit(100),
           ]),
