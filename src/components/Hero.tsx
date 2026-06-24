@@ -3,8 +3,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useLanguage } from "../context/LanguageContext";
+import { dictionary } from "../locales/dictionary";
 
 export default function Hero() {
+  const { language } = useLanguage();
+  const t = dictionary[language].hero;
+
   return (
     <section className="relative w-full min-h-[90vh] flex items-center bg-[#F1E7E2] pt-20 overflow-hidden">
       
@@ -26,7 +31,7 @@ export default function Hero() {
             >
               <span className="w-8 h-[1px] bg-dourado-suave" />
               <span className="font-sans-premium text-[10px] sm:text-xs tracking-[0.3em] uppercase text-dourado-suave font-semibold">
-                Curadoria de Luxo
+                {t.curadoria}
               </span>
             </motion.div>
 
@@ -36,8 +41,8 @@ export default function Hero() {
               transition={{ duration: 0.9, delay: 0.1, ease: "easeOut" }}
               className="font-serif-premium text-3xl sm:text-4xl md:text-5xl tracking-wide leading-[1.15] text-neutral-900 font-light mb-8"
             >
-              Fórmulas que vestem a pele, <br />
-              <span className="italic font-normal text-dourado-suave">essências</span> que revelam a alma.
+              {t.titulo1}<br />
+              <span className="italic font-normal text-dourado-suave">{t.titulo_destaque}</span>{t.titulo2}
             </motion.h1>
 
             <motion.p
@@ -46,7 +51,7 @@ export default function Hero() {
               transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
               className="font-sans-premium text-neutral-600 text-sm sm:text-base leading-relaxed tracking-wide font-light max-w-lg mx-auto lg:mx-0 mb-10"
             >
-              A harmonia perfeita entre a biotecnologia avançada dos cuidados com a pele, a sofisticação da alta perfumaria e a delicadeza da seda pura.
+              {t.descricao}
             </motion.p>
 
             <motion.div
@@ -59,7 +64,7 @@ export default function Hero() {
                 href="#products-section"
                 className="luxury-btn w-full sm:w-auto text-center px-8 py-4 border border-dourado-suave bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:text-neutral-900 font-semibold shadow-lg transition-all duration-300 z-10"
               >
-                Descobrir Coleção
+                {t.botao}
               </a>
             </motion.div>
             
@@ -89,10 +94,10 @@ export default function Hero() {
               <div className="absolute bottom-6 left-6 right-6 glass-card p-5 rounded-xl text-neutral-900 flex justify-between items-center transition-all duration-500 hover:bg-white/80">
                 <div>
                   <p className="font-serif-premium italic text-sm tracking-wide">
-                    Sinergia Conceitual
+                    {t.sinergia}
                   </p>
                   <p className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 mt-1">
-                    Edição Limitada 2026
+                    {t.edicao}
                   </p>
                 </div>
                 <div className="h-2 w-2 rounded-full bg-dourado-suave animate-ping" />

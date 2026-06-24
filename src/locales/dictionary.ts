@@ -9,6 +9,17 @@ export const dictionary = {
       acessorios: "Acessórios",
       rotina_skincare: "Rotina Skincare"
     },
+    // Hero
+    hero: {
+      curadoria: "Curadoria de Luxo",
+      titulo1: "Fórmulas que vestem a pele, ",
+      titulo_destaque: "essências",
+      titulo2: " que revelam a alma.",
+      descricao: "A harmonia perfeita entre a biotecnologia avançada dos cuidados com a pele, a sofisticação da alta perfumaria e a delicadeza da seda pura.",
+      botao: "Descobrir Coleção",
+      sinergia: "Sinergia Conceitual",
+      edicao: "Edição Limitada 2026"
+    },
     // Product Grid
     grid: {
       colecao_modelo: "Coleção Modelo",
@@ -65,6 +76,17 @@ export const dictionary = {
       vestidos: "Abiti",
       acessorios: "Accessori",
       rotina_skincare: "Routine Skincare"
+    },
+    // Hero
+    hero: {
+      curadoria: "Curatela di Lusso",
+      titulo1: "Formule che vestono la pelle, ",
+      titulo_destaque: "essenze",
+      titulo2: " che rivelano l'anima.",
+      descricao: "La perfetta armonia tra la biotecnologia avanzata per la cura della pelle, la raffinatezza dell'alta profumeria e la delicatezza della pura seta.",
+      botao: "Scopri la Collezione",
+      sinergia: "Sinergia Concettuale",
+      edicao: "Edizione Limitata 2026"
     },
     // Product Grid
     grid: {
