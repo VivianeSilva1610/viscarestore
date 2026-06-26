@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { items, customerEmail, customerName } = await req.json();
+    const { items, customerEmail, customerName, customerProfile } = await req.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Carrinho está vazio." }, { status: 400 });
@@ -44,6 +44,17 @@ export async function POST(req: Request) {
       };
     });
 
+    const ipCountry = req.headers.get("x-vercel-ip-country");
+    // Se tiver perfil e tiver preenchido endereço, checa se é do Brasil (adicionando address_country caso exista, ou assumindo pelo IP)
+    const profileCountry = customerProfile?.address_country;
+    
+    let isBrazil = true;
+    if (profileCountry) {
+      isBrazil = profileCountry === "BR";
+    } else if (ipCountry) {
+      isBrazil = ipCountry === "BR";
+    }
+
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
       line_items,
@@ -59,7 +70,7 @@ export async function POST(req: Request) {
             custom: "CPF",
           },
           type: "text",
-          optional: false,
+          optional: !isBrazil,
         },
       ],
       billing_address_collection: "required",

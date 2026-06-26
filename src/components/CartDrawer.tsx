@@ -33,6 +33,7 @@ export default function CartDrawer() {
           items: cart,
           customerEmail: user?.email || "",
           customerName: profile?.name || "",
+          customerProfile: profile, // Pass profile to check address
         }),
       });
       const data = await response.json();
