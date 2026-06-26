@@ -59,6 +59,8 @@ function CheckoutSuccessContent() {
           ? data.line_items.map((i: any) => `${i.quantity}x ${i.description}`).join(", ")
           : "Produtos não informados";
 
+        const protocolNumber = "VIS-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
         await databases.createDocument(DB_ID, ORDERS_COL_ID, ID.unique(), {
           sessionId: session,
           customerName: data.customer_name || "Cliente",
@@ -66,7 +68,9 @@ function CheckoutSuccessContent() {
           amountTotal: data.amount_total || 0,
           shippingAddress: address,
           products: itemsSummary,
-          status: "pago"
+          status: "pago",
+          protocolNumber,
+          paymentMethod: data.payment_method || "Stripe"
         });
 
         // 4. Deduct stock quantity

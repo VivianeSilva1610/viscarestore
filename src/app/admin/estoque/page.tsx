@@ -41,6 +41,7 @@ interface Product {
   status: string;
   cost_price: number;
   additional_costs: number;
+  productCode?: string;
 }
 
 const emptyProduct: Omit<Product, "$id"> = {
@@ -156,6 +157,7 @@ export default function AdminEstoquePage() {
       status: product.status || "draft",
       cost_price: product.cost_price || 0,
       additional_costs: product.additional_costs || 0,
+      productCode: product.productCode,
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
@@ -192,7 +194,7 @@ export default function AdminEstoquePage() {
       const parsedCost = parseVal(form.cost_price) || 0;
       const parsedAdditional = parseVal(form.additional_costs) || 0;
 
-      const data = { 
+      const data: any = { 
         ...form, 
         image_id: imageId, 
         price: isNaN(parsedPrice) ? 0 : parsedPrice, 
@@ -207,6 +209,22 @@ export default function AdminEstoquePage() {
         await databases.updateDocument(DB_ID, COLLECTION_ID, editingProduct.$id, data);
         showToast("success", "Produto atualizado com sucesso!");
       } else {
+        let newCode = "";
+        const sameNameProduct = products.find(p => p.name_pt.trim().toLowerCase() === form.name_pt.trim().toLowerCase());
+        
+        if (sameNameProduct && sameNameProduct.productCode) {
+           newCode = sameNameProduct.productCode;
+        } else {
+           const prefix = (form.category ? form.category.replace(/[^A-Za-z0-9]/g, '').substring(0, 3).toUpperCase() : 'PRO');
+           const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+           let randomStr = '';
+           for (let i = 0; i < 4; i++) {
+               randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+           }
+           newCode = `${prefix}-${randomStr}`;
+        }
+        
+        data.productCode = newCode;
         await databases.createDocument(DB_ID, COLLECTION_ID, ID.unique(), data);
         showToast("success", "Produto criado com sucesso!");
       }
@@ -327,7 +345,8 @@ export default function AdminEstoquePage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50">
-                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4 w-16">Imagem</th>
+                <th className="px-6 py-4 text-[10px] uppercase tracking-widest text-neutral-400 font-semibold text-left">Código</th>
+                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 w-16">Imagem</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Nome (PT)</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Custo Total</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Preço Final</th>
@@ -344,7 +363,12 @@ export default function AdminEstoquePage() {
                 
                 return (
                   <tr key={product.$id} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-[10px] font-bold tracking-widest text-[#C8A97E] uppercase bg-[#C8A97E]/10 px-2 py-1 rounded-md">
+                        {product.productCode || "S/C"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#F1E7E2] flex items-center justify-center">
                         {imgUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -439,8 +463,13 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
             {/* Modal Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-neutral-100">
               <h2 className="text-lg font-semibold text-neutral-800">
-                {editingProduct ? "Editar Rascunho" : "Novo Rascunho"}
+                {editingProduct ? `Editar ${editingProduct.name_pt}` : "Novo Rascunho"}
               </h2>
+              {editingProduct && editingProduct.productCode && (
+                <span className="ml-4 text-[10px] font-bold tracking-widest text-[#C8A97E] uppercase bg-[#C8A97E]/10 px-2 py-1 rounded-md">
+                  Cód: {editingProduct.productCode}
+                </span>
+              )}
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-neutral-400 hover:text-neutral-700 transition-colors p-1"

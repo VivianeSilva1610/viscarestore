@@ -25,7 +25,7 @@ const navItems = [
   { label: "Categorias", href: "/admin/categorias", icon: Tags },
   { label: "Clientes", href: "/admin/clientes", icon: Users },
   { label: "Mídia", href: "/admin/midia", icon: ImageIcon },
-  { label: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
+  { label: "Rastreamento", href: "/admin/rastreamento", icon: ShoppingBag },
   { label: "Mensagens", href: "/admin/mensagens", icon: MessageSquare },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
   { label: "Configurações", href: "/admin/configuracoes", icon: Settings },

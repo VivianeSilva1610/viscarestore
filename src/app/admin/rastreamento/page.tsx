@@ -17,6 +17,8 @@ interface OrderDoc {
   shippingAddress: string;
   products: string;
   status: string;
+  protocolNumber?: string;
+  paymentMethod?: string;
   $createdAt: string;
 }
 
@@ -69,10 +71,10 @@ export default function PedidosPage() {
         <div>
           <h1 className="text-2xl font-semibold text-neutral-800 tracking-wide font-serif flex items-center gap-2">
             <ShoppingBag size={24} className="text-[#C8A97E]" />
-            Gestão de Pedidos
+            Rastreamento
           </h1>
           <p className="text-neutral-500 text-sm mt-1">
-            Acompanhe as vendas da sua loja, gerencie os envios e os dados dos clientes.
+            Acompanhe os protocolos de rastreamento gerados automaticamente e visualize os detalhes das compras.
           </p>
         </div>
         
@@ -112,7 +114,9 @@ export default function PedidosPage() {
                     <Package size={20} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Pedido #{order.$id.slice(-8).toUpperCase()}</p>
+                    <p className="text-[10px] font-bold tracking-widest text-[#C8A97E] uppercase">
+                      Protocolo: {order.protocolNumber || "N/A"}
+                    </p>
                     <p className="text-sm font-semibold text-neutral-800">
                       {new Date(order.$createdAt).toLocaleDateString("pt-BR", {
                         day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
@@ -160,6 +164,12 @@ export default function PedidosPage() {
                     <a href={`mailto:${order.customerEmail}`} className="text-xs text-neutral-500 hover:text-[#C8A97E] transition-colors mt-1 block">
                       {order.customerEmail}
                     </a>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">Pagamento</p>
+                    <p className="text-sm text-neutral-800 flex items-center gap-2">
+                      {order.paymentMethod ? (order.paymentMethod === 'card' ? 'Cartão de Crédito' : order.paymentMethod) : "Cartão (Stripe)"}
+                    </p>
                   </div>
                 </div>
 
