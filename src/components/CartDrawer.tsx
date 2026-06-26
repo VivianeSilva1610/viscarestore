@@ -21,7 +21,6 @@ export default function CartDrawer() {
   const { user, profile } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [shippingCountry, setShippingCountry] = useState<"BR" | "IT" | "">("");
-  const [shippingMethod, setShippingMethod] = useState<"PAC" | "SEDEX" | "POSTE" | "">("");
 
   const handleCheckout = async () => {
     setIsCheckingOut(true);
@@ -229,16 +228,8 @@ export default function CartDrawer() {
                 let shippingName = "A calcular";
 
                 if (shippingCountry === "BR") {
-                  if (shippingMethod === "PAC") {
-                    shippingCost = cartTotal >= freeShippingThreshold ? 0 : 25.00;
-                    shippingName = "Correios PAC";
-                  } else if (shippingMethod === "SEDEX") {
-                    shippingCost = 45.00;
-                    shippingName = "Correios SEDEX";
-                  } else if (shippingMethod === "POSTE") {
-                    shippingCost = getPosteItalianeRateEUR(cartTotalWeight);
-                    shippingName = "Poste Italiane (Internacional)";
-                  }
+                  shippingCost = getPosteItalianeRateEUR(cartTotalWeight);
+                  shippingName = "Poste Italiane (Internacional)";
                 } else if (shippingCountry === "IT") {
                   shippingCost = 10.00; // €10 fixed for Italy
                   shippingName = "Poste Italiane (Local)";
@@ -263,26 +254,12 @@ export default function CartDrawer() {
                         value={shippingCountry}
                         onChange={(e) => {
                           setShippingCountry(e.target.value as any);
-                          setShippingMethod("");
                         }}
                       >
                         <option value="">Selecione o País de Destino...</option>
-                        <option value="BR">Brasil 🇧🇷</option>
                         <option value="IT">Itália 🇮🇹</option>
+                        <option value="BR">Brasil 🇧🇷</option>
                       </select>
-
-                      {shippingCountry === "BR" && (
-                        <select 
-                          className="w-full text-xs font-sans-premium p-2 rounded-lg border border-neutral-200 focus:border-dourado-suave focus:outline-none"
-                          value={shippingMethod}
-                          onChange={(e) => setShippingMethod(e.target.value as any)}
-                        >
-                          <option value="">Selecione o método de envio...</option>
-                          <option value="PAC">Correios PAC (Nacional)</option>
-                          <option value="SEDEX">Correios SEDEX (Nacional)</option>
-                          <option value="POSTE">Poste Italiane (Internacional &rarr; Brasil)</option>
-                        </select>
-                      )}
                     </div>
 
                     <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600 pt-2">
@@ -293,10 +270,9 @@ export default function CartDrawer() {
                     </div>
 
                     <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
-                      <span>Frete</span>
+                      <span>Frete ({shippingName})</span>
                       <span className="text-dourado-suave font-semibold text-[10px] text-right">
-                        {shippingCost === 0 && shippingMethod ? "GRATUITO" : shippingCost > 0 ? `€ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
-                        {shippingMethod === "POSTE" && <span className="block text-[8px] text-neutral-400 normal-case mt-0.5">(Aprox. €{getPosteItalianeRateEUR(cartTotalWeight).toFixed(2)})</span>}
+                        {shippingCost > 0 ? `€ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
                       </span>
                     </div>
 

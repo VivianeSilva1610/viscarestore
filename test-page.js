@@ -1,4 +1,4 @@
-const { Client, Databases } = require('node-appwrite');
+const { Client, Databases, Query } = require('node-appwrite');
 
 const client = new Client()
     .setEndpoint('https://fra.cloud.appwrite.io/v1')
@@ -8,8 +8,8 @@ const db = new Databases(client);
 
 async function run() {
     try {
-        const res = await db.listDocuments('6a390e430024feb8df57', 'categories');
-        console.log(JSON.stringify(res.documents.map(c => ({ label: c.label, value: c.value })), null, 2));
+        const res = await db.listDocuments('6a390e430024feb8df57', 'pages');
+        console.log(JSON.stringify(res, null, 2));
     } catch (e) {
         console.error(e);
     }

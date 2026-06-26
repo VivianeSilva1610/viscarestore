@@ -199,33 +199,35 @@ export default function PerfilContent() {
                             placeholder="123" className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div className="grid grid-cols-1 gap-5">
                         <div>
                           <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">Complemento</label>
                           <input type="text" value={form.address_complement} onChange={(e) => setForm({ ...form, address_complement: e.target.value })}
                             placeholder="Apto, Sala, etc." className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
                         </div>
-                        <div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-5">
+                        <div className="col-span-1">
                           <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">Bairro</label>
                           <input type="text" value={form.address_district} onChange={(e) => setForm({ ...form, address_district: e.target.value })}
                             placeholder="Bairro" className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
                         </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-5">
-                        <div>
-                          <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">CEP</label>
-                          <input type="text" value={form.address_zip} onChange={(e) => setForm({ ...form, address_zip: e.target.value })}
-                            placeholder="00000-000" maxLength={9} className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
-                        </div>
-                        <div>
+                        <div className="col-span-2">
                           <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">Cidade</label>
                           <input type="text" value={form.address_city} onChange={(e) => setForm({ ...form, address_city: e.target.value })}
                             placeholder="Cidade" className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
                         </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-5">
                         <div>
-                          <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">Estado</label>
+                          <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">CEP / CAP</label>
+                          <input type="text" value={form.address_zip} onChange={(e) => setForm({ ...form, address_zip: e.target.value })}
+                            placeholder="Ex: 88100" maxLength={9} className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">Estado / Província</label>
                           <input type="text" value={form.address_state} onChange={(e) => setForm({ ...form, address_state: e.target.value.toUpperCase() })}
-                            placeholder="SP" maxLength={2} className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
+                            placeholder="Ex: SP ou CZ" maxLength={2} className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors" />
                         </div>
                       </div>
                     </div>

@@ -59,7 +59,7 @@ export default function AdminSettingsPage() {
   const [storeName, setStoreName] = useState("VisCaree");
   const [contactEmail, setContactEmail] = useState("contato@viscaree.com.br");
   const [contactPhone, setContactPhone] = useState("(11) 99999-9999");
-  const [freeShippingMin, setFreeShippingMin] = useState(1500);
+  const [freeShippingMin, setFreeShippingMin] = useState<string | number>(1500);
   const [instagramUrl, setInstagramUrl] = useState("https://instagram.com/viscaree");
   const [gridTitle, setGridTitle] = useState("");
   const [gridTitleIt, setGridTitleIt] = useState("");
@@ -154,8 +154,9 @@ export default function AdminSettingsPage() {
   // Save general store settings
   const handleSaveStoreSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedShipping = typeof freeShippingMin === 'string' ? Number(freeShippingMin.replace(',', '.')) : freeShippingMin;
     const settingsStr = JSON.stringify({
-      storeName, contactEmail, contactPhone, freeShippingMin, instagramUrl, gridTitle, gridSubtitle, gridTitleIt, gridSubtitleIt
+      storeName, contactEmail, contactPhone, freeShippingMin: parsedShipping, instagramUrl, gridTitle, gridSubtitle, gridTitleIt, gridSubtitleIt
     });
     
     try {
@@ -318,11 +319,11 @@ export default function AdminSettingsPage() {
                     Frete Grátis a partir de (€)
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
-                    min="0"
                     value={freeShippingMin}
-                    onChange={(e) => setFreeShippingMin(Number(e.target.value))}
+                    onChange={(e) => setFreeShippingMin(e.target.value.replace(/[^0-9.,]/g, ''))}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                   />
                 </div>

@@ -76,7 +76,14 @@ export default function AdminProdutosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState(emptyProduct);
+  
+  type FormState = Omit<Product, "$id" | "price" | "weight_kg" | "cost_price"> & {
+    price: string | number;
+    weight_kg: string | number;
+    cost_price: string | number;
+  };
+
+  const [form, setForm] = useState<FormState>(emptyProduct);
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -177,8 +184,10 @@ export default function AdminProdutosPage() {
         imageId = uploaded.$id;
       }
 
-      const parsedPrice = Number(form.price);
-      const parsedWeight = Number(form.weight_kg);
+      const parseVal = (v: string | number) => typeof v === 'string' ? Number(v.replace(',', '.')) : Number(v);
+      const parsedPrice = parseVal(form.price);
+      const parsedWeight = parseVal(form.weight_kg);
+      const parsedCost = parseVal(form.cost_price);
       const parsedStock = parseInt(form.stock_quantity as any, 10) || 0;
 
       const data = { 
@@ -186,6 +195,7 @@ export default function AdminProdutosPage() {
         image_id: imageId, 
         price: isNaN(parsedPrice) ? 0 : parsedPrice, 
         weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
+        cost_price: isNaN(parsedCost) ? 0 : parsedCost,
         stock_quantity: parsedStock,
         in_stock: parsedStock > 0
       };
@@ -562,11 +572,10 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                   </label>
                   <input
                     required
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={form.price}
-                    onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) })}
+                    onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^0-9.,]/g, '') })}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                     placeholder="0,00"
                   />
@@ -577,11 +586,10 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                   </label>
                   <input
                     required
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={form.weight_kg}
-                    onChange={(e) => setForm({ ...form, weight_kg: parseFloat(e.target.value) })}
+                    onChange={(e) => setForm({ ...form, weight_kg: e.target.value.replace(/[^0-9.,]/g, '') })}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                     placeholder="0.5"
                   />
