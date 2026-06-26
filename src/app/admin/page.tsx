@@ -10,7 +10,7 @@ export default function AdminDashboardPage() {
 
   const stats = [
     { label: "Produtos", icon: Package, value: "—", sub: "Ver produtos", href: "/admin/produtos", color: "text-[#C8A97E]", bg: "bg-[#C8A97E]/10" },
-    { label: "Pedidos", icon: ShoppingBag, value: "—", sub: "Ver pedidos", href: "/admin/pedidos", color: "text-blue-400", bg: "bg-blue-50" },
+    { label: "Rastreamento", icon: ShoppingBag, value: "—", sub: "Ver rastreamentos", href: "/admin/rastreamento", color: "text-blue-400", bg: "bg-blue-50" },
     { label: "Categorias", icon: Tags, value: "4", sub: "Gerenciar", href: "/admin/categorias", color: "text-violet-400", bg: "bg-violet-50" },
     { label: "Receita (mês)", icon: TrendingUp, value: "—", sub: "Em breve", href: "#", color: "text-emerald-400", bg: "bg-emerald-50" },
   ];
