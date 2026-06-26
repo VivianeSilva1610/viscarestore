@@ -115,7 +115,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (data: Partial<Omit<CustomerProfile, "$id" | "user_id" | "email">>) => {
-    if (!profile) throw new Error("No profile found");
+    if (!user) throw new Error("No user logged in");
+
+    if (!profile) {
+      const newProfile = await databases.createDocument(
+        DB_ID,
+        CUSTOMERS_COLLECTION_ID,
+        ID.unique(),
+        {
+          ...data,
+          user_id: user.$id,
+          name: user.name || data.name || "",
+          email: user.email,
+        }
+      );
+      setProfile(newProfile as unknown as CustomerProfile);
+      return;
+    }
+
     const updated = await databases.updateDocument(
       DB_ID,
       CUSTOMERS_COLLECTION_ID,
