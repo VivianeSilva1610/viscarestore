@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       amount_total: session.amount_total,
       payment_status: session.payment_status,
       payment_method: session.payment_method_types?.join(", ") || "Stripe",
-      shipping_details: (session as any).shipping_details || (session as any).shipping,
+      shipping_details: (session as any).shipping_details || (session as any).shipping || session.customer_details,
       line_items: session.line_items?.data,
       cartItems: session.metadata?.cartItems || "[]",
     });
