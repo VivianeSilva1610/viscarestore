@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       ],
       billing_address_collection: "required",
       shipping_address_collection: {
-        allowed_countries: ["BR"],
+        allowed_countries: ["BR", "IT"],
       },
       metadata: {
         customerName: customerName || "Guest",
