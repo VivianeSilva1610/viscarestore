@@ -110,7 +110,11 @@ export default function PedidosPage() {
               {/* Header do Pedido */}
               <div className="border-b border-neutral-100 bg-neutral-50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-lg ${order.status === 'pago' ? 'bg-[#C8A97E]/10 text-[#C8A97E]' : 'bg-emerald-50 text-emerald-600'}`}>
+                  <div className={`p-2 rounded-lg ${
+                    order.status === 'pago' ? 'bg-[#C8A97E]/10 text-[#C8A97E]' : 
+                    (order.status === 'reembolsado' || order.status === 'cancelado') ? 'bg-rose-50 text-rose-600' :
+                    'bg-emerald-50 text-emerald-600'
+                  }`}>
                     <Package size={20} />
                   </div>
                   <div>
@@ -141,12 +145,16 @@ export default function PedidosPage() {
                     className={`text-xs font-semibold px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors ${
                       order.status === 'pago' 
                         ? 'bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-500' 
+                        : (order.status === 'reembolsado' || order.status === 'cancelado')
+                        ? 'bg-rose-50 text-rose-700 border-rose-200 focus:ring-rose-500'
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200 focus:ring-emerald-500'
                     }`}
                   >
                     <option value="pago">PAGO - Preparando Envio</option>
                     <option value="enviado">ENVIADO - Em Trânsito</option>
                     <option value="concluido">CONCLUÍDO - Entregue</option>
+                    <option value="reembolsado">REEMBOLSADO - Estornado</option>
+                    <option value="cancelado">CANCELADO - Sem Sucesso</option>
                   </select>
                 </div>
               </div>
