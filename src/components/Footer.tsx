@@ -223,6 +223,7 @@ export default function Footer() {
             </h5>
             <ul className="space-y-3">
               {[
+                { label: language === "it" ? "Traccia il tuo ordine" : "Rastrear Pedido", href: "/rastreio" },
                 { label: t.duvidas_frequentes, href: "#", isFaq: true },
                 { label: t.politicas_frete, href: "/institucional/politicas-de-frete" },
                 { label: t.devolucoes_trocas, href: "/institucional/devolucoes-e-trocas" },

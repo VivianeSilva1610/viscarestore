@@ -20,6 +20,10 @@ interface OrderDoc {
   protocolNumber?: string;
   paymentMethod?: string;
   $createdAt: string;
+  trackingCode?: string;
+  trackingStatus?: string;
+  statusHistory?: string;
+  estimatedDeliveryDate?: string;
 }
 
 export default function PedidosPage() {
@@ -49,10 +53,24 @@ export default function PedidosPage() {
     fetchOrders();
   }, []);
 
-  const updateStatus = async (id: string, newStatus: string) => {
+  const updateStatus = async (order: OrderDoc, newTrackingStatus: string) => {
     try {
-      await databases.updateDocument(DB_ID, ORDERS_COL_ID, id, { status: newStatus });
-      setOrders(prev => prev.map(o => o.$id === id ? { ...o, status: newStatus } : o));
+      let history: { status: string; timestamp: string }[] = [];
+      try {
+        history = order.statusHistory ? JSON.parse(order.statusHistory) : [];
+      } catch {
+        history = [];
+      }
+      history.push({ status: newTrackingStatus, timestamp: new Date().toISOString() });
+
+      await databases.updateDocument(DB_ID, ORDERS_COL_ID, order.$id, {
+        trackingStatus: newTrackingStatus,
+        statusHistory: JSON.stringify(history),
+      });
+      setOrders(prev => prev.map(o => o.$id === order.$id
+        ? { ...o, trackingStatus: newTrackingStatus, statusHistory: JSON.stringify(history) }
+        : o
+      ));
     } catch (error) {
       console.error("Erro ao atualizar status", error);
       alert("Erro ao atualizar o status do pedido.");
@@ -111,15 +129,15 @@ export default function PedidosPage() {
               <div className="border-b border-neutral-100 bg-neutral-50 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className={`p-2 rounded-lg ${
-                    order.status === 'pago' ? 'bg-[#C8A97E]/10 text-[#C8A97E]' : 
-                    (order.status === 'reembolsado' || order.status === 'cancelado') ? 'bg-rose-50 text-rose-600' :
+                    order.trackingStatus === 'preparando' ? 'bg-[#C8A97E]/10 text-[#C8A97E]' :
+                    (order.trackingStatus === 'reembolsado' || order.trackingStatus === 'cancelado') ? 'bg-rose-50 text-rose-600' :
                     'bg-emerald-50 text-emerald-600'
                   }`}>
                     <Package size={20} />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold tracking-widest text-[#C8A97E] uppercase">
-                      Protocolo: {order.protocolNumber || "N/A"}
+                      Rastreio: {order.trackingCode || order.protocolNumber || "N/A"}
                     </p>
                     <p className="text-sm font-semibold text-neutral-800">
                       {new Date(order.$createdAt).toLocaleDateString("pt-BR", {
@@ -136,23 +154,23 @@ export default function PedidosPage() {
                       {(order.amountTotal / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'EUR' })}
                     </p>
                   </div>
-                  
+
                   <div className="h-8 w-px bg-neutral-200 hidden md:block mx-2"></div>
 
                   <select
-                    value={order.status}
-                    onChange={(e) => updateStatus(order.$id, e.target.value)}
+                    value={order.trackingStatus || "preparando"}
+                    onChange={(e) => updateStatus(order, e.target.value)}
                     className={`text-xs font-semibold px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors ${
-                      order.status === 'pago' 
-                        ? 'bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-500' 
-                        : (order.status === 'reembolsado' || order.status === 'cancelado')
+                      order.trackingStatus === 'preparando' || !order.trackingStatus
+                        ? 'bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-500'
+                        : (order.trackingStatus === 'reembolsado' || order.trackingStatus === 'cancelado')
                         ? 'bg-rose-50 text-rose-700 border-rose-200 focus:ring-rose-500'
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200 focus:ring-emerald-500'
                     }`}
                   >
-                    <option value="pago">PAGO - Preparando Envio</option>
-                    <option value="enviado">ENVIADO - Em Trânsito</option>
-                    <option value="concluido">CONCLUÍDO - Entregue</option>
+                    <option value="preparando">PREPARANDO ENTREGA</option>
+                    <option value="em_transito">PERCURSO EM ANDAMENTO</option>
+                    <option value="concluido">CONCLUÍDO</option>
                     <option value="reembolsado">REEMBOLSADO - Estornado</option>
                     <option value="cancelado">CANCELADO - Sem Sucesso</option>
                   </select>

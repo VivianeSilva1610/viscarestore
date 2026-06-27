@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
-import { motion, AnimatePresence } from "framer-motion";
-import { Eye, Plus, Loader2, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Eye, Plus, Loader2 } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { Query } from "appwrite";
 
@@ -24,14 +25,11 @@ interface Product {
   image: string;
   description_pt: string;
   description_it: string;
-  details_pt: string;
-  details_it: string;
-  volume?: string;
-  activeIngredient?: string;
   sizes?: string[];
   inStock?: boolean;
   ingredients_pt?: string;
   ingredients_it?: string;
+  delivery_days?: number;
 }
 
 export default function ProductGrid() {
@@ -43,7 +41,6 @@ export default function ProductGrid() {
     prod_dress: "M", // Default size for the dress
   });
   const [activeTab, setActiveTab] = useState<string>("todos");
-  const [selectedProductDetails, setSelectedProductDetails] = useState<Product | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{label: string, label_it?: string, value: string}[]>([]);
@@ -146,12 +143,11 @@ export default function ProductGrid() {
             image: imageUrl,
             description_pt: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
             description_it: doc.description_it ? doc.description_it.substring(0, 50) + "..." : "",
-            details_pt: doc.description_pt || "",
-            details_it: doc.description_it || "",
             sizes: sizesArr,
             inStock: doc.in_stock,
             ingredients_pt: doc.ingredients_pt || "",
             ingredients_it: doc.ingredients_it || "",
+            delivery_days: doc.delivery_days ?? 5,
           };
         });
         
@@ -168,8 +164,6 @@ export default function ProductGrid() {
 
   const getProductName = (p: Product) => language === "it" && p.name_it ? p.name_it : p.name_pt;
   const getProductDesc = (p: Product) => language === "it" && p.description_it ? p.description_it : p.description_pt;
-  const getProductDetails = (p: Product) => language === "it" && p.details_it ? p.details_it : p.details_pt;
-  const getProductIngredients = (p: Product) => language === "it" && p.ingredients_it ? p.ingredients_it : p.ingredients_pt;
 
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSizes((prev) => ({
@@ -188,7 +182,8 @@ export default function ProductGrid() {
       image: product.image,
       category: product.category,
       description: "",
-      size: size
+      size: size,
+      delivery_days: product.delivery_days,
     });
   };
 
@@ -277,33 +272,23 @@ export default function ProductGrid() {
                   loading="lazy"
                 />
 
-                {/* Details Floating Badge (Volume or Active Ingredient) */}
-                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 items-start">
-                  {product.inStock === false && (
+                {/* Out of stock badge */}
+                {product.inStock === false && (
+                  <div className="absolute top-4 left-4 z-10">
                     <span className="bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
                       {t.esgotado}
                     </span>
-                  )}
-                  {product.volume && (
-                    <span className="glass-card text-[9px] font-sans-premium tracking-widest text-neutral-800 uppercase px-2.5 py-1 rounded-full font-semibold">
-                      {product.volume}
-                    </span>
-                  )}
-                  {product.activeIngredient && (
-                    <span className="glass-card text-[9px] font-sans-premium tracking-widest text-dourado-suave uppercase px-2.5 py-1 rounded-full font-semibold">
-                      {product.activeIngredient}
-                    </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Quick Info Hover Action */}
-                <button
-                  onClick={() => setSelectedProductDetails(product)}
+                {/* Quick Info Hover Action - links to dedicated product page */}
+                <Link
+                  href={`/produtos/${product.id}`}
                   className="absolute top-4 right-4 z-10 p-2 rounded-full glass-card text-neutral-700 hover:text-dourado-suave hover:bg-white transition-all duration-300 opacity-0 group-hover:opacity-100"
-                  aria-label="Ver detalhes rápidos"
+                  aria-label="Ver detalhes do produto"
                 >
                   <Eye size={16} strokeWidth={2} />
-                </button>
+                </Link>
 
                 {/* Dynamic "Add to Bag" Hover Overlay Button */}
                 <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[#F1E7E2]/90 via-[#F1E7E2]/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex flex-col items-center">
@@ -358,9 +343,11 @@ export default function ProductGrid() {
                   {categories.find((c) => c.value === product.category)?.label || product.category}
                 </span>
                 
-                <h3 className="font-serif-premium text-lg sm:text-xl text-neutral-900 font-light tracking-wide hover:text-dourado-suave transition-colors duration-300 cursor-pointer" onClick={() => setSelectedProductDetails(product)}>
-                  {getProductName(product)}
-                </h3>
+                <Link href={`/produtos/${product.id}`}>
+                  <h3 className="font-serif-premium text-lg sm:text-xl text-neutral-900 font-light tracking-wide hover:text-dourado-suave transition-colors duration-300 cursor-pointer">
+                    {getProductName(product)}
+                  </h3>
+                </Link>
                 
                 <p className="font-sans-premium text-[10px] text-neutral-500 tracking-wider font-light mt-1.5 mb-2.5">
                   {getProductDesc(product)}
@@ -376,125 +363,6 @@ export default function ProductGrid() {
         )}
       </div>
 
-      {/* Product Details Modal (Quick View) */}
-      <AnimatePresence>
-        {selectedProductDetails && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            
-            {/* Backdrop blur overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedProductDetails(null)}
-              className="absolute inset-0 bg-neutral-950/40 backdrop-blur-md"
-            />
-
-            {/* Modal Box */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-y-auto max-h-[90vh] sm:max-h-[85vh] z-10 border border-dourado-suave/10"
-            >
-              <button
-                onClick={() => setSelectedProductDetails(null)}
-                className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md text-neutral-900 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-                aria-label="Fechar modal"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                {/* Image Panel */}
-                <div className="relative aspect-[3/4] bg-[#F1E7E2]">
-                  <img
-                    src={selectedProductDetails.image}
-                    alt={getProductName(selectedProductDetails)}
-                    className="w-full h-full object-cover mix-blend-multiply"
-                  />
-                </div>
-
-                {/* Details Panel */}
-                <div className="p-8 sm:p-10 flex flex-col justify-between">
-                  <div>
-                    <span className="font-sans-premium text-[10px] tracking-[0.25em] text-dourado-suave font-semibold uppercase block mb-2">
-                      {categories.find((c) => c.value === selectedProductDetails.category)?.label || selectedProductDetails.category}
-                    </span>
-                    <h3 className="font-serif-premium text-2xl sm:text-3xl text-neutral-900 tracking-wide font-light mb-4">
-                      {getProductName(selectedProductDetails)}
-                    </h3>
-                    <p className="font-sans-premium text-base font-semibold tracking-wider text-neutral-900 mb-6 border-b border-neutral-100 pb-4">
-                      € {selectedProductDetails.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
-                    
-                    <div className="space-y-4 mb-6">
-                      <p className="font-sans-premium text-xs text-neutral-600 leading-relaxed font-light tracking-wide">
-                        {getProductDetails(selectedProductDetails)}
-                      </p>
-                    </div>
-
-                    {getProductIngredients(selectedProductDetails) && (
-                      <div className="mb-6 bg-[#F1E7E2]/30 p-4 rounded-xl border border-dourado-suave/10">
-                        <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-2 font-semibold">
-                          {language === "it" ? "Ingredienti" : "Ingredientes"}
-                        </span>
-                        <p className="font-sans-premium text-[11px] text-neutral-600 leading-relaxed font-light tracking-wide">
-                          {getProductIngredients(selectedProductDetails)}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Sizelist inside modal */}
-                    {selectedProductDetails.sizes && (
-                      <div className="mb-6">
-                        <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-3">
-                          Selecione o tamanho:
-                        </span>
-                        <div className="flex space-x-3">
-                          {selectedProductDetails.sizes.map((sz) => (
-                            <button
-                              key={sz}
-                              onClick={() => handleSizeSelect(selectedProductDetails.id, sz)}
-                              className={`w-9 h-9 rounded-full text-[11px] font-sans-premium font-semibold flex items-center justify-center border transition-all duration-300 ${
-                                selectedSizes[selectedProductDetails.id] === sz
-                                  ? "bg-dourado-suave border-dourado-suave text-white shadow-sm"
-                                  : "bg-white border-neutral-900/10 hover:border-dourado-suave text-neutral-800"
-                              }`}
-                            >
-                              {sz}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-4 border-t border-neutral-100">
-                    <button
-                      onClick={() => {
-                        handleAddToCart(selectedProductDetails);
-                        setSelectedProductDetails(null);
-                      }}
-                      disabled={selectedProductDetails.inStock === false}
-                      className="w-full py-4 bg-neutral-900 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 shadow-md rounded-xl flex items-center justify-center space-x-2"
-                    >
-                      {selectedProductDetails.inStock === false ? (
-                        <span>{t.esgotado}</span>
-                      ) : (
-                        <>
-                          <Plus size={14} />
-                          <span>{t.adicionar_sacola}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

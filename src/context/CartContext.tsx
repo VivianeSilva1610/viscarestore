@@ -12,6 +12,7 @@ export interface CartItem {
   size?: string;
   category: string;
   description?: string;
+  delivery_days?: number;
 }
 
 interface CartContextType {

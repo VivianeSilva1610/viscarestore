@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Mail,
   Calculator,
+  Star,
 } from "lucide-react";
 
 const navItems = [
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Clientes", href: "/admin/clientes", icon: Users },
   { label: "Mídia", href: "/admin/midia", icon: ImageIcon },
   { label: "Rastreamento", href: "/admin/rastreamento", icon: ShoppingBag },
+  { label: "Avaliações", href: "/admin/avaliacoes", icon: Star },
   { label: "Mensagens", href: "/admin/mensagens", icon: MessageSquare },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
   { label: "Custos", href: "/admin/custos", icon: Calculator },

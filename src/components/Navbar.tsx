@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { ShoppingBag, Search, User, Menu, X, LogOut, ChevronDown, Globe } from "lucide-react";
+import { ShoppingBag, Search, User, Menu, X, LogOut, ChevronDown, Globe, Truck } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
 
@@ -181,6 +181,14 @@ export default function Navbar() {
                 <Search size={19} strokeWidth={1.5} />
               </button>
 
+              <a
+                href="/rastreio"
+                className="text-neutral-800 hover:text-dourado-suave p-1.5 transition-colors duration-300"
+                aria-label={language === "it" ? "Traccia ordine" : "Rastrear pedido"}
+              >
+                <Truck size={19} strokeWidth={1.5} />
+              </a>
+
               {/* User Menu */}
               <div className="relative" ref={userMenuRef}>
                 <button
@@ -313,6 +321,13 @@ export default function Navbar() {
             >
               <User size={18} strokeWidth={1.5} />
               <span>{t.minha_conta}</span>
+            </a>
+            <a
+              href="/rastreio"
+              className="flex items-center space-x-3 text-neutral-800 hover:text-dourado-suave font-sans-premium text-xs tracking-wider uppercase font-medium transition-colors"
+            >
+              <Truck size={18} strokeWidth={1.5} />
+              <span>{language === "it" ? "Traccia ordine" : "Rastrear pedido"}</span>
             </a>
             <p className="text-[10px] text-neutral-500 font-sans-premium tracking-widest uppercase">
               Curadoria de Luxo VisCaree
