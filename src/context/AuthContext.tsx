@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { account, databases } from "../lib/appwrite";
-import { ID, Query } from "appwrite";
+import { ID, Query, OAuthProvider } from "appwrite";
 import { Models } from "appwrite";
 
 const CUSTOMERS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_CUSTOMERS_COLLECTION_ID || "customers";
@@ -33,6 +33,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => void;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<Omit<CustomerProfile, "$id" | "user_id" | "email">>) => Promise<void>;
@@ -69,7 +70,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const currentUser = await account.get();
         setUser(currentUser);
-        await fetchProfile(currentUser.$id);
+        // Fetch profile; if not found (first Google login), create it automatically
+        const res = await databases.listDocuments(DB_ID, CUSTOMERS_COLLECTION_ID, [
+          Query.equal("user_id", currentUser.$id),
+          Query.limit(1),
+        ]);
+        if (res.documents.length > 0) {
+          setProfile(res.documents[0] as unknown as CustomerProfile);
+        } else {
+          // First OAuth login — create profile automatically
+          const newProfile = await databases.createDocument(
+            DB_ID,
+            CUSTOMERS_COLLECTION_ID,
+            ID.unique(),
+            {
+              user_id: currentUser.$id,
+              name: currentUser.name || "",
+              email: currentUser.email,
+              newsletter: false,
+            }
+          );
+          setProfile(newProfile as unknown as CustomerProfile);
+        }
       } catch {
         setUser(null);
         setProfile(null);
@@ -90,6 +112,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const currentUser = await account.get();
     setUser(currentUser);
     await fetchProfile(currentUser.$id);
+  };
+
+  const loginWithGoogle = () => {
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://viscarestore.vercel.app";
+    account.createOAuth2Session(
+      OAuthProvider.Google,
+      `${origin}/conta/perfil`,
+      `${origin}/conta?error=google`
+    );
   };
 
   const register = async (name: string, email: string, password: string) => {
@@ -155,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoggedIn: !!user,
         isLoading,
         login,
+        loginWithGoogle,
         register,
         logout,
         updateProfile,
