@@ -38,7 +38,17 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       // No active session to clear, safe to ignore.
     }
     await account.createEmailPasswordSession(email, password);
-    const user = await account.get();
+
+    // The session was just created, but some browsers (third-party storage
+    // partitioning) need a brief moment before the new session is readable.
+    // Retry once before giving up.
+    let user;
+    try {
+      user = await account.get();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      user = await account.get();
+    }
     setAdminUser(user);
   };
 

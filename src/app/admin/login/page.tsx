@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
@@ -13,6 +13,7 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const isSubmittingRef = useRef(false);
 
   // If already logged in, redirect to admin
   React.useEffect(() => {
@@ -21,7 +22,8 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setError("");
     setIsLoading(true);
     try {
@@ -36,6 +38,7 @@ export default function AdminLoginPage() {
       }
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
