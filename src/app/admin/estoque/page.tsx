@@ -42,6 +42,7 @@ interface Product {
   cost_price: number;
   additional_costs: number;
   productCode?: string;
+  delivery_days: number;
 }
 
 const emptyProduct: Omit<Product, "$id"> = {
@@ -62,6 +63,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   status: "draft",
   cost_price: 0,
   additional_costs: 0,
+  delivery_days: 5,
 };
 
 // Categories will be fetched from Appwrite
@@ -158,6 +160,7 @@ export default function AdminEstoquePage() {
       cost_price: product.cost_price || 0,
       additional_costs: product.additional_costs || 0,
       productCode: product.productCode,
+      delivery_days: product.delivery_days ?? 5,
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
@@ -744,6 +747,22 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                       <option key={c.$id} value={c.value}>{c.label}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Prazo de Entrega (dias úteis) *
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={form.delivery_days}
+                    onChange={(e) => setForm({ ...form, delivery_days: parseInt(e.target.value) || 1 })}
+                    className="w-24 border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors text-center"
+                    placeholder="5"
+                  />
                 </div>
 
                 <label className="flex items-center gap-3 cursor-pointer mt-4 sm:mt-0">
