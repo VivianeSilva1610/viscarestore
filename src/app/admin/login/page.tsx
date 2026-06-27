@@ -21,13 +21,19 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     setError("");
     setIsLoading(true);
     try {
       await login(email, password);
       router.replace("/admin");
-    } catch {
-      setError("Email ou senha incorretos. Verifique suas credenciais.");
+    } catch (err: any) {
+      const code = err?.code;
+      if (code === 401) {
+        setError("Email ou senha incorretos. Verifique suas credenciais.");
+      } else {
+        setError(err?.message || "Erro ao entrar. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }

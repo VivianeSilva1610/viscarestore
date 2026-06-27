@@ -32,6 +32,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    try {
+      await account.deleteSession("current");
+    } catch {
+      // No active session to clear, safe to ignore.
+    }
     await account.createEmailPasswordSession(email, password);
     const user = await account.get();
     setAdminUser(user);

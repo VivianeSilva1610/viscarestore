@@ -81,6 +81,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = async (email: string, password: string) => {
+    try {
+      await account.deleteSession("current");
+    } catch {
+      // No active session to clear, safe to ignore.
+    }
     await account.createEmailPasswordSession(email, password);
     const currentUser = await account.get();
     setUser(currentUser);
