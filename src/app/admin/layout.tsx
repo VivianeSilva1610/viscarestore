@@ -16,6 +16,7 @@ import {
   Users,
   MessageSquare,
   Mail,
+  Calculator,
 } from "lucide-react";
 
 const navItems = [
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Rastreamento", href: "/admin/rastreamento", icon: ShoppingBag },
   { label: "Mensagens", href: "/admin/mensagens", icon: MessageSquare },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
+  { label: "Custos", href: "/admin/custos", icon: Calculator },
   { label: "Configurações", href: "/admin/configuracoes", icon: Settings },
 ];
 
