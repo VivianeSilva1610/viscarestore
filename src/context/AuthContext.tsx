@@ -68,31 +68,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // 1. Check if there is an active session — this is the only thing that
+        //    should determine if the user is logged in or not.
         const currentUser = await account.get();
         setUser(currentUser);
-        // Fetch profile; if not found (first Google login), create it automatically
-        const res = await databases.listDocuments(DB_ID, CUSTOMERS_COLLECTION_ID, [
-          Query.equal("user_id", currentUser.$id),
-          Query.limit(1),
-        ]);
-        if (res.documents.length > 0) {
-          setProfile(res.documents[0] as unknown as CustomerProfile);
-        } else {
-          // First OAuth login — create profile automatically
-          const newProfile = await databases.createDocument(
-            DB_ID,
-            CUSTOMERS_COLLECTION_ID,
-            ID.unique(),
-            {
-              user_id: currentUser.$id,
-              name: currentUser.name || "",
-              email: currentUser.email,
-              newsletter: false,
-            }
-          );
-          setProfile(newProfile as unknown as CustomerProfile);
+
+        // 2. Fetch or create profile — handled separately so a DB error
+        //    does NOT log the user out.
+        try {
+          const res = await databases.listDocuments(DB_ID, CUSTOMERS_COLLECTION_ID, [
+            Query.equal("user_id", currentUser.$id),
+            Query.limit(1),
+          ]);
+          if (res.documents.length > 0) {
+            setProfile(res.documents[0] as unknown as CustomerProfile);
+          } else {
+            // First OAuth login — create profile automatically
+            const newProfile = await databases.createDocument(
+              DB_ID,
+              CUSTOMERS_COLLECTION_ID,
+              ID.unique(),
+              {
+                user_id: currentUser.$id,
+                name: currentUser.name || "",
+                email: currentUser.email,
+                newsletter: false,
+              }
+            );
+            setProfile(newProfile as unknown as CustomerProfile);
+          }
+        } catch {
+          // Profile fetch/creation failed — user is still logged in,
+          // profile will be null and can be created later via updateProfile.
+          setProfile(null);
         }
       } catch {
+        // No active session
         setUser(null);
         setProfile(null);
       } finally {
