@@ -158,6 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginWithGoogle = () => {
+    // Clear any stale/conflicting session reference from previous attempts
+    // before starting a fresh OAuth redirect, so a half-failed earlier
+    // attempt can't interfere with this one.
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("cookieFallback");
+    }
+
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
