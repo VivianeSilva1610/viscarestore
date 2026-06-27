@@ -68,6 +68,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // 0. Finalize OAuth2 token-based login if we were redirected back
+        //    with ?userId=&secret= (createOAuth2Token flow). This avoids
+        //    relying on a cross-domain cookie being set during the OAuth
+        //    redirect chain, which browsers increasingly block as third-party.
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const oauthUserId = params.get("userId");
+          const oauthSecret = params.get("secret");
+          if (oauthUserId && oauthSecret) {
+            try {
+              await account.createSession({ userId: oauthUserId, secret: oauthSecret });
+            } catch (e) {
+              console.error("Failed to finalize OAuth session", e);
+            }
+            params.delete("userId");
+            params.delete("secret");
+            const newSearch = params.toString();
+            window.history.replaceState({}, "", window.location.pathname + (newSearch ? `?${newSearch}` : ""));
+          }
+        }
+
         // 1. Check if there is an active session — this is the only thing that
         //    should determine if the user is logged in or not.
         const currentUser = await account.get();
@@ -130,11 +151,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       typeof window !== "undefined"
         ? window.location.origin
         : "https://viscarestore.vercel.app";
-    account.createOAuth2Session(
-      OAuthProvider.Google,
-      `${origin}/conta/perfil`,
-      `${origin}/conta?error=google`
-    );
+    account.createOAuth2Token({
+      provider: OAuthProvider.Google,
+      success: `${origin}/conta/perfil`,
+      failure: `${origin}/conta?error=google`,
+    });
   };
 
   const register = async (name: string, email: string, password: string) => {
