@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -49,6 +49,15 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [activeMedia, setActiveMedia] = useState<"image" | "video">(product.video ? "video" : "image");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (activeMedia === "video" && videoRef.current) {
+      // iOS Safari is unreliable with the autoPlay attribute on mount;
+      // calling play() explicitly after the element exists works consistently.
+      videoRef.current.play().catch(() => {});
+    }
+  }, [activeMedia]);
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
@@ -166,13 +175,15 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
           <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden border border-[#C8A97E]/10">
             {activeMedia === "video" && product.video ? (
               <video
+                ref={videoRef}
                 src={product.video}
                 className="w-full h-full object-cover"
                 controls
-                autoPlay
                 muted
                 loop
                 playsInline
+                preload="auto"
+                onClick={(e) => (e.currentTarget as HTMLVideoElement).play()}
               />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
