@@ -68,19 +68,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // 0. Finalize OAuth2 token-based login if we were redirected back
-        //    with ?userId=&secret= (createOAuth2Token flow). This avoids
-        //    relying on a cross-domain cookie being set during the OAuth
-        //    redirect chain, which browsers increasingly block as third-party.
-        let justFinalizedOAuth = false;
-        if (typeof window !== "undefined") {
+        // 0. Check if there is already a usable session first. This covers
+        //    the case where a session was already established by a
+        //    concurrent/duplicate request (e.g. a OAuth token getting
+        //    consumed twice), so we don't try to consume the URL token again.
+        let currentUser;
+        try {
+          currentUser = await account.get();
+        } catch {
+          currentUser = undefined;
+        }
+
+        // 1. Finalize OAuth2 token-based login if we were redirected back
+        //    with ?userId=&secret= (createOAuth2Token flow) and we aren't
+        //    already logged in. This avoids relying on a cross-domain cookie
+        //    being set during the OAuth redirect chain, which browsers
+        //    increasingly block as third-party.
+        if (!currentUser && typeof window !== "undefined") {
           const params = new URLSearchParams(window.location.search);
           const oauthUserId = params.get("userId");
           const oauthSecret = params.get("secret");
           if (oauthUserId && oauthSecret) {
             try {
               await account.createSession({ userId: oauthUserId, secret: oauthSecret });
-              justFinalizedOAuth = true;
             } catch (e) {
               console.error("Failed to finalize OAuth session", e);
             }
@@ -88,19 +98,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             params.delete("secret");
             const newSearch = params.toString();
             window.history.replaceState({}, "", window.location.pathname + (newSearch ? `?${newSearch}` : ""));
+
+            // Some browsers need a brief moment before a just-created session
+            // is readable, so retry a few times before giving up.
+            for (let attempt = 0; attempt < 3 && !currentUser; attempt++) {
+              try {
+                currentUser = await account.get();
+              } catch {
+                await new Promise((resolve) => setTimeout(resolve, 600));
+              }
+            }
           }
         }
 
-        // 1. Check if there is an active session — this is the only thing that
-        //    should determine if the user is logged in or not.
-        // Some browsers need a brief moment before a just-created session is
-        // readable, so retry once before giving up.
-        let currentUser;
-        try {
-          currentUser = await account.get();
-        } catch (e) {
-          if (!justFinalizedOAuth) throw e;
-          await new Promise((resolve) => setTimeout(resolve, 800));
+        if (!currentUser) {
           currentUser = await account.get();
         }
         setUser(currentUser);
