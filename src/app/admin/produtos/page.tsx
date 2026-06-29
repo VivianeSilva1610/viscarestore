@@ -32,6 +32,7 @@ interface Product {
   weight_kg: number;
   category: string;
   image_id?: string;
+  video_id?: string;
   in_stock: boolean;
   featured: boolean;
   sizes?: string;
@@ -54,6 +55,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   weight_kg: 0.5,
   category: "perfumes",
   image_id: "",
+  video_id: "",
   in_stock: true,
   featured: false,
   sizes: "",
@@ -90,9 +92,13 @@ export default function AdminProdutosPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [removeVideo, setRemoveVideo] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const configured = isAppwriteConfigured();
 
   const showToast = (type: "success" | "error", msg: string) => {
@@ -130,11 +136,18 @@ export default function AdminProdutosPage() {
     return `https://fra.cloud.appwrite.io/v1/storage/buckets/${BUCKET_ID}/files/${imageId}/view?project=viscareelojavirtual1610`;
   };
 
+  const getVideoUrl = (videoId?: string) => {
+    return `https://fra.cloud.appwrite.io/v1/storage/buckets/${BUCKET_ID}/files/${videoId}/view?project=viscareelojavirtual1610`;
+  };
+
   const openCreateModal = () => {
     setEditingProduct(null);
     setForm(emptyProduct);
     setImageFile(null);
     setImagePreview(null);
+    setVideoFile(null);
+    setVideoPreview(null);
+    setRemoveVideo(false);
     setIsModalOpen(true);
   };
 
@@ -149,6 +162,7 @@ export default function AdminProdutosPage() {
       weight_kg: product.weight_kg ?? 0.5,
       category: product.category,
       image_id: product.image_id,
+      video_id: product.video_id,
       in_stock: product.in_stock,
       featured: product.featured,
       sizes: product.sizes,
@@ -163,6 +177,9 @@ export default function AdminProdutosPage() {
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
+    setVideoFile(null);
+    setVideoPreview(product.video_id ? getVideoUrl(product.video_id) : null);
+    setRemoveVideo(false);
     setIsModalOpen(true);
   };
 
@@ -171,6 +188,21 @@ export default function AdminProdutosPage() {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    setRemoveVideo(false);
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoFile(null);
+    setVideoPreview(null);
+    setRemoveVideo(true);
+    if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -189,16 +221,33 @@ export default function AdminProdutosPage() {
         imageId = uploaded.$id;
       }
 
+      let videoId = form.video_id;
+
+      // Upload video if new one selected
+      if (videoFile && configured) {
+        const uploaded = await storage.createFile(BUCKET_ID, ID.unique(), videoFile);
+        if (editingProduct?.video_id) {
+          await storage.deleteFile(BUCKET_ID, editingProduct.video_id).catch(() => {});
+        }
+        videoId = uploaded.$id;
+      } else if (removeVideo) {
+        if (editingProduct?.video_id) {
+          await storage.deleteFile(BUCKET_ID, editingProduct.video_id).catch(() => {});
+        }
+        videoId = "";
+      }
+
       const parseVal = (v: string | number) => typeof v === 'string' ? Number(v.replace(',', '.')) : Number(v);
       const parsedPrice = parseVal(form.price);
       const parsedWeight = parseVal(form.weight_kg);
       const parsedCost = parseVal(form.cost_price);
       const parsedStock = parseInt(form.stock_quantity as any, 10) || 0;
 
-      const data: any = { 
-        ...form, 
-        image_id: imageId, 
-        price: isNaN(parsedPrice) ? 0 : parsedPrice, 
+      const data: any = {
+        ...form,
+        image_id: imageId,
+        video_id: videoId,
+        price: isNaN(parsedPrice) ? 0 : parsedPrice,
         weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
         cost_price: isNaN(parsedCost) ? 0 : parsedCost,
         stock_quantity: parsedStock,
@@ -504,6 +553,42 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Video Upload (optional) */}
+              <div>
+                <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-3">
+                  Vídeo do Produto <span className="text-neutral-400 normal-case">(opcional)</span>
+                </label>
+                <div
+                  className="relative w-full h-44 bg-[#F8F5F2] border-2 border-dashed border-neutral-200 rounded-2xl flex items-center justify-center cursor-pointer hover:border-[#C8A97E] transition-colors overflow-hidden"
+                  onClick={() => videoInputRef.current?.click()}
+                >
+                  {videoPreview ? (
+                    <video src={videoPreview} className="w-full h-full object-cover" muted />
+                  ) : (
+                    <div className="text-center space-y-2">
+                      <Upload size={28} className="text-neutral-300 mx-auto" strokeWidth={1} />
+                      <p className="text-neutral-400 text-xs">Clique para fazer upload (mp4, webm, mov)</p>
+                    </div>
+                  )}
+                </div>
+                {videoPreview && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleRemoveVideo(); }}
+                    className="mt-2 text-xs text-red-500 hover:text-red-600 font-medium"
+                  >
+                    Remover vídeo
+                  </button>
+                )}
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  onChange={handleVideoChange}
                   className="hidden"
                 />
               </div>

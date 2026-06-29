@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { databases, isAppwriteConfigured } from "../lib/appwrite";
 import { ID, Query } from "appwrite";
-import { Star, Plus, Loader2, Truck, MessageSquare } from "lucide-react";
+import { Star, Plus, Loader2, Truck, MessageSquare, Play } from "lucide-react";
 import { getEstimatedDeliveryDate, formatDeliveryDate } from "../lib/delivery";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
@@ -22,6 +22,7 @@ export interface ProductPageProduct {
   price: number;
   weight_kg: number;
   image: string;
+  video?: string;
   description_pt: string;
   description_it: string;
   ingredients_pt: string;
@@ -47,6 +48,7 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [activeMedia, setActiveMedia] = useState<"image" | "video">("image");
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
@@ -160,13 +162,49 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-20">
         {/* Gallery */}
-        <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden border border-[#C8A97E]/10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={product.image} alt={productName} className="w-full h-full object-cover mix-blend-multiply" />
-          {product.inStock === false && (
-            <span className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
-              {isPt ? "Esgotado" : "Esaurito"}
-            </span>
+        <div>
+          <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden border border-[#C8A97E]/10">
+            {activeMedia === "video" && product.video ? (
+              <video
+                src={product.video}
+                className="w-full h-full object-cover"
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={product.image} alt={productName} className="w-full h-full object-cover mix-blend-multiply" />
+            )}
+            {product.inStock === false && (
+              <span className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
+                {isPt ? "Esgotado" : "Esaurito"}
+              </span>
+            )}
+          </div>
+
+          {product.video && (
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setActiveMedia("image")}
+                className={`flex-1 aspect-square w-16 rounded-xl overflow-hidden border-2 transition-colors ${
+                  activeMedia === "image" ? "border-dourado-suave" : "border-transparent opacity-70 hover:opacity-100"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={product.image} alt={productName} className="w-full h-full object-cover" />
+              </button>
+              <button
+                onClick={() => setActiveMedia("video")}
+                className={`flex-1 aspect-square w-16 rounded-xl overflow-hidden border-2 bg-neutral-900 flex items-center justify-center transition-colors ${
+                  activeMedia === "video" ? "border-dourado-suave" : "border-transparent opacity-70 hover:opacity-100"
+                }`}
+              >
+                <Play size={18} className="text-white" fill="white" />
+              </button>
+            </div>
           )}
         </div>
 

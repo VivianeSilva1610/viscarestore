@@ -55,6 +55,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const imageUrl = product.image_id
     ? storage.getFileView(BUCKET_ID, product.image_id).toString()
     : "/images/perfume.png";
+  const videoUrl = product.video_id
+    ? storage.getFileView(BUCKET_ID, product.video_id).toString()
+    : undefined;
 
   return (
     <AuthProvider>
@@ -74,6 +77,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 price: product.price || 0,
                 weight_kg: product.weight_kg ?? 0.5,
                 image: imageUrl,
+                video: videoUrl,
                 description_pt: product.description_pt || "",
                 description_it: product.description_it || "",
                 ingredients_pt: product.ingredients_pt || "",
