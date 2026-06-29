@@ -48,7 +48,7 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
-  const [activeMedia, setActiveMedia] = useState<"image" | "video">("image");
+  const [activeMedia, setActiveMedia] = useState<"image" | "video">(product.video ? "video" : "image");
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
