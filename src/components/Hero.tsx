@@ -61,7 +61,7 @@ export default function Hero() {
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6"
             >
               <a
-                href="#products-section"
+                href="/collezione"
                 className="luxury-btn w-full sm:w-auto text-center px-8 py-4 border border-dourado-suave bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:text-neutral-900 font-semibold shadow-lg transition-all duration-300 z-10"
               >
                 {t.botao}
