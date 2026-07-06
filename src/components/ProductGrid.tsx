@@ -50,6 +50,7 @@ export default function ProductGrid() {
   const [customTitleIt, setCustomTitleIt] = useState("");
   const [customSubtitle, setCustomSubtitle] = useState("");
   const [customSubtitleIt, setCustomSubtitleIt] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Listen for category change events from other components (like Categories.tsx)
   React.useEffect(() => {
@@ -59,13 +60,13 @@ export default function ProductGrid() {
     };
     window.addEventListener('changeCategory', handleCategoryChange);
     
-    // Check URL parameters for category
+    // Check URL parameters for category and search
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const cat = urlParams.get("category");
-      if (cat) {
-        setActiveTab(cat);
-      }
+      if (cat) setActiveTab(cat);
+      const q = urlParams.get("q");
+      if (q) setSearchQuery(q);
     }
     
     return () => window.removeEventListener('changeCategory', handleCategoryChange);
@@ -187,9 +188,19 @@ export default function ProductGrid() {
     });
   };
 
-  const filteredProducts = activeTab === "todos"
-    ? products
-    : products.filter(p => p.category === activeTab);
+  const filteredProducts = products
+    .filter(p => activeTab === "todos" || p.category === activeTab)
+    .filter(p => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        p.name_pt?.toLowerCase().includes(q) ||
+        p.name_it?.toLowerCase().includes(q) ||
+        p.description_pt?.toLowerCase().includes(q) ||
+        p.description_it?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q)
+      );
+    });
 
   return (
     <section className="py-24 bg-white" id="products-section">
@@ -265,12 +276,14 @@ export default function ProductGrid() {
             >
               {/* Product Card Container */}
               <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden mb-5 border border-[#C8A97E]/10 group shadow-sm hover:shadow-md transition-shadow duration-500">
-                <img
-                  src={product.image}
-                  alt={getProductName(product)}
-                  className="w-full h-full object-cover zoom-image mix-blend-multiply"
-                  loading="lazy"
-                />
+                <Link href={`/produtos/${product.id}`} className="absolute inset-0 z-0">
+                  <img
+                    src={product.image}
+                    alt={getProductName(product)}
+                    className="w-full h-full object-cover zoom-image mix-blend-multiply"
+                    loading="lazy"
+                  />
+                </Link>
 
                 {/* Out of stock badge */}
                 {product.inStock === false && (
@@ -291,7 +304,7 @@ export default function ProductGrid() {
                 </Link>
 
                 {/* Dynamic "Add to Bag" Hover Overlay Button */}
-                <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[#F1E7E2]/90 via-[#F1E7E2]/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex flex-col items-center">
+                <div className="absolute inset-x-0 bottom-0 z-10 p-5 bg-gradient-to-t from-[#F1E7E2]/90 via-[#F1E7E2]/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex flex-col items-center">
                   
                   {/* Silk Dress Size Selector inside Hover */}
                   {product.sizes && (
@@ -349,9 +362,11 @@ export default function ProductGrid() {
                   </h3>
                 </Link>
                 
-                <p className="font-sans-premium text-[10px] text-neutral-500 tracking-wider font-light mt-1.5 mb-2.5">
-                  {getProductDesc(product)}
-                </p>
+                <Link href={`/produtos/${product.id}`}>
+                  <p className="font-sans-premium text-[10px] text-neutral-500 tracking-wider font-light mt-1.5 mb-2.5 hover:text-dourado-suave transition-colors duration-300 cursor-pointer">
+                    {getProductDesc(product)}
+                  </p>
+                </Link>
 
                 <p className="font-sans-premium text-sm font-semibold tracking-widest text-neutral-900">
                   € {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}

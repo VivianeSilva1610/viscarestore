@@ -7,6 +7,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { databases, isAppwriteConfigured } from "../lib/appwrite";
 import { ID, Query } from "appwrite";
 import { Star, Plus, Loader2, Truck, MessageSquare, Play } from "lucide-react";
+import CurationCriteria from "./CurationCriteria";
+import SecurityBadges from "./SecurityBadges";
 import { getEstimatedDeliveryDate, formatDeliveryDate } from "../lib/delivery";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
@@ -318,7 +320,14 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
               {isPt ? "Comprar Agora" : "Acquista Ora"}
             </button>
           </div>
+
+          <SecurityBadges compact />
         </div>
+      </div>
+
+      {/* Curation Criteria */}
+      <div className="border-t border-neutral-100 pt-12 mb-12">
+        <CurationCriteria />
       </div>
 
       {/* Reviews Section */}

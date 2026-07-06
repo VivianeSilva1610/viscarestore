@@ -10,7 +10,7 @@ import ShopifyLangNotice from "@/components/ShopifyLangNotice";
 
 export const dynamic = "force-dynamic";
 
-const HANDLE = "collezione-di-cura-per-il-viso-e-pelle";
+const HANDLE = "abiti";
 
 function formatPrice(amount: string, currencyCode: string) {
   return new Intl.NumberFormat("it-IT", {
@@ -79,7 +79,7 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
   );
 }
 
-export default async function CollezionePage() {
+export default async function AbitiPage() {
   const locale = (await cookies()).get("viscaree_lang")?.value ?? "it";
   const collection = await fetchShopifyCollection(HANDLE, locale);
   const products = collection?.products.edges.map((e) => e.node) ?? [];
@@ -100,12 +100,12 @@ export default async function CollezionePage() {
                 <div className="inline-flex items-center space-x-2 mb-4">
                   <span className="w-8 h-[1px] bg-[#C8A97E]" />
                   <span className="font-sans-premium text-[10px] tracking-[0.3em] uppercase text-[#C8A97E] font-semibold">
-                    Skincare
+                    Moda
                   </span>
                   <span className="w-8 h-[1px] bg-[#C8A97E]" />
                 </div>
                 <h1 className="font-serif-premium text-3xl sm:text-4xl text-neutral-900 font-light tracking-wide mb-4">
-                  {collection?.title ?? "Cura per il Viso e Pelle"}
+                  {collection?.title ?? "Abiti"}
                 </h1>
                 {collection?.description && (
                   <p className="font-sans-premium text-neutral-500 text-sm max-w-xl mx-auto leading-relaxed">

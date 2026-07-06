@@ -12,24 +12,6 @@ export default function GuiaNotasOlfativas() {
   const { language } = useLanguage();
   const isPt = language === "pt";
 
-  const familyImages = {
-    citrica: [
-      "/images/olfativas/citrica.png"
-    ],
-    floral: [
-      "/images/olfativas/floral.png"
-    ],
-    oriental: [
-      "/images/olfativas/oriental.png"
-    ],
-    amadeirada: [
-      "/images/olfativas/amadeirada.png"
-    ],
-    gourmand: [
-      "/images/olfativas/gourmand.png"
-    ]
-  };
-
   const content = {
     pt: {
       title: "Guia de Notas Olfativas VisCaree",
@@ -248,24 +230,8 @@ export default function GuiaNotasOlfativas() {
 
               {/* Families */}
               <div className="space-y-12 mb-16">
-                {t.families.map((family, index) => {
-                  const images = familyImages[family.id as keyof typeof familyImages] || [];
-                  
-                  return (
+                {t.families.map((family, index) => (
                     <div key={index} className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-neutral-100 transition-all hover:shadow-md hover:border-dourado-suave/30">
-                      
-                      {images.length > 0 && (
-                        <div className="w-full h-48 md:h-64 mb-8 overflow-hidden rounded-2xl relative">
-                          <img 
-                            src={images[0]} 
-                            alt={family.title} 
-                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-                        </div>
-                      )}
-
                       <div className="flex flex-col md:flex-row gap-8 items-center">
                         <div className="w-24 h-24 shrink-0 bg-[#F1E7E2]/50 rounded-full flex items-center justify-center text-5xl">
                           {family.emoji}
@@ -318,8 +284,7 @@ export default function GuiaNotasOlfativas() {
                       </div>
 
                     </div>
-                  );
-                })}
+                ))}
               </div>
 
               {/* How to Choose */}

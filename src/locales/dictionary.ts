@@ -17,38 +17,38 @@ export const dictionary = {
     },
     // Hero
     hero: {
-      curadoria: "Curadoria de Luxo",
-      titulo1: "Fórmulas que vestem a pele, ",
-      titulo_destaque: "essências",
-      titulo2: " que revelam a alma.",
-      descricao: "A harmonia perfeita entre a biotecnologia avançada dos cuidados com a pele, a sofisticação da alta perfumaria e a delicadeza da seda pura.",
+      curadoria: "Seleção com Critério",
+      titulo1: "Perfumaria e skincare ",
+      titulo_destaque: "escolhidos",
+      titulo2: " a dedo, sem enrolação.",
+      descricao: "Testamos, avaliamos ingredientes e só incluímos no catálogo o que realmente funciona — perfumes com fixação real, skincare com ativos comprovados e moda com materiais verificados.",
       botao: "Descobrir Coleção",
-      sinergia: "Sinergia Conceitual",
-      edicao: "Edição Limitada 2026"
+      sinergia: "Testado & Aprovado",
+      edicao: "Selecionado este mês"
     },
     // Categories
     categories: {
-      destaque: "Categorias em Destaque",
-      sinergia: "A Sinergia das Nossas Três Curadorias",
+      destaque: "O que selecionamos",
+      sinergia: "Três categorias, um critério de escolha",
       explorar: "Explorar",
       items: {
         perfumes: {
-          title: "Alta Perfumaria",
-          subtitle: "Essências Raras & Notas Olfativas",
-          description: "Uma curadoria exclusiva de acordes complexos, unindo Jasmin Imperial, Bergamota da Calábria e Sândalo de Mysore.",
+          title: "Perfumaria",
+          subtitle: "Selecionado pela fixação e qualidade",
+          description: "Perfumes avaliados pela durabilidade em pele real, qualidade das matérias-primas e relação custo-benefício honesta — sem pagar pela embalagem.",
           details: "Notas Olfativas: Floral Amadeirado Especiado"
         },
         skincare: {
           title: "Cosméticos & Skincare",
-          subtitle: "Biotecnologia Avançada",
-          description: "Fórmulas dermatológicas de alta performance com ácido hialurônico puro, retinol encapsulado e peptídeos regeneradores.",
-          details: "Indicação Técnica: Regeneração Celular & Hidratação profunda"
+          subtitle: "Ingredientes com propósito",
+          description: "Produtos com ativos comprovados — ácido hialurônico, retinol, vitamina C — escolhidos com base em eficácia real e avaliações de quem usou, não em jargão técnico.",
+          details: "Ativos: Hidratação, Firmeza & Uniformização"
         },
         fashion: {
           title: "Moda & Joias",
-          subtitle: "Curadoria Exclusiva",
-          description: "Vestidos fluidos em seda pura, bolsas com design minimalista estruturado e brincos finos banhados a ouro 18k.",
-          details: "Seda Pura & Design Estruturado"
+          subtitle: "Materiais verificados",
+          description: "Peças avaliadas pela qualidade do tecido, acabamento e caimento real — sem inflacionar o preço com nome de grife. O que entra no catálogo passa pelo nosso critério de durabilidade.",
+          details: "Qualidade de material & Acabamento verificado"
         }
       }
     },
@@ -66,15 +66,15 @@ export const dictionary = {
     },
     // Footer
     footer: {
-      entrega_vip: "Entrega VIP",
-      entrega_desc: "Frete cortesia e embalagem premium especial para compras qualificadas.",
-      autenticidade: "Autenticidade",
-      autenticidade_desc: "Garantia de origem de 100% dos cosméticos, perfumes e tecidos nobres.",
+      entrega_vip: "Entrega Rastreada",
+      entrega_desc: "Envio com rastreio em tempo real para o Brasil e para a Europa.",
+      autenticidade: "Produtos Verificados",
+      autenticidade_desc: "Cada produto no catálogo passou pela nossa avaliação antes de ser publicado.",
       troca_facilitada: "Troca Facilitada",
-      troca_desc: "Logística reversa simplificada em até 7 dias para sua total comodidade.",
-      atendimento_exclusivo: "Atendimento Exclusivo",
-      atendimento_desc: "Suporte especializado via WhatsApp para auxílio olfativo ou tabelas de medidas.",
-      sobre_marca: "Uma curadoria de alta perfumaria, skincare de última geração e moda minimalista. Fórmulas científicas que vestem a pele e essências que revelam a alma.",
+      troca_desc: "Solicitação de troca ou devolução em até 7 dias após o recebimento.",
+      atendimento_exclusivo: "Atendimento Direto",
+      atendimento_desc: "Suporte via WhatsApp — dúvidas sobre fragrâncias, tamanhos ou pedidos.",
+      sobre_marca: "Uma seleção de perfumaria, skincare e moda escolhida com critério real — testada pela nossa equipe e escolhida pela qualidade dos ingredientes e materiais, não pelo nome da marca.",
       inscreva_se: "Inscreva-se no Club VisCaree",
       email_placeholder: "Seu endereço de e-mail",
       termos_newsletter: "Ao se inscrever, você concorda com nossa Política de Privacidade.",
@@ -117,38 +117,38 @@ export const dictionary = {
     },
     // Hero
     hero: {
-      curadoria: "Curatela di Lusso",
-      titulo1: "Formule che vestono la pelle, ",
-      titulo_destaque: "essenze",
-      titulo2: " che rivelano l'anima.",
-      descricao: "La perfetta armonia tra la biotecnologia avanzata per la cura della pelle, la raffinatezza dell'alta profumeria e la delicatezza della pura seta.",
+      curadoria: "Selezione con Criterio",
+      titulo1: "Profumeria e skincare ",
+      titulo_destaque: "scelti",
+      titulo2: " con cura, senza esagerazioni.",
+      descricao: "Testiamo, valutiamo gli ingredienti e inseriamo nel catalogo solo ciò che funziona davvero — profumi con reale durata, skincare con attivi comprovati e moda con materiali verificati.",
       botao: "Scopri la Collezione",
-      sinergia: "Sinergia Concettuale",
-      edicao: "Edizione Limitata 2026"
+      sinergia: "Testato & Approvato",
+      edicao: "Selezionato questo mese"
     },
     // Categories
     categories: {
-      destaque: "Categorie in Evidenza",
-      sinergia: "La Sinergia delle Nostre Tre Curatele",
+      destaque: "Cosa selezioniamo",
+      sinergia: "Tre categorie, un unico criterio di scelta",
       explorar: "Esplora",
       items: {
         perfumes: {
-          title: "Alta Profumeria",
-          subtitle: "Essenze Rare & Note Olfattive",
-          description: "Una curatela esclusiva di accordi complessi, che unisce Gelsomino Imperiale, Bergamotto di Calabria e Sandalo di Mysore.",
+          title: "Profumeria",
+          subtitle: "Scelto per durata e qualità",
+          description: "Profumi valutati per la durata sulla pelle reale, la qualità delle materie prime e il giusto rapporto qualità-prezzo — senza pagare per la confezione.",
           details: "Note Olfattive: Floreale Legnoso Speziato"
         },
         skincare: {
           title: "Cosmetici & Skincare",
-          subtitle: "Biotecnologia Avanzata",
-          description: "Formule dermatologiche ad alte prestazioni con acido ialuronico puro, retinolo incapsulato e peptidi rigeneranti.",
-          details: "Indicazione Tecnica: Rigenerazione Cellulare & Idratazione profonda"
+          subtitle: "Ingredienti con uno scopo",
+          description: "Prodotti con attivi comprovati — acido ialuronico, retinolo, vitamina C — scelti in base all'efficacia reale e alle recensioni di chi li ha usati, non al gergo tecnico.",
+          details: "Attivi: Idratazione, Compattezza & Uniformazione"
         },
         fashion: {
           title: "Moda & Gioielli",
-          subtitle: "Curatela Esclusiva",
-          description: "Abiti fluidi in pura seta, borse dal design minimalista strutturato e orecchini raffinati placcati oro 18k.",
-          details: "Pura Seta & Design Strutturato"
+          subtitle: "Materiali verificati",
+          description: "Capi valutati per la qualità del tessuto, la rifinitura e la vestibilità reale — senza gonfiare il prezzo con il nome del brand. Tutto ciò che è nel catalogo supera il nostro criterio di durabilità.",
+          details: "Qualità del materiale & Rifinitura verificata"
         }
       }
     },
@@ -166,15 +166,15 @@ export const dictionary = {
     },
     // Footer
     footer: {
-      entrega_vip: "Consegna VIP",
-      entrega_desc: "Spedizione gratuita e imballaggio premium speciale per acquisti qualificati.",
-      autenticidade: "Autenticità",
-      autenticidade_desc: "Garanzia di origine al 100% per cosmetici, profumi e tessuti pregiati.",
+      entrega_vip: "Spedizione Tracciata",
+      entrega_desc: "Invio con tracciamento in tempo reale per il Brasile e per l'Europa.",
+      autenticidade: "Prodotti Verificati",
+      autenticidade_desc: "Ogni prodotto nel catalogo è stato valutato dal nostro team prima di essere pubblicato.",
       troca_facilitada: "Reso Facile",
-      troca_desc: "Logistica inversa semplificata entro 7 giorni per la tua massima comodità.",
-      atendimento_exclusivo: "Assistenza Esclusiva",
-      atendimento_desc: "Supporto specializzato via WhatsApp per assistenza olfattiva o tabelle taglie.",
-      sobre_marca: "Una curatela di alta profumeria, skincare di ultima generazione e moda minimalista. Formule scientifiche che vestono la pelle ed essenze che rivelano l'anima.",
+      troca_desc: "Richiesta di reso o cambio entro 7 giorni dalla ricezione.",
+      atendimento_exclusivo: "Assistenza Diretta",
+      atendimento_desc: "Supporto via WhatsApp — domande su fragranze, taglie o ordini.",
+      sobre_marca: "Una selezione di profumeria, skincare e moda scelta con criterio reale — testata dal nostro team e selezionata per la qualità degli ingredienti e dei materiali, non per il nome del brand.",
       inscreva_se: "Iscriviti al Club VisCaree",
       email_placeholder: "Il tuo indirizzo email",
       termos_newsletter: "Iscrivendoti, accetti la nostra Informativa sulla Privacy.",

@@ -2,11 +2,15 @@
 
 import React, { useState } from "react";
 import { ArrowRight, ShieldCheck, HelpCircle, Truck, RefreshCw, Loader2 } from "lucide-react";
+import SecurityBadges from "./SecurityBadges";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
 import { databases } from "../lib/appwrite";
 import { ID } from "appwrite";
 import Link from "next/link";
+
+// ATENÇÃO: preencher NEXT_PUBLIC_COMPANY_CNPJ no .env.local e no Vercel antes do lançamento
+const COMPANY_CNPJ = process.env.NEXT_PUBLIC_COMPANY_CNPJ || "00.000.000/0001-00";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -179,7 +183,7 @@ export default function Footer() {
               {t.colecoes}
             </h5>
             <ul className="space-y-3">
-              {[tn.novidades, t.alta_perfumaria, t.skincare_biologico, t.vestidos_seda, t.acessorios_ouro].map((item) => (
+              {[tn.novidades, t.alta_perfumaria].map((item) => (
                 <li key={item}>
                   <Link href="#" className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
                     {item}
@@ -224,25 +228,16 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { label: language === "it" ? "Traccia il tuo ordine" : "Rastrear Pedido", href: "/rastreio" },
-                { label: t.duvidas_frequentes, href: "#", isFaq: true },
+                { label: t.duvidas_frequentes, href: "/institucional/faq" },
                 { label: t.politicas_frete, href: "/institucional/politicas-de-frete" },
                 { label: t.devolucoes_trocas, href: "/institucional/devolucoes-e-trocas" },
                 { label: t.guia_notas, href: "/guia-notas-olfativas" },
                 { label: t.tabela_medidas, href: "/tabela-de-medidas" }
               ].map((item) => (
                 <li key={item.label}>
-                  {item.isFaq ? (
-                    <button 
-                      onClick={(e) => { e.preventDefault(); setIsFaqOpen(true); }}
-                      className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light"
-                    >
-                      {item.label}
-                    </button>
-                  ) : (
-                    <Link href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
-                      {item.label}
-                    </Link>
-                  )}
+                  <Link href={item.href} className="font-sans-premium text-xs text-neutral-500 hover:text-dourado-suave transition-colors duration-300 font-light">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -250,16 +245,23 @@ export default function Footer() {
 
         </div>
 
+        {/* Security Badges */}
+        <div className="border-t border-dourado-suave/10 pt-8 mb-6">
+          <SecurityBadges />
+        </div>
+
         {/* Bottom Bar */}
         <div className="border-t border-dourado-suave/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="font-sans-premium text-[10px] text-neutral-400 tracking-wide text-center sm:text-left">
-            {t.direitos}
+            {language === "it"
+              ? `© 2026 VisCaree. Tutti i diritti riservati. CNPJ: ${COMPANY_CNPJ}.`
+              : `© 2026 VisCaree. Todos os direitos reservados. CNPJ: ${COMPANY_CNPJ}.`}
           </p>
           <div className="flex space-x-6">
-            <Link href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
+            <Link href="/institucional/termos-de-uso" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
               {t.termos_uso}
             </Link>
-            <Link href="#" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
+            <Link href="/institucional/politica-de-privacidade" className="font-sans-premium text-[10px] text-neutral-400 hover:text-dourado-suave transition-colors">
               {t.politicas_privacidade}
             </Link>
           </div>

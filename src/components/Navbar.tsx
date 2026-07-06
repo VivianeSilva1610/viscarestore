@@ -6,15 +6,20 @@ import { useAuth } from "../context/AuthContext";
 import { ShoppingBag, Search, User, Menu, X, LogOut, ChevronDown, Globe, Truck } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { dictionary } from "../locales/dictionary";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { setIsCartOpen, cartCount } = useCart();
   const { isLoggedIn, profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,12 +54,27 @@ export default function Navbar() {
   const navLinks = [
     { name: t.novidades, href: "/#products-section", categoryId: "todos" },
     { name: t.perfumes, href: "/?category=perfumes#products-section", categoryId: "perfumes" },
-    { name: t.skincare, href: "/?category=skincare#products-section", categoryId: "skincare" },
-    { name: t.vestidos, href: "/?category=moda#products-section", categoryId: "moda" },
-    { name: t.acessorios, href: "/?category=acessorios#products-section", categoryId: "acessorios" },
+    { name: t.skincare, href: "/collezione" },
+    { name: t.vestidos, href: "/abiti" },
+    { name: t.acessorios, href: "/acessori" },
     { name: language === "pt" ? "VÍDEOS" : "VIDEO", href: "/videos" },
     { name: t.rotina_skincare, href: "https://viscare.vercel.app/", external: true },
   ];
+
+  const handleSearchOpen = () => {
+    setIsSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    if (q) {
+      router.push(`/?q=${encodeURIComponent(q)}#products-section`);
+    }
+  };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: any) => {
     if (link.external || !link.categoryId) return;
@@ -133,13 +153,18 @@ export default function Navbar() {
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
                   onClick={(e) => handleNavClick(e, link)}
-                  className={`font-sans-premium text-xs tracking-[0.2em] uppercase transition-colors duration-300 font-medium ${
+                  className={`font-sans-premium text-xs tracking-[0.2em] uppercase transition-colors duration-300 font-medium inline-flex items-center gap-1.5 ${
                     link.external
-                      ? "text-dourado-suave border-b border-dourado-suave/20 hover:border-dourado-suave pb-0.5"
+                      ? "text-dourado-suave hover:text-dourado-suave/80"
                       : "text-neutral-800 hover:text-dourado-suave"
                   }`}
                 >
                   {link.name}
+                  {link.external && (
+                    <span className="text-[8px] tracking-widest bg-[#C8A97E] text-white px-1.5 py-0.5 rounded font-bold leading-none">
+                      APP
+                    </span>
+                  )}
                 </a>
               ))}
             </nav>
@@ -175,6 +200,7 @@ export default function Navbar() {
               </div>
 
               <button
+                onClick={handleSearchOpen}
                 className="text-neutral-800 hover:text-dourado-suave p-1.5 transition-colors duration-300"
                 aria-label="Buscar"
               >
@@ -259,6 +285,40 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* Search Overlay */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
+          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setIsSearchOpen(false)} />
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-neutral-100"
+          >
+            <div className="flex items-center px-5 py-4">
+              <Search size={18} strokeWidth={1.5} className="text-[#C8A97E] shrink-0 mr-3" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === "it" ? "Cerca prodotti…" : "Buscar produtos…"}
+                className="flex-grow font-sans-premium text-sm text-neutral-800 placeholder-neutral-400 outline-none tracking-wide"
+              />
+              <button type="button" onClick={() => setIsSearchOpen(false)} className="ml-3 text-neutral-400 hover:text-neutral-700">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="border-t border-neutral-100 px-5 py-3 flex justify-end">
+              <button
+                type="submit"
+                className="font-sans-premium text-[10px] tracking-[0.2em] uppercase text-white bg-neutral-900 hover:bg-[#C8A97E] px-5 py-2 transition-colors duration-300"
+              >
+                {language === "it" ? "Cerca" : "Buscar"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Mobile Drawer Navigation */}
       <div
         className={`fixed inset-0 z-30 lg:hidden transition-all duration-500 ${
@@ -302,13 +362,18 @@ export default function Navbar() {
                     if (!link.categoryId && !link.external) setIsMobileMenuOpen(false);
                     handleNavClick(e, link);
                   }}
-                  className={`font-sans-premium text-sm tracking-[0.2em] uppercase font-medium border-b border-neutral-900/5 pb-2 inline-block transition-all duration-300 ${
+                  className={`font-sans-premium text-sm tracking-[0.2em] uppercase font-medium border-b border-neutral-900/5 pb-2 inline-flex items-center gap-2 transition-all duration-300 ${
                     link.external
                       ? "text-dourado-suave font-semibold"
                       : "text-neutral-800 hover:text-dourado-suave"
                   }`}
                 >
                   {link.name}
+                  {link.external && (
+                    <span className="text-[8px] tracking-widest bg-[#C8A97E] text-white px-1.5 py-0.5 rounded font-bold leading-none">
+                      APP
+                    </span>
+                  )}
                 </a>
               ))}
             </nav>
@@ -330,7 +395,7 @@ export default function Navbar() {
               <span>{language === "it" ? "Traccia ordine" : "Rastrear pedido"}</span>
             </a>
             <p className="text-[10px] text-neutral-500 font-sans-premium tracking-widest uppercase">
-              Curadoria de Luxo VisCaree
+              {language === "it" ? "Selezione con Criterio · VisCaree" : "Seleção com Critério · VisCaree"}
             </p>
           </div>
         </div>
