@@ -28,10 +28,10 @@ interface Props {
 export default function ShopifyProductClient({ productId, title, description, allImages, variants }: Props) {
   const firstAvailable = variants.find((v) => v.availableForSale) ?? variants[0];
   const [selected, setSelected] = useState<Variant>(firstAvailable);
+  const [displayImage, setDisplayImage] = useState<ShopifyImage | null>(
+    firstAvailable.image ?? allImages[0] ?? null
+  );
 
-  // imagem principal: imagem da variante (se tiver) ou primeira do produto
-  const mainImage = selected.image ?? allImages[0] ?? null;
-  // miniaturas: todas as imagens do produto (a variante selecionada fica em destaque)
   const thumbnails = allImages.length > 0 ? allImages : (selected.image ? [selected.image] : []);
 
   const { addToCart } = useCart();
@@ -50,7 +50,7 @@ export default function ShopifyProductClient({ productId, title, description, al
       name: variants.length > 1 ? `${title} — ${selected.title}` : title,
       price,
       weight_kg: 0.5,
-      image: mainImage?.url ?? "",
+      image: displayImage?.url ?? "",
       category: "shopify",
       description,
       source: "shopify",
@@ -61,6 +61,7 @@ export default function ShopifyProductClient({ productId, title, description, al
   const handleVariantClick = (v: Variant) => {
     if (!v.availableForSale) return;
     setSelected(v);
+    if (v.image) setDisplayImage(v.image);
   };
 
   return (
@@ -68,13 +69,13 @@ export default function ShopifyProductClient({ productId, title, description, al
       {/* Galeria */}
       <div>
         <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden border border-[#C8A97E]/10">
-          {mainImage ? (
+          {displayImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={mainImage.url}
-              alt={mainImage.altText ?? title}
+              src={displayImage.url}
+              alt={displayImage.altText ?? title}
               className="w-full h-full object-cover transition-opacity duration-300"
-              key={mainImage.url}
+              key={displayImage.url}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -98,7 +99,12 @@ export default function ShopifyProductClient({ productId, title, description, al
                 key={i}
                 src={img.url}
                 alt={img.altText ?? `${title} ${i + 1}`}
-                className="w-16 h-20 object-cover rounded-xl border border-neutral-200 flex-shrink-0 cursor-pointer hover:border-[#C8A97E] transition-colors"
+                onClick={() => setDisplayImage(img)}
+                className={`w-16 h-20 object-cover rounded-xl border-2 flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                  displayImage?.url === img.url
+                    ? "border-[#C8A97E] opacity-100"
+                    : "border-transparent opacity-60 hover:opacity-100 hover:border-[#C8A97E]/50"
+                }`}
               />
             ))}
           </div>
