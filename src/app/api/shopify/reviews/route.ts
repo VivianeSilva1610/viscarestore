@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const SHOP_DOMAIN = "viscare-2.myshopify.com";
+const SHOP_DOMAIN = process.env.JUDGEME_SHOP_DOMAIN || "f2e6hr-zk.myshopify.com";
 const JUDGEME_TOKEN = process.env.JUDGEME_PUBLIC_TOKEN;
 
 export async function GET(req: NextRequest) {
