@@ -105,7 +105,7 @@ export const dictionary = {
       novidades: "Novità",
       perfumes: "Profumi",
       skincare: "Skincare", // User requested NOT to change "skincare"
-      vestidos: "Abiti",
+      vestidos: "Moda",
       acessorios: "Accessori",
       rotina_skincare: "Routine Skincare",
       minha_conta: "Il Mio Account",
