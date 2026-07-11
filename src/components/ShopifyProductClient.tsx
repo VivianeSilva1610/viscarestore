@@ -21,18 +21,27 @@ interface Props {
   productId: string;
   title: string;
   description: string;
+  featuredImage?: ShopifyImage | null;
   allImages: ShopifyImage[];
   variants: Variant[];
 }
 
-export default function ShopifyProductClient({ productId, title, description, allImages, variants }: Props) {
+export default function ShopifyProductClient({ productId, title, description, featuredImage, allImages, variants }: Props) {
   const firstAvailable = variants.find((v) => v.availableForSale) ?? variants[0];
   const [selected, setSelected] = useState<Variant>(firstAvailable);
-  const [displayImage, setDisplayImage] = useState<ShopifyImage | null>(
-    firstAvailable.image ?? allImages[0] ?? null
-  );
 
-  const thumbnails = allImages.length > 0 ? allImages : (selected.image ? [selected.image] : []);
+  // Build complete gallery: product images + unique variant images (deduplicated by URL)
+  const variantImages = variants
+    .map((v) => v.image)
+    .filter((img): img is ShopifyImage => !!img);
+  const seenUrls = new Set(allImages.map((i) => i.url));
+  const extraVariantImages = variantImages.filter((img) => !seenUrls.has(img.url));
+  const thumbnails = [...allImages, ...extraVariantImages];
+
+  // Initial image: variant image → product gallery → featuredImage
+  const [displayImage, setDisplayImage] = useState<ShopifyImage | null>(
+    firstAvailable.image ?? thumbnails[0] ?? featuredImage ?? null
+  );
 
   const { addToCart } = useCart();
   const { language } = useLanguage();
@@ -61,6 +70,7 @@ export default function ShopifyProductClient({ productId, title, description, al
   const handleVariantClick = (v: Variant) => {
     if (!v.availableForSale) return;
     setSelected(v);
+    // Switch to variant's own image, or keep current if it doesn't have one
     if (v.image) setDisplayImage(v.image);
   };
 

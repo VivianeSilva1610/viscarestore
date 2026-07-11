@@ -48,6 +48,7 @@ export default async function ShopifyProductPage({
                 productId={product.id}
                 title={product.title}
                 description={product.description}
+                featuredImage={product.featuredImage}
                 allImages={allImages}
                 variants={variants}
               />

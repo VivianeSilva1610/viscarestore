@@ -113,7 +113,7 @@ const PRODUCT_QUERY = `
       priceRange {
         minVariantPrice { amount currencyCode }
       }
-      variants(first: 10) {
+      variants(first: 50) {
         edges {
           node {
             id
