@@ -19,6 +19,7 @@ export interface ShopifyProduct {
   handle: string;
   title: string;
   description: string;
+  productType: string;
   featuredImage: ShopifyImage | null;
   priceRange: {
     minVariantPrice: ShopifyMoney;
@@ -55,6 +56,7 @@ const COLLECTION_QUERY = `
             handle
             title
             description
+            productType
             featuredImage {
               url
               altText
