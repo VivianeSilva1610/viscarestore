@@ -4,9 +4,11 @@ import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import CartDrawer from "@/components/CartDrawer";
-import { fetchShopifyCollection, ShopifyProduct, SHOP_URL } from "@/lib/shopify";
+import Link from "next/link";
+import { fetchShopifyCollection, ShopifyProduct } from "@/lib/shopify";
 import { cookies } from "next/headers";
 import ShopifyLangNotice from "@/components/ShopifyLangNotice";
+import ShopifyAddToCartButton from "@/components/ShopifyAddToCartButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,22 +21,13 @@ function formatPrice(amount: string, currencyCode: string) {
   }).format(Number(amount));
 }
 
-function getVariantNumericId(gid: string): string {
-  return gid.split("/").pop() ?? "";
-}
-
 function ProductCard({ product }: { product: ShopifyProduct }) {
   const { amount, currencyCode } = product.priceRange.minVariantPrice;
-  const productUrl = `${SHOP_URL}/products/${product.handle}`;
-  const firstVariantGid = product.variants.edges[0]?.node.id ?? "";
-  const variantId = getVariantNumericId(firstVariantGid);
-  const checkoutUrl = variantId
-    ? `${SHOP_URL}/cart/${variantId}:1`
-    : productUrl;
+  const variantGid = product.variants.edges[0]?.node.id ?? "";
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 border border-neutral-100 flex flex-col">
-      <a href={productUrl} target="_blank" rel="noopener noreferrer" className="block">
+      <Link href={`/produto/${product.handle}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-[#F1E7E2]">
           {product.featuredImage ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -63,17 +56,17 @@ function ProductCard({ product }: { product: ShopifyProduct }) {
             {formatPrice(amount, currencyCode)}
           </p>
         </div>
-      </a>
+      </Link>
 
       <div className="px-5 pb-5">
-        <a
-          href={checkoutUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center py-3 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.2em] uppercase hover:bg-[#C8A97E] transition-colors duration-300"
-        >
-          Comprar
-        </a>
+        <ShopifyAddToCartButton
+          productId={product.id}
+          title={product.title}
+          description={product.description}
+          price={parseFloat(amount)}
+          image={product.featuredImage?.url ?? ""}
+          variantGid={variantGid}
+        />
       </div>
     </div>
   );
@@ -95,7 +88,6 @@ export default async function AbitiPage() {
 
               <ShopifyLangNotice />
 
-              {/* Header */}
               <div className="text-center mb-16">
                 <div className="inline-flex items-center space-x-2 mb-4">
                   <span className="w-8 h-[1px] bg-[#C8A97E]" />
@@ -114,7 +106,6 @@ export default async function AbitiPage() {
                 )}
               </div>
 
-              {/* Grid */}
               {products.length === 0 ? (
                 <div className="text-center py-24">
                   <p className="font-sans-premium text-neutral-400 text-sm tracking-wide">

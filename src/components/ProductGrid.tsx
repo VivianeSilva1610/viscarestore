@@ -353,7 +353,10 @@ export default function ProductGrid() {
               {/* Product Info Description */}
               <div className="text-center px-1">
                 <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-1">
-                  {categories.find((c) => c.value === product.category)?.label || product.category}
+                  {(() => {
+                    const cat = categories.find((c) => c.value === product.category);
+                    return (language === "it" && cat?.label_it) ? cat.label_it : (cat?.label || product.category);
+                  })()}
                 </span>
                 
                 <Link href={`/produtos/${product.id}`}>

@@ -17,12 +17,14 @@ export default function CartDrawer() {
     cartTotal,
     cartTotalWeight,
     cartCount,
+    cartSource,
   } = useCart();
   const { user, profile } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [shippingCountry, setShippingCountry] = useState<"BR" | "IT" | "">("");
 
-  const handleCheckout = async () => {
+  // Checkout Appwrite → Stripe
+  const handleAppwriteCheckout = async () => {
     setIsCheckingOut(true);
     try {
       const response = await fetch("/api/checkout", {
@@ -32,7 +34,7 @@ export default function CartDrawer() {
           items: cart,
           customerEmail: user?.email || "",
           customerName: profile?.name || "",
-          customerProfile: profile, // Pass profile to check address
+          customerProfile: profile,
         }),
       });
       const data = await response.json();
@@ -42,8 +44,34 @@ export default function CartDrawer() {
         alert("Erro ao iniciar checkout: " + (data.error || "Tente novamente."));
         setIsCheckingOut(false);
       }
-    } catch (error) {
+    } catch {
       alert("Erro de conexão ao processar o checkout.");
+      setIsCheckingOut(false);
+    }
+  };
+
+  // Checkout Shopify → cria cart na API e redireciona para checkoutUrl
+  const handleShopifyCheckout = async () => {
+    setIsCheckingOut(true);
+    try {
+      const shopifyItems = cart
+        .filter((i) => i.source === "shopify" && i.shopifyVariantId)
+        .map((i) => ({ variantId: i.shopifyVariantId!, quantity: i.quantity }));
+
+      const res = await fetch("/api/shopify/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: shopifyItems }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert("Erro ao redirecionar para o checkout Shopify.");
+        setIsCheckingOut(false);
+      }
+    } catch {
+      alert("Erro de conexão.");
       setIsCheckingOut(false);
     }
   };
@@ -211,57 +239,10 @@ export default function CartDrawer() {
               </div>
 
               {/* Checkout Panel Footer */}
-              {cart.length > 0 && (() => {
-                
-                const getPosteItalianeRateEUR = (weight: number) => {
-                  if (weight <= 1) return 32.80;
-                  if (weight <= 3) return 40.35;
-                  if (weight <= 5) return 64.00;
-                  if (weight <= 10) return 84.40;
-                  if (weight <= 15) return 109.15;
-                  return 132.25;
-                };
-
-                // No conversion needed since store is in Euro
-
-                let shippingCost = 0;
-                let shippingName = "A calcular";
-
-                if (shippingCountry === "BR") {
-                  shippingCost = getPosteItalianeRateEUR(cartTotalWeight);
-                  shippingName = "Poste Italiane (Internacional)";
-                } else if (shippingCountry === "IT") {
-                  shippingCost = 10.00; // €10 fixed for Italy
-                  shippingName = "Poste Italiane (Local)";
-                }
-
-                const finalTotal = cartTotal + shippingCost;
-
-                return (
+              {cart.length > 0 && (
+                cartSource === "shopify" ? (
+                  /* ── Shopify checkout ── */
                   <div className="px-6 py-6 border-t border-dourado-suave/10 bg-white/50 space-y-4">
-                    
-                    {/* Shipping Calculator UI */}
-                    <div className="bg-[#F8F5F2] p-4 rounded-xl border border-dourado-suave/20 space-y-3">
-                      <h4 className="font-sans-premium text-[10px] tracking-widest text-neutral-800 uppercase font-bold">
-                        Calcule seu Frete
-                      </h4>
-                      <p className="font-sans-premium text-[9px] text-neutral-500">
-                        Peso total: <span className="font-semibold text-neutral-700">{cartTotalWeight.toFixed(2)} kg</span>
-                      </p>
-                      
-                      <select 
-                        className="w-full text-xs font-sans-premium p-2 rounded-lg border border-neutral-200 focus:border-dourado-suave focus:outline-none"
-                        value={shippingCountry}
-                        onChange={(e) => {
-                          setShippingCountry(e.target.value as any);
-                        }}
-                      >
-                        <option value="">Selecione o País de Destino...</option>
-                        <option value="IT">Itália 🇮🇹</option>
-                        <option value="BR">Brasil 🇧🇷</option>
-                      </select>
-                    </div>
-
                     <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600 pt-2">
                       <span>Subtotal</span>
                       <span className="text-neutral-900 font-semibold">
@@ -269,38 +250,108 @@ export default function CartDrawer() {
                       </span>
                     </div>
 
-                    <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
-                      <span>Frete ({shippingName})</span>
-                      <span className="text-dourado-suave font-semibold text-[10px] text-right">
-                        {shippingCost > 0 ? `€ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
-                      </span>
-                    </div>
-
-                    <div className="border-t border-dashed border-dourado-suave/10 pt-4 flex justify-between font-serif-premium text-lg tracking-wide text-neutral-900">
-                      <span>Total Estimado</span>
-                      <span className="font-sans-premium text-base font-bold">
-                        € {finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-
                     <p className="font-sans-premium text-[9px] text-neutral-400 leading-relaxed text-center tracking-wide">
-                      Transação de alta segurança • Embalagem exclusiva de presente VisCaree inclusa.
+                      Frete e impostos calculados no próximo passo · Pagamento seguro via Shopify.
                     </p>
 
                     <button
-                      onClick={handleCheckout}
-                      disabled={isCheckingOut || (!shippingCountry)}
-                      className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave disabled:opacity-70 disabled:hover:bg-neutral-900 font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center space-x-2"
+                      onClick={handleShopifyCheckout}
+                      disabled={isCheckingOut}
+                      className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave disabled:opacity-70 font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center space-x-2"
                     >
                       {isCheckingOut ? (
-                        <><Loader2 size={16} className="animate-spin" /> <span>Processando...</span></>
+                        <><Loader2 size={16} className="animate-spin" /><span>Redirecionando...</span></>
                       ) : (
-                        <span>{!shippingCountry ? "Calcule o Frete para Finalizar" : "Finalizar Pedido"}</span>
+                        <span>Finalizar Pedido</span>
                       )}
                     </button>
                   </div>
-                );
-              })()}
+                ) : (
+                  /* ── Appwrite / Stripe checkout ── */
+                  (() => {
+                    const getPosteItalianeRateEUR = (weight: number) => {
+                      if (weight <= 1) return 32.80;
+                      if (weight <= 3) return 40.35;
+                      if (weight <= 5) return 64.00;
+                      if (weight <= 10) return 84.40;
+                      if (weight <= 15) return 109.15;
+                      return 132.25;
+                    };
+
+                    let shippingCost = 0;
+                    let shippingName = "A calcular";
+
+                    if (shippingCountry === "BR") {
+                      shippingCost = getPosteItalianeRateEUR(cartTotalWeight);
+                      shippingName = "Poste Italiane (Internacional)";
+                    } else if (shippingCountry === "IT") {
+                      shippingCost = 10.00;
+                      shippingName = "Poste Italiane (Local)";
+                    }
+
+                    const finalTotal = cartTotal + shippingCost;
+
+                    return (
+                      <div className="px-6 py-6 border-t border-dourado-suave/10 bg-white/50 space-y-4">
+                        <div className="bg-[#F8F5F2] p-4 rounded-xl border border-dourado-suave/20 space-y-3">
+                          <h4 className="font-sans-premium text-[10px] tracking-widest text-neutral-800 uppercase font-bold">
+                            Calcule seu Frete
+                          </h4>
+                          <p className="font-sans-premium text-[9px] text-neutral-500">
+                            Peso total: <span className="font-semibold text-neutral-700">{cartTotalWeight.toFixed(2)} kg</span>
+                          </p>
+                          <select
+                            className="w-full text-xs font-sans-premium p-2 rounded-lg border border-neutral-200 focus:border-dourado-suave focus:outline-none"
+                            value={shippingCountry}
+                            onChange={(e) => setShippingCountry(e.target.value as "BR" | "IT" | "")}
+                          >
+                            <option value="">Selecione o País de Destino...</option>
+                            <option value="IT">Itália 🇮🇹</option>
+                            <option value="BR">Brasil 🇧🇷</option>
+                          </select>
+                        </div>
+
+                        <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600 pt-2">
+                          <span>Subtotal</span>
+                          <span className="text-neutral-900 font-semibold">
+                            € {cartTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between font-sans-premium text-xs tracking-wider uppercase text-neutral-600">
+                          <span>Frete ({shippingName})</span>
+                          <span className="text-dourado-suave font-semibold text-[10px] text-right">
+                            {shippingCost > 0 ? `€ ${shippingCost.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "A calcular"}
+                          </span>
+                        </div>
+
+                        <div className="border-t border-dashed border-dourado-suave/10 pt-4 flex justify-between font-serif-premium text-lg tracking-wide text-neutral-900">
+                          <span>Total Estimado</span>
+                          <span className="font-sans-premium text-base font-bold">
+                            € {finalTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+
+                        <p className="font-sans-premium text-[9px] text-neutral-400 leading-relaxed text-center tracking-wide">
+                          Transação de alta segurança • Embalagem exclusiva de presente VisCaree inclusa.
+                        </p>
+
+                        <button
+                          onClick={handleAppwriteCheckout}
+                          disabled={isCheckingOut || !shippingCountry}
+                          className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.25em] uppercase hover:bg-dourado-suave disabled:opacity-70 disabled:hover:bg-neutral-900 font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center space-x-2"
+                        >
+                          {isCheckingOut ? (
+                            <><Loader2 size={16} className="animate-spin" /><span>Processando...</span></>
+                          ) : (
+                            <span>{!shippingCountry ? "Calcule o Frete para Finalizar" : "Finalizar Pedido"}</span>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()
+                )
+              )}
             </motion.div>
           </div>
 

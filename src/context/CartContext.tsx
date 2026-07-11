@@ -13,6 +13,9 @@ export interface CartItem {
   category: string;
   description?: string;
   delivery_days?: number;
+  // Bloco 2 — unified source
+  source?: "shopify" | "appwrite";
+  shopifyVariantId?: string; // populated only when source === "shopify"
 }
 
 interface CartContextType {
@@ -26,6 +29,8 @@ interface CartContextType {
   cartTotalWeight: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
+  /** "shopify" | "appwrite" | null (empty cart) */
+  cartSource: "shopify" | "appwrite" | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -35,15 +40,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
-    
     const savedCart = localStorage.getItem("viscare_cart");
     if (savedCart) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCart(JSON.parse(savedCart));
       } catch (e) {
         console.error("Error loading cart from localStorage", e);
@@ -51,7 +52,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save cart to localStorage when it changes
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem("viscare_cart", JSON.stringify(cart));
@@ -59,23 +59,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [cart, isMounted]);
 
   const addToCart = (newItem: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+    const effectiveSource = newItem.source ?? "appwrite";
+
+    // Bloco 4 — prevent mixed carts in v1
+    if (cart.length > 0) {
+      const existingSource = cart[0].source ?? "appwrite";
+      if (existingSource !== effectiveSource) {
+        const confirmed = window.confirm(
+          effectiveSource === "shopify"
+            ? "O seu carrinho tem produtos próprios VisCaree. Esvazie-o para adicionar produtos do catálogo Shopify?"
+            : "O seu carrinho tem produtos do catálogo Shopify. Esvazie-o para adicionar produtos próprios VisCaree?"
+        );
+        if (!confirmed) return;
+        setCart([{ ...newItem, source: effectiveSource, quantity: newItem.quantity ?? 1 }]);
+        setIsCartOpen(true);
+        return;
+      }
+    }
+
     setCart((prevCart) => {
-      // Find if item with same ID and same size already exists
-      const existingItemIndex = prevCart.findIndex(
+      const existingIndex = prevCart.findIndex(
         (item) => item.id === newItem.id && item.size === newItem.size
       );
-
       const qtyToAdd = newItem.quantity ?? 1;
 
-      if (existingItemIndex > -1) {
-        const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex].quantity += qtyToAdd;
-        return updatedCart;
+      if (existingIndex > -1) {
+        const updated = [...prevCart];
+        updated[existingIndex].quantity += qtyToAdd;
+        return updated;
       }
 
-      return [...prevCart, { ...newItem, quantity: qtyToAdd }];
+      return [...prevCart, { ...newItem, source: effectiveSource, quantity: qtyToAdd }];
     });
-    setIsCartOpen(true); // Auto-open cart when adding an item
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string, size?: string) => {
@@ -96,13 +112,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  const cartTotalWeight = cart.reduce((total, item) => total + (item.weight_kg || 0.5) * item.quantity, 0);
+  const cartTotalWeight = cart.reduce(
+    (total, item) => total + (item.weight_kg || 0.5) * item.quantity,
+    0
+  );
+  const cartSource: "shopify" | "appwrite" | null =
+    cart.length === 0 ? null : (cart[0].source ?? "appwrite") === "shopify" ? "shopify" : "appwrite";
 
   return (
     <CartContext.Provider
@@ -117,6 +136,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cartTotalWeight,
         isCartOpen,
         setIsCartOpen,
+        cartSource,
       }}
     >
       {children}

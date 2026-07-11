@@ -79,6 +79,106 @@ const COLLECTION_QUERY = `
   }
 `;
 
+export interface ShopifyProductDetail extends ShopifyProduct {
+  descriptionHtml: string;
+  images: { edges: Array<{ node: ShopifyImage }> };
+  variants: {
+    edges: Array<{
+      node: { id: string; title: string; availableForSale: boolean; price: ShopifyMoney };
+    }>;
+  };
+}
+
+const PRODUCT_QUERY = `
+  query ProductByHandle($handle: String!, $language: LanguageCode!)
+  @inContext(language: $language) {
+    product(handle: $handle) {
+      id
+      handle
+      title
+      description
+      descriptionHtml
+      featuredImage { url altText }
+      images(first: 10) {
+        edges { node { url altText } }
+      }
+      priceRange {
+        minVariantPrice { amount currencyCode }
+      }
+      variants(first: 10) {
+        edges {
+          node {
+            id
+            title
+            availableForSale
+            price { amount currencyCode }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchShopifyProduct(
+  handle: string,
+  locale = "it"
+): Promise<ShopifyProductDetail | null> {
+  if (!STOREFRONT_TOKEN) return null;
+
+  const language = SHOPIFY_LANG[locale] ?? "IT";
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN,
+    },
+    body: JSON.stringify({ query: PRODUCT_QUERY, variables: { handle, language } }),
+    next: { revalidate: 300 },
+  });
+
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.data?.product ?? null;
+}
+
+const CREATE_CART_MUTATION = `
+  mutation CartCreate($lines: [CartLineInput!]!) {
+    cartCreate(input: { lines: $lines }) {
+      cart {
+        checkoutUrl
+      }
+      userErrors { field message }
+    }
+  }
+`;
+
+export async function createShopifyCart(
+  items: { variantId: string; quantity: number }[]
+): Promise<{ checkoutUrl: string } | null> {
+  if (!STOREFRONT_TOKEN) return null;
+
+  const lines = items.map(({ variantId, quantity }) => ({
+    merchandiseId: variantId,
+    quantity,
+  }));
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN,
+    },
+    body: JSON.stringify({ query: CREATE_CART_MUTATION, variables: { lines } }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const json = await res.json();
+  const checkoutUrl = json.data?.cartCreate?.cart?.checkoutUrl;
+  return checkoutUrl ? { checkoutUrl } : null;
+}
+
 export async function fetchShopifyCollection(
   handle: string,
   locale = "it"

@@ -21,12 +21,14 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID 
 interface Category {
   $id: string;
   label: string;
+  name_it?: string;
   value: string;
   description?: string;
 }
 
 const emptyCategory: Omit<Category, "$id"> = {
   label: "",
+  name_it: "",
   value: "",
   description: "",
 };
@@ -74,6 +76,7 @@ export default function AdminCategoriasPage() {
     setEditingCategory(category);
     setForm({
       label: category.label,
+      name_it: category.name_it || "",
       value: category.value,
       description: category.description || "",
     });
@@ -206,6 +209,7 @@ export default function AdminCategoriasPage() {
               <tr className="border-b border-neutral-100 bg-neutral-50">
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4 w-12">Ícone</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Nome da Categoria</th>
+                <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Nome em Italiano</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Identificador (Slug)</th>
                 <th className="text-right text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4">Ações</th>
               </tr>
@@ -223,6 +227,11 @@ export default function AdminCategoriasPage() {
                     {category.description && (
                         <p className="text-xs text-neutral-400 mt-1 max-w-md truncate">{category.description}</p>
                     )}
+                  </td>
+                  <td className="px-4 py-4 hidden md:table-cell">
+                    <p className="text-sm text-neutral-500 italic">
+                      {category.name_it || <span className="text-neutral-300">—</span>}
+                    </p>
                   </td>
                   <td className="px-4 py-4 hidden md:table-cell">
                     <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs font-mono rounded">
@@ -285,6 +294,19 @@ export default function AdminCategoriasPage() {
                   onChange={handleLabelChange}
                   className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                   placeholder="Ex: Alta Perfumaria"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                  Nome em Italiano
+                </label>
+                <input
+                  type="text"
+                  value={form.name_it || ""}
+                  onChange={(e) => setForm({ ...form, name_it: e.target.value })}
+                  className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                  placeholder="Ex: Alta Profumeria"
                 />
               </div>
 
