@@ -116,11 +116,13 @@ export default function ProductGrid() {
           ]),
         ]);
 
-        const formattedCategories = catRes.documents.map((c: any) => ({
-          label: c.label,
-          label_it: c.name_it || "",
-          value: c.value,
-        }));
+        const formattedCategories = catRes.documents
+          .filter((c: any) => c.active !== false)
+          .map((c: any) => ({
+            label: c.label,
+            label_it: c.name_it || "",
+            value: c.value,
+          }));
         setCategories(formattedCategories);
 
         const formattedProducts = prodRes.documents.map((doc: any): Product => {

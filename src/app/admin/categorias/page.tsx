@@ -24,6 +24,7 @@ interface Category {
   name_it?: string;
   value: string;
   description?: string;
+  active?: boolean;
 }
 
 const emptyCategory: Omit<Category, "$id"> = {
@@ -31,6 +32,7 @@ const emptyCategory: Omit<Category, "$id"> = {
   name_it: "",
   value: "",
   description: "",
+  active: true,
 };
 
 export default function AdminCategoriasPage() {
@@ -131,6 +133,19 @@ export default function AdminCategoriasPage() {
     }
   };
 
+  const handleToggleActive = async (category: Category) => {
+    try {
+      const newActive = category.active === false ? true : false;
+      await databases.updateDocument(DB_ID, COLLECTION_ID, category.$id, { active: newActive });
+      setCategories((prev) =>
+        prev.map((c) => (c.$id === category.$id ? { ...c, active: newActive } : c))
+      );
+      showToast("success", newActive ? `"${category.label}" visível no site.` : `"${category.label}" oculta no site.`);
+    } catch {
+      showToast("error", "Erro ao alterar visibilidade.");
+    }
+  };
+
   const handleDelete = async (category: Category) => {
     if (!confirm(`Tem certeza que deseja excluir a categoria "${category.label}"?`)) return;
     try {
@@ -211,6 +226,7 @@ export default function AdminCategoriasPage() {
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Nome da Categoria</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Nome em Italiano</th>
                 <th className="text-left text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4 hidden md:table-cell">Identificador (Slug)</th>
+                <th className="text-center text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-4 py-4">Visível no site</th>
                 <th className="text-right text-[10px] tracking-widest uppercase text-neutral-500 font-semibold px-6 py-4">Ações</th>
               </tr>
             </thead>
@@ -238,6 +254,23 @@ export default function AdminCategoriasPage() {
                       {category.value}
                     </span>
                   </td>
+                  {/* Toggle visível no site */}
+                  <td className="px-4 py-4 text-center">
+                    <button
+                      onClick={() => handleToggleActive(category)}
+                      title={category.active === false ? "Clique para tornar visível" : "Clique para ocultar"}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+                        category.active === false ? "bg-neutral-200" : "bg-emerald-400"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                          category.active === false ? "translate-x-1" : "translate-x-6"
+                        }`}
+                      />
+                    </button>
+                  </td>
+
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button
