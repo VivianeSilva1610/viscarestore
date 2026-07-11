@@ -7,22 +7,34 @@ const JUDGEME_TOKEN = process.env.JUDGEME_PUBLIC_TOKEN;
 
 export async function GET(req: NextRequest) {
   const productId = req.nextUrl.searchParams.get("productId");
+  const handle = req.nextUrl.searchParams.get("handle");
   const debug = req.nextUrl.searchParams.get("debug") === "1";
 
-  if (!productId) return NextResponse.json({ reviews: [], rating: 0, total: 0 });
+  if (!productId && !handle) return NextResponse.json({ reviews: [], rating: 0, total: 0 });
 
   if (!JUDGEME_TOKEN) {
     return NextResponse.json({ reviews: [], rating: 0, total: 0, error: "JUDGEME_PUBLIC_TOKEN não configurado" });
   }
 
-  const url = `https://judge.me/api/v1/reviews?api_token=${JUDGEME_TOKEN}&shop_domain=${SHOP_DOMAIN}&product_id=${productId}&per_page=30`;
+  // Judge.me accepts both product_id (numeric) and handle
+  const params = new URLSearchParams({
+    api_token: JUDGEME_TOKEN,
+    shop_domain: SHOP_DOMAIN,
+    per_page: "30",
+  });
+  if (productId) params.set("product_id", productId);
+  if (handle) params.set("handle", handle);
+
+  const url = `https://judge.me/api/v1/reviews?${params.toString()}`;
 
   try {
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
 
     if (debug) {
-      return NextResponse.json({ status: res.status, url, raw: text.slice(0, 2000) });
+      let parsed: unknown = text;
+      try { parsed = JSON.parse(text); } catch { /* keep as string */ }
+      return NextResponse.json({ httpStatus: res.status, url: url.replace(JUDGEME_TOKEN, "***"), raw: parsed });
     }
 
     if (!res.ok) return NextResponse.json({ reviews: [], rating: 0, total: 0, httpStatus: res.status });

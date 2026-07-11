@@ -55,6 +55,7 @@ export default async function ShopifyProductPage({
 
               <ShopifyReviews
                 numericProductId={numericProductId}
+                handle={handle}
                 productTitle={product.title}
               />
 

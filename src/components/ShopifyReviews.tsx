@@ -36,10 +36,11 @@ function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
 
 interface Props {
   numericProductId: string;
+  handle: string;
   productTitle: string;
 }
 
-export default function ShopifyReviews({ numericProductId, productTitle }: Props) {
+export default function ShopifyReviews({ numericProductId, handle, productTitle }: Props) {
   const { language } = useLanguage();
   const isPt = language === "pt";
 
@@ -57,7 +58,7 @@ export default function ShopifyReviews({ numericProductId, productTitle }: Props
   const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
-    fetch(`/api/shopify/reviews?productId=${numericProductId}`)
+    fetch(`/api/shopify/reviews?productId=${numericProductId}&handle=${encodeURIComponent(handle)}`)
       .then((r) => r.json())
       .then((data) => {
         setReviews(data.reviews ?? []);
