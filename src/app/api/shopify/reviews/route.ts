@@ -7,21 +7,27 @@ const JUDGEME_TOKEN = process.env.JUDGEME_PUBLIC_TOKEN;
 
 export async function GET(req: NextRequest) {
   const productId = req.nextUrl.searchParams.get("productId");
+  const debug = req.nextUrl.searchParams.get("debug") === "1";
+
   if (!productId) return NextResponse.json({ reviews: [], rating: 0, total: 0 });
 
   if (!JUDGEME_TOKEN) {
     return NextResponse.json({ reviews: [], rating: 0, total: 0, error: "JUDGEME_PUBLIC_TOKEN não configurado" });
   }
 
+  const url = `https://judge.me/api/v1/reviews?api_token=${JUDGEME_TOKEN}&shop_domain=${SHOP_DOMAIN}&product_id=${productId}&per_page=30`;
+
   try {
-    const res = await fetch(
-      `https://judge.me/api/v1/reviews?api_token=${JUDGEME_TOKEN}&shop_domain=${SHOP_DOMAIN}&product_id=${productId}&per_page=30`,
-      { next: { revalidate: 300 } }
-    );
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text();
 
-    if (!res.ok) return NextResponse.json({ reviews: [], rating: 0, total: 0 });
+    if (debug) {
+      return NextResponse.json({ status: res.status, url, raw: text.slice(0, 2000) });
+    }
 
-    const data = await res.json();
+    if (!res.ok) return NextResponse.json({ reviews: [], rating: 0, total: 0, httpStatus: res.status });
+
+    const data = JSON.parse(text);
     const reviews: any[] = data.reviews ?? [];
     const total = reviews.length;
     const rating = total > 0
@@ -39,7 +45,7 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({ reviews: formatted, rating, total });
-  } catch {
-    return NextResponse.json({ reviews: [], rating: 0, total: 0 });
+  } catch (e: any) {
+    return NextResponse.json({ reviews: [], rating: 0, total: 0, error: e.message });
   }
 }
