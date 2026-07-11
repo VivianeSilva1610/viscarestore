@@ -7,6 +7,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import ShopifyProductClient from "@/components/ShopifyProductClient";
+import ShopifyReviews from "@/components/ShopifyReviews";
 import { fetchShopifyProduct } from "@/lib/shopify";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,8 @@ export default async function ShopifyProductPage({
 
   const allImages = product.images.edges.map((e) => e.node);
   const variants = product.variants.edges.map((e) => e.node);
+  // gid://shopify/Product/10735993815373 → "10735993815373"
+  const numericProductId = product.id.split("/").pop() ?? product.id;
 
   return (
     <AuthProvider>
@@ -47,6 +50,11 @@ export default async function ShopifyProductPage({
                 description={product.description}
                 allImages={allImages}
                 variants={variants}
+              />
+
+              <ShopifyReviews
+                numericProductId={numericProductId}
+                productTitle={product.title}
               />
 
             </div>

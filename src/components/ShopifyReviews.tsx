@@ -1,0 +1,278 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { databases, isAppwriteConfigured } from "@/lib/appwrite";
+import { ID } from "appwrite";
+import { Star, Loader2, Send, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+
+const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
+const REVIEWS_COL_ID = "reviews";
+
+interface Review {
+  id: number | string;
+  author: string;
+  rating: number;
+  title: string;
+  body: string;
+  createdAt: string;
+  pictures: string[];
+}
+
+function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
+  return (
+    <span className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          size={size}
+          className={i <= Math.round(rating) ? "text-amber-400 fill-amber-400" : "text-neutral-200 fill-neutral-200"}
+          strokeWidth={0}
+        />
+      ))}
+    </span>
+  );
+}
+
+interface Props {
+  numericProductId: string;
+  productTitle: string;
+}
+
+export default function ShopifyReviews({ numericProductId, productTitle }: Props) {
+  const { language } = useLanguage();
+  const isPt = language === "pt";
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [rating, setRating] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+
+  // Form state
+  const [form, setForm] = useState({ name: "", rating: 5, comment: "" });
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+
+  useEffect(() => {
+    fetch(`/api/shopify/reviews?productId=${numericProductId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setReviews(data.reviews ?? []);
+        setRating(data.rating ?? 0);
+        setTotal(data.total ?? 0);
+      })
+      .finally(() => setIsLoading(false));
+  }, [numericProductId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.comment.trim()) return;
+    setIsSending(true);
+    try {
+      if (isAppwriteConfigured()) {
+        await databases.createDocument(DB_ID, REVIEWS_COL_ID, ID.unique(), {
+          productId: numericProductId,
+          customerName: form.name.trim(),
+          rating: form.rating,
+          comment: form.comment.trim(),
+          approved: false,
+        });
+      }
+      setSent(true);
+      setShowForm(false);
+      setForm({ name: "", rating: 5, comment: "" });
+    } catch {
+      // silently fail — review still submitted to Appwrite if configured
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <section className="mt-20 border-t border-neutral-100 pt-16">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h2 className="font-serif-premium text-2xl text-neutral-900 font-light tracking-wide mb-2">
+            {isPt ? "Avaliações dos Clientes" : "Recensioni Clienti"}
+          </h2>
+          {!isLoading && total > 0 && (
+            <div className="flex items-center gap-3">
+              <Stars rating={rating} size={16} />
+              <span className="font-sans-premium text-sm font-semibold text-neutral-800">{rating.toFixed(1)}</span>
+              <span className="font-sans-premium text-xs text-neutral-400">
+                {total} {isPt ? "avaliação(ões)" : total === 1 ? "recensione" : "recensioni"}
+              </span>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => { setShowForm(!showForm); setSent(false); }}
+          className="px-5 py-2.5 border border-[#C8A97E] text-[#C8A97E] font-sans-premium text-xs tracking-widest uppercase hover:bg-[#C8A97E] hover:text-white transition-all duration-200 rounded-xl"
+        >
+          {isPt ? "Avaliar produto" : "Scrivi una recensione"}
+        </button>
+      </div>
+
+      {/* Thank-you message */}
+      {sent && (
+        <div className="flex items-center gap-3 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl px-5 py-4 mb-8 font-sans-premium text-sm">
+          <CheckCircle size={18} />
+          {isPt
+            ? "Obrigado! Sua avaliação será publicada após revisão."
+            : "Grazie! La tua recensione sarà pubblicata dopo revisione."}
+        </div>
+      )}
+
+      {/* Review form */}
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-[#F8F5F2] rounded-2xl p-6 mb-10 border border-[#C8A97E]/10">
+          <h3 className="font-serif-premium text-lg text-neutral-800 font-light mb-5">
+            {isPt ? `Avaliar: ${productTitle}` : `Recensire: ${productTitle}`}
+          </h3>
+
+          {/* Star picker */}
+          <div className="mb-4">
+            <label className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 block mb-2">
+              {isPt ? "Sua nota" : "Il tuo voto"}
+            </label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onMouseEnter={() => setHoverRating(i)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  onClick={() => setForm({ ...form, rating: i })}
+                >
+                  <Star
+                    size={28}
+                    className={i <= (hoverRating || form.rating)
+                      ? "text-amber-400 fill-amber-400"
+                      : "text-neutral-300 fill-neutral-100"}
+                    strokeWidth={0.5}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 block mb-2">
+              {isPt ? "Seu nome" : "Il tuo nome"} *
+            </label>
+            <input
+              required
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full border border-neutral-200 focus:border-[#C8A97E] outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl bg-white"
+              placeholder={isPt ? "Ex: Maria S." : "Es: Maria S."}
+            />
+          </div>
+
+          <div className="mb-5">
+            <label className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 block mb-2">
+              {isPt ? "Comentário" : "Commento"} *
+            </label>
+            <textarea
+              required
+              rows={4}
+              value={form.comment}
+              onChange={(e) => setForm({ ...form, comment: e.target.value })}
+              className="w-full border border-neutral-200 focus:border-[#C8A97E] outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl resize-none bg-white"
+              placeholder={isPt ? "Conte sua experiência com o produto…" : "Racconta la tua esperienza con il prodotto…"}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="px-5 py-2.5 text-sm text-neutral-500 hover:text-neutral-700 font-sans-premium"
+            >
+              {isPt ? "Cancelar" : "Annulla"}
+            </button>
+            <button
+              type="submit"
+              disabled={isSending}
+              className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-[#C8A97E] text-white font-sans-premium text-xs tracking-widest uppercase transition-colors duration-300 rounded-xl disabled:opacity-60"
+            >
+              {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              {isPt ? "Enviar" : "Invia"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Reviews list */}
+      {isLoading && (
+        <div className="flex justify-center py-12">
+          <Loader2 size={24} className="animate-spin text-[#C8A97E]" />
+        </div>
+      )}
+
+      {!isLoading && reviews.length === 0 && (
+        <p className="font-sans-premium text-sm text-neutral-400 text-center py-10">
+          {isPt ? "Sem avaliações ainda. Seja o primeiro a avaliar!" : "Nessuna recensione ancora. Sii il primo a recensire!"}
+        </p>
+      )}
+
+      {!isLoading && reviews.length > 0 && (
+        <div className="space-y-8">
+          {reviews.map((r) => (
+            <div key={r.id} className="border-b border-neutral-100 pb-8 last:border-0">
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <div>
+                  <Stars rating={r.rating} />
+                  <p className="font-sans-premium text-sm font-semibold text-neutral-800 mt-1">{r.author}</p>
+                  {r.title && (
+                    <p className="font-serif-premium text-sm text-neutral-700 italic mt-0.5">{r.title}</p>
+                  )}
+                </div>
+                {r.createdAt && (
+                  <span className="font-sans-premium text-[10px] text-neutral-400 shrink-0">
+                    {new Date(r.createdAt).toLocaleDateString(isPt ? "pt-BR" : "it-IT", { day: "numeric", month: "long", year: "numeric" })}
+                  </span>
+                )}
+              </div>
+
+              {r.body && (
+                <p className="font-sans-premium text-sm text-neutral-600 leading-relaxed mt-2">{r.body}</p>
+              )}
+
+              {r.pictures.length > 0 && (
+                <div className="flex gap-2 mt-4 flex-wrap">
+                  {r.pictures.filter(Boolean).map((url, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={url}
+                      alt=""
+                      onClick={() => setSelectedPhoto(url)}
+                      className="w-16 h-16 object-cover rounded-xl cursor-pointer hover:opacity-80 transition-opacity border border-neutral-100"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Photo lightbox */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={selectedPhoto} alt="" className="max-w-lg max-h-[80vh] object-contain rounded-2xl shadow-2xl" />
+        </div>
+      )}
+    </section>
+  );
+}
