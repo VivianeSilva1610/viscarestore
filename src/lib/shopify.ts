@@ -186,6 +186,65 @@ export async function createShopifyCart(
   return checkoutUrl ? { checkoutUrl } : null;
 }
 
+export interface ShopifySearchResult {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  featuredImage: ShopifyImage | null;
+  priceRange: { minVariantPrice: ShopifyMoney };
+  collections: { edges: Array<{ node: { title: string; handle: string } }> };
+  variants: { edges: Array<{ node: { id: string } }> };
+}
+
+const SEARCH_QUERY = `
+  query SearchProducts($query: String!, $language: LanguageCode!)
+  @inContext(language: $language) {
+    search(query: $query, types: PRODUCT, first: 24) {
+      edges {
+        node {
+          ... on Product {
+            id
+            handle
+            title
+            description
+            featuredImage { url altText }
+            priceRange { minVariantPrice { amount currencyCode } }
+            collections(first: 3) {
+              edges { node { title handle } }
+            }
+            variants(first: 1) {
+              edges { node { id } }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function searchShopifyProducts(
+  query: string,
+  locale = "it"
+): Promise<ShopifySearchResult[]> {
+  if (!STOREFRONT_TOKEN || !query) return [];
+  const language = SHOPIFY_LANG[locale] ?? "IT";
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": STOREFRONT_TOKEN,
+    },
+    body: JSON.stringify({ query: SEARCH_QUERY, variables: { query, language } }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return [];
+  const json = await res.json();
+  return (json.data?.search?.edges ?? []).map((e: any) => e.node);
+}
+
 export async function fetchShopifyCollection(
   handle: string,
   locale = "it"

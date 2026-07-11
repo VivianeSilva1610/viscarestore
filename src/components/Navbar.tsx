@@ -72,7 +72,7 @@ export default function Navbar() {
     setIsSearchOpen(false);
     setSearchQuery("");
     if (q) {
-      router.push(`/?q=${encodeURIComponent(q)}#products-section`);
+      router.push(`/busca?q=${encodeURIComponent(q)}`);
     }
   };
 
