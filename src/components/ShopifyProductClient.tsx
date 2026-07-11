@@ -1,0 +1,186 @@
+"use client";
+
+import React, { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface ShopifyImage {
+  url: string;
+  altText: string | null;
+}
+
+interface Variant {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  price: { amount: string; currencyCode: string };
+  image: ShopifyImage | null;
+}
+
+interface Props {
+  productId: string;
+  title: string;
+  description: string;
+  allImages: ShopifyImage[];
+  variants: Variant[];
+}
+
+export default function ShopifyProductClient({ productId, title, description, allImages, variants }: Props) {
+  const firstAvailable = variants.find((v) => v.availableForSale) ?? variants[0];
+  const [selected, setSelected] = useState<Variant>(firstAvailable);
+
+  // imagem principal: imagem da variante (se tiver) ou primeira do produto
+  const mainImage = selected.image ?? allImages[0] ?? null;
+  // miniaturas: todas as imagens do produto (a variante selecionada fica em destaque)
+  const thumbnails = allImages.length > 0 ? allImages : (selected.image ? [selected.image] : []);
+
+  const { addToCart } = useCart();
+  const { language } = useLanguage();
+  const isPt = language === "pt";
+
+  const price = parseFloat(selected.price.amount);
+  const formattedPrice = new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: selected.price.currencyCode,
+  }).format(price);
+
+  const handleAdd = () => {
+    addToCart({
+      id: productId,
+      name: variants.length > 1 ? `${title} — ${selected.title}` : title,
+      price,
+      weight_kg: 0.5,
+      image: mainImage?.url ?? "",
+      category: "shopify",
+      description,
+      source: "shopify",
+      shopifyVariantId: selected.id,
+    });
+  };
+
+  const handleVariantClick = (v: Variant) => {
+    if (!v.availableForSale) return;
+    setSelected(v);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+      {/* Galeria */}
+      <div>
+        <div className="relative aspect-[3/4] bg-[#F1E7E2] rounded-2xl overflow-hidden border border-[#C8A97E]/10">
+          {mainImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={mainImage.url}
+              alt={mainImage.altText ?? title}
+              className="w-full h-full object-cover transition-opacity duration-300"
+              key={mainImage.url}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="font-serif-premium text-neutral-300 text-6xl italic">V</span>
+            </div>
+          )}
+
+          {!selected.availableForSale && (
+            <span className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-[9px] font-sans-premium tracking-widest text-white uppercase px-2.5 py-1 rounded-full font-bold">
+              {isPt ? "Esgotado" : "Esaurito"}
+            </span>
+          )}
+        </div>
+
+        {/* Miniaturas */}
+        {thumbnails.length > 1 && (
+          <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
+            {thumbnails.map((img, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={img.url}
+                alt={img.altText ?? `${title} ${i + 1}`}
+                className="w-16 h-20 object-cover rounded-xl border border-neutral-200 flex-shrink-0 cursor-pointer hover:border-[#C8A97E] transition-colors"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Painel de informações */}
+      <div className="flex flex-col">
+        <span className="font-sans-premium text-[10px] tracking-[0.25em] text-dourado-suave font-semibold uppercase block mb-2">
+          {isPt ? "Catálogo Shopify" : "Catalogo Shopify"}
+        </span>
+
+        <h1 className="font-serif-premium text-3xl sm:text-4xl text-neutral-900 tracking-wide font-light mb-5">
+          {title}
+        </h1>
+
+        {/* Preço da variante selecionada */}
+        <p className="font-sans-premium text-2xl font-semibold tracking-widest text-neutral-900 mb-6 border-b border-neutral-100 pb-5">
+          {formattedPrice}
+        </p>
+
+        {description && (
+          <p className="font-sans-premium text-sm text-neutral-600 leading-relaxed font-light tracking-wide mb-8">
+            {description}
+          </p>
+        )}
+
+        {/* Seletor de variantes */}
+        {variants.length > 1 && (
+          <div className="mb-6">
+            <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-1">
+              {isPt ? "Variante selecionada:" : "Variante selezionata:"}
+            </span>
+            <span className="font-sans-premium text-xs text-neutral-800 font-semibold block mb-3">
+              {selected.title}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {variants.map((v) => {
+                const isSelected = v.id === selected.id;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => handleVariantClick(v)}
+                    disabled={!v.availableForSale}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-sans-premium border transition-all duration-200 ${
+                      isSelected
+                        ? "border-[#C8A97E] bg-[#C8A97E]/10 text-[#8B6E4E] font-semibold"
+                        : v.availableForSale
+                        ? "border-neutral-300 text-neutral-700 hover:border-[#C8A97E]/60 hover:bg-[#F8F5F2]"
+                        : "border-neutral-100 text-neutral-300 line-through cursor-not-allowed"
+                    }`}
+                  >
+                    {v.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Botão */}
+        <div className="mt-auto pt-4 border-t border-neutral-100">
+          {selected.availableForSale ? (
+            <button
+              onClick={handleAdd}
+              className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-[0.2em] uppercase hover:bg-[#C8A97E] transition-colors duration-300 rounded-xl font-semibold"
+            >
+              {isPt ? "Adicionar à Sacola" : "Aggiungi alla Borsa"}
+            </button>
+          ) : (
+            <div className="w-full py-4 bg-neutral-200 text-neutral-400 font-sans-premium text-xs tracking-widest uppercase text-center rounded-xl">
+              {isPt ? "Variante Esgotada" : "Variante Esaurita"}
+            </div>
+          )}
+        </div>
+
+        <p className="font-sans-premium text-[9px] text-neutral-400 mt-4 text-center tracking-wide">
+          {isPt
+            ? "O checkout será processado com segurança pelo Shopify."
+            : "Il checkout verrà elaborato in modo sicuro da Shopify."}
+        </p>
+      </div>
+    </div>
+  );
+}

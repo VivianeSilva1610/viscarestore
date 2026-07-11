@@ -84,7 +84,13 @@ export interface ShopifyProductDetail extends ShopifyProduct {
   images: { edges: Array<{ node: ShopifyImage }> };
   variants: {
     edges: Array<{
-      node: { id: string; title: string; availableForSale: boolean; price: ShopifyMoney };
+      node: {
+        id: string;
+        title: string;
+        availableForSale: boolean;
+        price: ShopifyMoney;
+        image: ShopifyImage | null;
+      };
     }>;
   };
 }
@@ -112,6 +118,7 @@ const PRODUCT_QUERY = `
             title
             availableForSale
             price { amount currencyCode }
+            image { url altText }
           }
         }
       }
