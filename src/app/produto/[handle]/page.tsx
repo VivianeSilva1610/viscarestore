@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
-import ShopifyAddToCartButton from "@/components/ShopifyAddToCartButton";
+import ShopifyVariantSelector from "@/components/ShopifyVariantSelector";
 import { fetchShopifyProduct } from "@/lib/shopify";
 
 export const dynamic = "force-dynamic";
@@ -22,13 +22,6 @@ export default async function ShopifyProductPage({
 
   const product = await fetchShopifyProduct(handle, locale);
   if (!product) notFound();
-
-  const { amount, currencyCode } = product.priceRange.minVariantPrice;
-  const price = parseFloat(amount);
-  const formattedPrice = new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: currencyCode,
-  }).format(price);
 
   const images = product.images.edges.map((e) => e.node);
   const mainImage = images[0] ?? product.featuredImage;
@@ -103,61 +96,19 @@ export default async function ShopifyProductPage({
                     {product.title}
                   </h1>
 
-                  <p className="font-sans-premium text-2xl font-semibold tracking-widest text-neutral-900 mb-6 border-b border-neutral-100 pb-5">
-                    {formattedPrice}
-                  </p>
-
                   {product.description && (
                     <p className="font-sans-premium text-sm text-neutral-600 leading-relaxed font-light tracking-wide mb-8">
                       {product.description}
                     </p>
                   )}
 
-                  {/* Variants */}
-                  {product.variants.edges.length > 1 && (
-                    <div className="mb-6">
-                      <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-3">
-                        {isPt ? "Variantes disponíveis:" : "Varianti disponibili:"}
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {product.variants.edges.map(({ node: v }) => (
-                          <span
-                            key={v.id}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-sans-premium border ${
-                              v.availableForSale
-                                ? "border-neutral-300 text-neutral-700"
-                                : "border-neutral-100 text-neutral-300 line-through"
-                            }`}
-                          >
-                            {v.title}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-auto pt-4 border-t border-neutral-100">
-                    {available && firstVariant ? (
-                      <ShopifyAddToCartButton
-                        productId={product.id}
-                        title={product.title}
-                        description={product.description}
-                        price={price}
-                        image={mainImage?.url ?? ""}
-                        variantGid={firstVariant.id}
-                      />
-                    ) : (
-                      <div className="w-full py-4 bg-neutral-200 text-neutral-400 font-sans-premium text-xs tracking-widest uppercase text-center rounded-xl">
-                        {isPt ? "Produto Esgotado" : "Prodotto Esaurito"}
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="font-sans-premium text-[9px] text-neutral-400 mt-4 text-center tracking-wide">
-                    {isPt
-                      ? "O checkout será processado com segurança pelo Shopify."
-                      : "Il checkout verrà elaborato in modo sicuro da Shopify."}
-                  </p>
+                  <ShopifyVariantSelector
+                    productId={product.id}
+                    title={product.title}
+                    description={product.description}
+                    image={mainImage?.url ?? ""}
+                    variants={product.variants.edges.map((e) => e.node)}
+                  />
                 </div>
               </div>
 
