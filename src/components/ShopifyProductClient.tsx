@@ -1,8 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { translateTexts } from "@/lib/translate";
+
+// Extracts the block matching [PT], [IT] or [EN] markers from a multi-language description.
+// Returns null if no markers are found (caller should fall back to translation).
+function extractLanguageSection(text: string, lang: string): string | null {
+  const marker = `[${lang.toUpperCase()}]`;
+  const allMarkers = ["[PT]", "[IT]", "[EN]"];
+  if (!allMarkers.some((m) => text.includes(m))) return null;
+  const idx = text.indexOf(marker);
+  if (idx === -1) return null;
+  const start = idx + marker.length;
+  const others = allMarkers.filter((m) => m !== marker);
+  let end = text.length;
+  for (const m of others) {
+    const i = text.indexOf(m, start);
+    if (i !== -1 && i < end) end = i;
+  }
+  return text.slice(start, end).trim();
+}
 
 interface ShopifyImage {
   url: string;
@@ -46,6 +65,19 @@ export default function ShopifyProductClient({ productId, title, description, fe
   const { addToCart } = useCart();
   const { language } = useLanguage();
   const isPt = language === "pt";
+
+  const [displayDesc, setDisplayDesc] = useState<string>(description);
+
+  useEffect(() => {
+    if (!description) return;
+    const section = extractLanguageSection(description, language);
+    if (section) {
+      setDisplayDesc(section);
+      return;
+    }
+    // No markers: translate the full text to the current language
+    translateTexts([description], language).then(([t]) => setDisplayDesc(t ?? description));
+  }, [description, language]);
 
   const price = parseFloat(selected.price.amount);
   const formattedPrice = new Intl.NumberFormat("it-IT", {
@@ -136,9 +168,9 @@ export default function ShopifyProductClient({ productId, title, description, fe
           {formattedPrice}
         </p>
 
-        {description && (
-          <p className="font-sans-premium text-sm text-neutral-600 leading-relaxed font-light tracking-wide mb-8">
-            {description}
+        {displayDesc && (
+          <p className="font-sans-premium text-sm text-neutral-600 leading-relaxed font-light tracking-wide mb-8 whitespace-pre-line">
+            {displayDesc}
           </p>
         )}
 
