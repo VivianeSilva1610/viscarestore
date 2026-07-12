@@ -18,7 +18,7 @@ export default function Categories() {
       description: t.items.perfumes.description,
       details: t.items.perfumes.details,
       image: "/images/cat-perfumes.png",
-      link: "#perfumes",
+      link: "/profumi",
       gridClass: "lg:col-span-8 lg:row-span-1 h-[450px] lg:h-[500px]",
     },
     {
@@ -43,15 +43,14 @@ export default function Categories() {
     },
   ];
 
-  const handleExplore = (e: React.MouseEvent<HTMLAnchorElement>, categoryId: string) => {
+  const handleExplore = (e: React.MouseEvent<HTMLAnchorElement>, link: string, categoryId: string) => {
+    if (!link.startsWith("#")) return; // let the browser navigate normally
     e.preventDefault();
     window.dispatchEvent(new CustomEvent('changeCategory', { detail: categoryId }));
-    
-    // Slight delay to allow state update before scrolling, for smoother UX
     setTimeout(() => {
       const section = document.getElementById('products-section');
       if (section) {
-        const yOffset = -80; 
+        const yOffset = -80;
         const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
@@ -118,7 +117,7 @@ export default function Categories() {
                   
                   <a
                     href={cat.link}
-                    onClick={(e) => handleExplore(e, cat.id)}
+                    onClick={(e) => handleExplore(e, cat.link, cat.id)}
                     className="font-sans-premium text-[10px] tracking-[0.2em] uppercase text-dourado-suave hover:text-white font-medium inline-flex items-center space-x-1.5 transition-colors duration-300 self-start sm:self-auto"
                   >
                     <span>{t.explorar}</span>
