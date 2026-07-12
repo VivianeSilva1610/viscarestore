@@ -39,13 +39,14 @@ interface Variant {
 interface Props {
   productId: string;
   title: string;
-  description: string;
+  description: string;       // pre-extracted by server for initial locale
+  rawDescription: string;    // full original text, used for client-side language toggle
   featuredImage?: ShopifyImage | null;
   allImages: ShopifyImage[];
   variants: Variant[];
 }
 
-export default function ShopifyProductClient({ productId, title, description, featuredImage, allImages, variants }: Props) {
+export default function ShopifyProductClient({ productId, title, description, rawDescription, featuredImage, allImages, variants }: Props) {
   const firstAvailable = variants.find((v) => v.availableForSale) ?? variants[0];
   const [selected, setSelected] = useState<Variant>(firstAvailable);
 
@@ -68,16 +69,19 @@ export default function ShopifyProductClient({ productId, title, description, fe
 
   const [displayDesc, setDisplayDesc] = useState<string>(description);
 
+  // Re-extract/translate when user switches language on the client
   useEffect(() => {
-    if (!description) return;
-    const section = extractLanguageSection(description, language);
+    const src = rawDescription || description;
+    if (!src) return;
+    const section = extractLanguageSection(src, language);
     if (section) {
       setDisplayDesc(section);
       return;
     }
-    // No markers: translate the full text to the current language
-    translateTexts([description], language).then(([t]) => setDisplayDesc(t ?? description));
-  }, [description, language]);
+    // No markers: translate automatically
+    translateTexts([src], language).then(([t]) => setDisplayDesc(t ?? src));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const price = parseFloat(selected.price.amount);
   const formattedPrice = new Intl.NumberFormat("it-IT", {

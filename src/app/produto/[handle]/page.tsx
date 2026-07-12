@@ -10,6 +10,22 @@ import ShopifyProductClient from "@/components/ShopifyProductClient";
 import ShopifyReviews from "@/components/ShopifyReviews";
 import { fetchShopifyProduct } from "@/lib/shopify";
 
+function extractDescriptionSection(text: string, lang: string): string {
+  const marker = `[${lang.toUpperCase()}]`;
+  const allMarkers = ["[PT]", "[IT]", "[EN]"];
+  if (!allMarkers.some((m) => text.includes(m))) return text;
+  const idx = text.indexOf(marker);
+  if (idx === -1) return text;
+  const start = idx + marker.length;
+  const others = allMarkers.filter((m) => m !== marker);
+  let end = text.length;
+  for (const m of others) {
+    const i = text.indexOf(m, start);
+    if (i !== -1 && i < end) end = i;
+  }
+  return text.slice(start, end).trim();
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function ShopifyProductPage({
@@ -47,7 +63,8 @@ export default async function ShopifyProductPage({
               <ShopifyProductClient
                 productId={product.id}
                 title={product.title}
-                description={product.description}
+                description={extractDescriptionSection(product.description, locale)}
+                rawDescription={product.description}
                 featuredImage={product.featuredImage}
                 allImages={allImages}
                 variants={variants}
