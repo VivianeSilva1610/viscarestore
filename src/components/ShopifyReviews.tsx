@@ -5,6 +5,7 @@ import { databases, isAppwriteConfigured } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 import { Star, Loader2, Send, CheckCircle, ImagePlus, X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { translateTexts } from "@/lib/translate";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
 const REVIEWS_COL_ID = "reviews";
@@ -97,18 +98,33 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
             : [];
 
         const combined = [...judgeReviews, ...appwriteReviews];
-        setReviews(combined);
-        const t = combined.length;
+
+        // Translate review bodies and titles into the current language
+        const bodies = combined.map((r) => r.body);
+        const titles = combined.map((r) => r.title);
+        const [translatedBodies, translatedTitles] = await Promise.all([
+          translateTexts(bodies, language),
+          translateTexts(titles, language),
+        ]);
+        const translated = combined.map((r, i) => ({
+          ...r,
+          body: translatedBodies[i] ?? r.body,
+          title: translatedTitles[i] ?? r.title,
+        }));
+
+        setReviews(translated);
+        const t = translated.length;
         setTotal(t);
         setRating(
-          t > 0 ? Math.round((combined.reduce((s, r) => s + r.rating, 0) / t) * 10) / 10 : 0
+          t > 0 ? Math.round((translated.reduce((s, r) => s + r.rating, 0) / t) * 10) / 10 : 0
         );
       } finally {
         setIsLoading(false);
       }
     };
     loadAll();
-  }, [numericProductId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numericProductId, language]);
 
   // Cleanup object URLs on unmount or when files change
   useEffect(() => {

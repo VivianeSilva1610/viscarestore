@@ -7,6 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { databases, isAppwriteConfigured } from "../lib/appwrite";
 import { ID, Query } from "appwrite";
 import { Star, Plus, Loader2, Truck, MessageSquare, Play, ImagePlus, X } from "lucide-react";
+import { translateTexts } from "../lib/translate";
 import CurationCriteria from "./CurationCriteria";
 import SecurityBadges from "./SecurityBadges";
 import { getEstimatedDeliveryDate, formatDeliveryDate } from "../lib/delivery";
@@ -112,7 +113,10 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
           Query.orderDesc("$createdAt"),
           Query.limit(50),
         ]);
-        setReviews(res.documents as unknown as Review[]);
+        const docs = res.documents as unknown as Review[];
+        const comments = docs.map((d) => d.comment);
+        const translated = await translateTexts(comments, language);
+        setReviews(docs.map((d, i) => ({ ...d, comment: translated[i] ?? d.comment })));
       } catch (error) {
         console.error("Erro ao buscar avaliações", error);
       } finally {
@@ -120,7 +124,8 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
       }
     };
     fetchReviews();
-  }, [product.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id, language]);
 
   const avgRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
