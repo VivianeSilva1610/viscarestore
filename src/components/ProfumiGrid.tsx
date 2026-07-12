@@ -24,8 +24,8 @@ interface Product {
 
 const TABS = [
   { id: "all",             labelPt: "Todos",           labelIt: "Tutti" },
-  { id: "perfumes",        labelPt: "Perfumes",         labelIt: "Profumi" },
-  { id: "alta-perfumaria", labelPt: "Alta Perfumaria",  labelIt: "Alta Profumeria" },
+  { id: "Perfumes",        labelPt: "Perfumes",         labelIt: "Profumi" },
+  { id: "Alta-perfumaria", labelPt: "Alta Perfumaria",  labelIt: "Alta Profumeria" },
 ];
 
 export default function ProfumiGrid({ products }: { products: Product[] }) {

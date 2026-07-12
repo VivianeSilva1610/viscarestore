@@ -10,7 +10,7 @@ import ProfumiGrid from "@/components/ProfumiGrid";
 
 export const dynamic = "force-dynamic";
 
-const PERFUME_CATEGORIES = ["perfumes", "alta-perfumaria"];
+const PERFUME_CATEGORIES = ["Perfumes", "Alta-perfumaria"];
 
 function imageUrl(imageId: string) {
   return `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${imageId}/view?project=${PROJECT_ID}`;
