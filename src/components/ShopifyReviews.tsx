@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { databases, isAppwriteConfigured } from "@/lib/appwrite";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { databases, storage, isAppwriteConfigured } from "@/lib/appwrite";
 import { ID } from "appwrite";
-import { Star, Loader2, Send, CheckCircle } from "lucide-react";
+import { Star, Loader2, Send, CheckCircle, ImagePlus, X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
+const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://fra.cloud.appwrite.io/v1";
+const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "viscareelojavirtual1610";
 const REVIEWS_COL_ID = "reviews";
+const MAX_PHOTOS = 5;
 
 interface Review {
   id: number | string;
@@ -57,6 +61,12 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
   const [sent, setSent] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
 
+  // Image upload state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     fetch(`/api/shopify/reviews?productId=${numericProductId}&handle=${encodeURIComponent(handle)}`)
       .then((r) => r.json())
@@ -68,11 +78,60 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
       .finally(() => setIsLoading(false));
   }, [numericProductId]);
 
+  // Cleanup object URLs on unmount or when files change
+  useEffect(() => {
+    return () => { previews.forEach((url) => URL.revokeObjectURL(url)); };
+  }, [previews]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS - selectedFiles.length);
+    if (!newFiles.length) return;
+    const combined = [...selectedFiles, ...newFiles].slice(0, MAX_PHOTOS);
+    setSelectedFiles(combined);
+    setPreviews((prev) => {
+      prev.forEach((u) => URL.revokeObjectURL(u));
+      return combined.map((f) => URL.createObjectURL(f));
+    });
+    // Reset input so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [selectedFiles]);
+
+  const removeFile = useCallback((index: number) => {
+    URL.revokeObjectURL(previews[index]);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  }, [previews]);
+
+  const resetForm = () => {
+    setForm({ name: "", rating: 5, comment: "" });
+    setSelectedFiles([]);
+    setPreviews((prev) => { prev.forEach((u) => URL.revokeObjectURL(u)); return []; });
+    setUploadProgress(0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.comment.trim()) return;
     setIsSending(true);
+    setUploadProgress(0);
+
     try {
+      const imageUrls: string[] = [];
+
+      if (selectedFiles.length > 0 && isAppwriteConfigured()) {
+        for (let i = 0; i < selectedFiles.length; i++) {
+          try {
+            const fileId = ID.unique();
+            await storage.createFile(BUCKET_ID, fileId, selectedFiles[i]);
+            const url = `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileId}/view?project=${PROJECT_ID}`;
+            imageUrls.push(url);
+          } catch {
+            // skip failed uploads — review still submits with whatever succeeded
+          }
+          setUploadProgress(Math.round(((i + 1) / selectedFiles.length) * 100));
+        }
+      }
+
       if (isAppwriteConfigured()) {
         await databases.createDocument(DB_ID, REVIEWS_COL_ID, ID.unique(), {
           productId: numericProductId,
@@ -80,13 +139,15 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
           rating: form.rating,
           comment: form.comment.trim(),
           approved: false,
+          ...(imageUrls.length > 0 && { images: imageUrls }),
         });
       }
+
       setSent(true);
       setShowForm(false);
-      setForm({ name: "", rating: 5, comment: "" });
+      resetForm();
     } catch {
-      // silently fail — review still submitted to Appwrite if configured
+      // silently fail
     } finally {
       setIsSending(false);
     }
@@ -189,10 +250,83 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
             />
           </div>
 
+          {/* Image upload */}
+          <div className="mb-6">
+            <label className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 block mb-3">
+              {isPt ? `Fotos (opcional, máx. ${MAX_PHOTOS})` : `Foto (opzionale, max ${MAX_PHOTOS})`}
+            </label>
+
+            {/* Previews grid */}
+            {previews.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-neutral-200 bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute top-0.5 right-0.5 bg-neutral-900/70 hover:bg-neutral-900 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more slot */}
+                {selectedFiles.length < MAX_PHOTOS && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-20 h-20 rounded-xl border-2 border-dashed border-[#C8A97E]/50 hover:border-[#C8A97E] text-[#C8A97E] flex flex-col items-center justify-center gap-1 transition-colors"
+                  >
+                    <ImagePlus size={18} />
+                    <span className="font-sans-premium text-[9px] tracking-wide uppercase">
+                      {isPt ? "Mais" : "Altra"}
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Initial upload button (shown when no files selected) */}
+            {previews.length === 0 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2.5 border-2 border-dashed border-[#C8A97E]/40 hover:border-[#C8A97E] rounded-xl px-5 py-4 text-neutral-500 hover:text-[#C8A97E] transition-colors w-full justify-center"
+              >
+                <ImagePlus size={18} />
+                <span className="font-sans-premium text-xs tracking-widest uppercase">
+                  {isPt ? "Adicionar fotos" : "Aggiungi foto"}
+                </span>
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {/* Upload progress bar */}
+            {isSending && selectedFiles.length > 0 && uploadProgress < 100 && (
+              <div className="mt-2 h-1 bg-neutral-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#C8A97E] transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={() => { setShowForm(false); resetForm(); }}
               className="px-5 py-2.5 text-sm text-neutral-500 hover:text-neutral-700 font-sans-premium"
             >
               {isPt ? "Cancelar" : "Annulla"}
@@ -203,7 +337,9 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
               className="flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-[#C8A97E] text-white font-sans-premium text-xs tracking-widest uppercase transition-colors duration-300 rounded-xl disabled:opacity-60"
             >
               {isSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              {isPt ? "Enviar" : "Invia"}
+              {isSending
+                ? (isPt ? "Enviando…" : "Invio…")
+                : (isPt ? "Enviar" : "Invia")}
             </button>
           </div>
         </form>
