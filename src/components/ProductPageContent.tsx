@@ -1,18 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { databases, isAppwriteConfigured } from "../lib/appwrite";
+import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { ID, Query } from "appwrite";
-import { Star, Plus, Loader2, Truck, MessageSquare, Play } from "lucide-react";
+import { Star, Plus, Loader2, Truck, MessageSquare, Play, ImagePlus, X } from "lucide-react";
 import CurationCriteria from "./CurationCriteria";
 import SecurityBadges from "./SecurityBadges";
 import { getEstimatedDeliveryDate, formatDeliveryDate } from "../lib/delivery";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
+const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
+const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://fra.cloud.appwrite.io/v1";
+const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "viscareelojavirtual1610";
 const REVIEWS_COL_ID = "reviews";
+const MAX_PHOTOS = 5;
 
 export interface ProductPageProduct {
   id: string;
@@ -69,6 +73,34 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  // Image upload
+  const [reviewFiles, setReviewFiles] = useState<File[]>([]);
+  const [reviewPreviews, setReviewPreviews] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => { reviewPreviews.forEach((u) => URL.revokeObjectURL(u)); };
+  }, [reviewPreviews]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS - reviewFiles.length);
+    if (!newFiles.length) return;
+    const combined = [...reviewFiles, ...newFiles].slice(0, MAX_PHOTOS);
+    setReviewFiles(combined);
+    setReviewPreviews((prev) => {
+      prev.forEach((u) => URL.revokeObjectURL(u));
+      return combined.map((f) => URL.createObjectURL(f));
+    });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [reviewFiles]);
+
+  const removeFile = useCallback((index: number) => {
+    URL.revokeObjectURL(reviewPreviews[index]);
+    setReviewFiles((prev) => prev.filter((_, i) => i !== index));
+    setReviewPreviews((prev) => prev.filter((_, i) => i !== index));
+  }, [reviewPreviews]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -149,18 +181,33 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
     e.preventDefault();
     if (!reviewName.trim() || !reviewComment.trim()) return;
     setIsSubmittingReview(true);
+    setUploadProgress(0);
     try {
+      const imageUrls: string[] = [];
+      if (reviewFiles.length > 0 && isAppwriteConfigured()) {
+        for (let i = 0; i < reviewFiles.length; i++) {
+          try {
+            const fileId = ID.unique();
+            await storage.createFile(BUCKET_ID, fileId, reviewFiles[i]);
+            imageUrls.push(`${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileId}/view?project=${PROJECT_ID}`);
+          } catch { /* skip failed upload */ }
+          setUploadProgress(Math.round(((i + 1) / reviewFiles.length) * 100));
+        }
+      }
       await databases.createDocument(DB_ID, REVIEWS_COL_ID, ID.unique(), {
         productId: product.id,
         customerName: reviewName.trim(),
         rating: reviewRating,
         comment: reviewComment.trim(),
         approved: false,
+        ...(imageUrls.length > 0 && { images: imageUrls }),
       });
       setReviewSubmitted(true);
       setReviewName("");
       setReviewComment("");
       setReviewRating(5);
+      setReviewFiles([]);
+      setReviewPreviews((prev) => { prev.forEach((u) => URL.revokeObjectURL(u)); return []; });
     } catch (error) {
       console.error("Erro ao enviar avaliação", error);
       alert(isPt ? "Erro ao enviar sua avaliação. Tente novamente." : "Errore nell'invio della recensione.");
@@ -406,6 +453,49 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
                   placeholder={isPt ? "Conte sua experiência com o produto..." : "Racconta la tua esperienza..."}
                   className="w-full bg-white border border-neutral-200 focus:border-dourado-suave focus:outline-none px-4 py-3 text-sm rounded-xl transition-colors resize-none"
                 />
+
+                {/* Image upload */}
+                <div>
+                  <p className="font-sans-premium text-[10px] tracking-widest uppercase text-neutral-500 mb-2">
+                    {isPt ? `Fotos (opcional, máx. ${MAX_PHOTOS})` : `Foto (opzionale, max ${MAX_PHOTOS})`}
+                  </p>
+                  {reviewPreviews.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {reviewPreviews.map((src, i) => (
+                        <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-neutral-200 bg-white">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="" className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => removeFile(i)}
+                            className="absolute top-0.5 right-0.5 bg-neutral-900/70 hover:bg-neutral-900 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
+                      {reviewFiles.length < MAX_PHOTOS && (
+                        <button type="button" onClick={() => fileInputRef.current?.click()}
+                          className="w-16 h-16 rounded-xl border-2 border-dashed border-dourado-suave/50 hover:border-dourado-suave text-dourado-suave flex flex-col items-center justify-center gap-0.5 transition-colors">
+                          <ImagePlus size={16} />
+                          <span className="font-sans-premium text-[8px] uppercase">{isPt ? "Mais" : "Altra"}</span>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 border-2 border-dashed border-dourado-suave/40 hover:border-dourado-suave rounded-xl px-4 py-3 text-neutral-500 hover:text-dourado-suave transition-colors w-full justify-center">
+                      <ImagePlus size={16} />
+                      <span className="font-sans-premium text-xs tracking-widest uppercase">
+                        {isPt ? "Adicionar fotos" : "Aggiungi foto"}
+                      </span>
+                    </button>
+                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
+                  {isSubmittingReview && reviewFiles.length > 0 && uploadProgress < 100 && (
+                    <div className="mt-2 h-1 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-dourado-suave transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   disabled={isSubmittingReview}
