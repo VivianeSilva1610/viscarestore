@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { databases, storage, isAppwriteConfigured } from "@/lib/appwrite";
-import { ID } from "appwrite";
+import { ID, Query } from "appwrite";
 import { Star, Loader2, Send, CheckCircle, ImagePlus, X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -68,14 +68,49 @@ export default function ShopifyReviews({ numericProductId, handle, productTitle 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch(`/api/shopify/reviews?productId=${numericProductId}&handle=${encodeURIComponent(handle)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setReviews(data.reviews ?? []);
-        setRating(data.rating ?? 0);
-        setTotal(data.total ?? 0);
-      })
-      .finally(() => setIsLoading(false));
+    const loadAll = async () => {
+      try {
+        // Fetch Judge.me reviews and Appwrite approved reviews in parallel
+        const [judgeRes, appwriteDocs] = await Promise.allSettled([
+          fetch(`/api/shopify/reviews?productId=${numericProductId}&handle=${encodeURIComponent(handle)}`).then((r) => r.json()),
+          isAppwriteConfigured()
+            ? databases.listDocuments(DB_ID, REVIEWS_COL_ID, [
+                Query.equal("productId", numericProductId),
+                Query.equal("approved", true),
+                Query.orderDesc("$createdAt"),
+                Query.limit(50),
+              ])
+            : Promise.resolve({ documents: [] }),
+        ]);
+
+        const judgeReviews: Review[] =
+          judgeRes.status === "fulfilled" ? (judgeRes.value.reviews ?? []) : [];
+
+        const appwriteReviews: Review[] =
+          appwriteDocs.status === "fulfilled"
+            ? appwriteDocs.value.documents.map((d: any) => ({
+                id: d.$id,
+                author: d.customerName,
+                rating: d.rating,
+                title: "",
+                body: d.comment,
+                createdAt: d.$createdAt,
+                pictures: Array.isArray(d.images) ? d.images.filter(Boolean) : [],
+              }))
+            : [];
+
+        const combined = [...judgeReviews, ...appwriteReviews];
+        setReviews(combined);
+        const t = combined.length;
+        setTotal(t);
+        setRating(
+          t > 0 ? Math.round((combined.reduce((s, r) => s + r.rating, 0) / t) * 10) / 10 : 0
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadAll();
   }, [numericProductId]);
 
   // Cleanup object URLs on unmount or when files change
