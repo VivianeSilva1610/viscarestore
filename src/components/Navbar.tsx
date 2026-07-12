@@ -53,7 +53,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: t.novidades, href: "/#products-section", categoryId: "todos" },
-    { name: t.perfumes, href: "/?category=perfumes#products-section", categoryId: "perfumes" },
+    { name: t.perfumes, href: "/profumi" },
     { name: t.skincare, href: "/collezione" },
     { name: t.vestidos, href: "/abiti" },
     { name: t.acessorios, href: "/acessori" },
