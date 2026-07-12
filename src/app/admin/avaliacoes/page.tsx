@@ -16,6 +16,7 @@ interface ReviewDoc {
   comment: string;
   approved: boolean;
   $createdAt: string;
+  images?: string[];
 }
 
 export default function AdminAvaliacoesPage() {
@@ -155,6 +156,16 @@ export default function AdminAvaliacoesPage() {
                   </span>
                 </div>
                 <p className="text-sm text-neutral-600 leading-relaxed">{review.comment}</p>
+                {review.images && review.images.length > 0 && (
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    {review.images.filter(Boolean).map((url, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                        <img src={url} alt="" className="w-14 h-14 object-cover rounded-xl border border-neutral-200 hover:opacity-80 transition-opacity" />
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <p className="text-[10px] text-neutral-400 mt-2">
                   {new Date(review.$createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>

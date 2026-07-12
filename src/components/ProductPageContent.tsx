@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
-import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
+import { databases, isAppwriteConfigured } from "../lib/appwrite";
 import { ID, Query } from "appwrite";
 import { Star, Plus, Loader2, Truck, MessageSquare, Play, ImagePlus, X } from "lucide-react";
 import CurationCriteria from "./CurationCriteria";
@@ -12,9 +12,6 @@ import SecurityBadges from "./SecurityBadges";
 import { getEstimatedDeliveryDate, formatDeliveryDate } from "../lib/delivery";
 
 const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
-const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "6a391020001d02651b57";
-const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://fra.cloud.appwrite.io/v1";
-const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "viscareelojavirtual1610";
 const REVIEWS_COL_ID = "reviews";
 const MAX_PHOTOS = 5;
 
@@ -184,15 +181,16 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
     setUploadProgress(0);
     try {
       const imageUrls: string[] = [];
-      if (reviewFiles.length > 0 && isAppwriteConfigured()) {
-        for (let i = 0; i < reviewFiles.length; i++) {
-          try {
-            const fileId = ID.unique();
-            await storage.createFile(BUCKET_ID, fileId, reviewFiles[i]);
-            imageUrls.push(`${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileId}/view?project=${PROJECT_ID}`);
-          } catch { /* skip failed upload */ }
-          setUploadProgress(Math.round(((i + 1) / reviewFiles.length) * 100));
-        }
+      if (reviewFiles.length > 0) {
+        setUploadProgress(10);
+        const fd = new FormData();
+        reviewFiles.forEach((f) => fd.append("files", f));
+        try {
+          const res = await fetch("/api/reviews/upload", { method: "POST", body: fd });
+          const data = await res.json();
+          if (data.urls) imageUrls.push(...data.urls);
+        } catch { /* skip on upload failure */ }
+        setUploadProgress(90);
       }
       await databases.createDocument(DB_ID, REVIEWS_COL_ID, ID.unique(), {
         productId: product.id,
