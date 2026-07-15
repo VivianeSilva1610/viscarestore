@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ID, InputFile } from "node-appwrite";
+import { ID, InputFile, Permission, Role } from "node-appwrite";
 import { adminStorage, BUCKET_ID, ENDPOINT, PROJECT_ID } from "@/lib/appwrite-admin";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const inputFile = InputFile.fromBuffer(buffer, file.name || "image.jpg");
       const fileId = ID.unique();
-      await adminStorage.createFile(BUCKET_ID, fileId, inputFile);
+      await adminStorage.createFile(BUCKET_ID, fileId, inputFile, [
+        Permission.read(Role.any()),
+      ]);
       urls.push(`${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileId}/view?project=${PROJECT_ID}`);
     }
 
