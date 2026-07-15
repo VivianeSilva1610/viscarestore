@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ID, InputFile, Permission, Role } from "node-appwrite";
+import { ID, Permission, Role } from "node-appwrite";
+import { InputFile } from "node-appwrite/dist/inputFile";
 import { adminStorage, BUCKET_ID, ENDPOINT, PROJECT_ID } from "@/lib/appwrite-admin";
 
 export const dynamic = "force-dynamic";
