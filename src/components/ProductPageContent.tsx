@@ -42,6 +42,7 @@ interface Review {
   rating: number;
   comment: string;
   $createdAt: string;
+  images?: string[];
 }
 
 export default function ProductPageContent({ product }: { product: ProductPageProduct }) {
@@ -190,11 +191,10 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
         setUploadProgress(10);
         const fd = new FormData();
         reviewFiles.forEach((f) => fd.append("files", f));
-        try {
-          const res = await fetch("/api/reviews/upload", { method: "POST", body: fd });
-          const data = await res.json();
-          if (data.urls) imageUrls.push(...data.urls);
-        } catch { /* skip on upload failure */ }
+        const res = await fetch("/api/reviews/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (data.urls) imageUrls.push(...data.urls);
+        else console.error("[review upload]", data.error);
         setUploadProgress(90);
       }
       await databases.createDocument(DB_ID, REVIEWS_COL_ID, ID.unique(), {
@@ -412,6 +412,16 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
                     </div>
                   </div>
                   <p className="text-xs text-neutral-600 leading-relaxed">{review.comment}</p>
+                  {review.images && review.images.length > 0 && (
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      {review.images.filter(Boolean).map((url, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                          <img src={url} alt="" className="w-14 h-14 object-cover rounded-xl border border-neutral-100 hover:opacity-80 transition-opacity cursor-pointer" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             )}

@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ urls });
   } catch (e: any) {
+    console.error("[reviews/upload] erro:", e?.message, e?.response);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
