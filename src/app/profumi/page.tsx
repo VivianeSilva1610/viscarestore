@@ -31,7 +31,7 @@ export default async function ProfumiPage() {
         name_it: doc.name_it || "",
         category: doc.category || "",
         price: doc.price || 0,
-        image: doc.image ? imageUrl(doc.image) : "",
+        image: doc.image_id ? imageUrl(doc.image_id) : "",
         description_pt: doc.description_pt || "",
         description_it: doc.description_it || "",
         sizes: doc.sizes || [],
