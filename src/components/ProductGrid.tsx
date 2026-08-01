@@ -21,6 +21,7 @@ interface Product {
   name_it: string;
   category: string;
   price: number;
+  price_brl?: number;
   weight_kg?: number;
   image: string;
   description_pt: string;
@@ -142,6 +143,7 @@ export default function ProductGrid() {
             name_it: doc.name_it || "",
             category: doc.category || "geral",
             price: doc.price || 0,
+            price_brl: doc.price_brl || 0,
             weight_kg: doc.weight_kg ?? 0.5,
             image: imageUrl,
             description_pt: doc.description_pt ? doc.description_pt.substring(0, 50) + "..." : "",
@@ -167,6 +169,13 @@ export default function ProductGrid() {
 
   const getProductName = (p: Product) => language === "it" && p.name_it ? p.name_it : p.name_pt;
   const getProductDesc = (p: Product) => language === "it" && p.description_it ? p.description_it : p.description_pt;
+  const getProductPrice = (p: Product) => language === "pt" && p.price_brl ? p.price_brl : p.price;
+  const formatPrice = (p: Product) => {
+    if (language === "pt" && p.price_brl) {
+      return `R$ ${p.price_brl.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    }
+    return `€ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  };
 
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSizes((prev) => ({
@@ -180,7 +189,7 @@ export default function ProductGrid() {
     addToCart({
       id: product.id,
       name: getProductName(product),
-      price: product.price,
+      price: getProductPrice(product),
       weight_kg: product.weight_kg ?? 0.5,
       image: product.image,
       category: product.category,
@@ -374,7 +383,7 @@ export default function ProductGrid() {
                 </Link>
 
                 <p className="font-sans-premium text-sm font-semibold tracking-widest text-neutral-900">
-                  € {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {formatPrice(product)}
                 </p>
               </div>
             </motion.div>

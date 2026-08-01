@@ -13,6 +13,7 @@ interface Product {
   name_it: string;
   category: string;
   price: number;
+  price_brl?: number;
   image: string;
   description_pt: string;
   description_it: string;
@@ -39,6 +40,13 @@ export default function ProfumiGrid({ products }: { products: Product[] }) {
 
   const label = (p: Product) => (isPt ? p.name_pt : p.name_it) || p.name_pt;
   const desc  = (p: Product) => (isPt ? p.description_pt : p.description_it) || p.description_pt;
+  const formatPrice = (p: Product) => {
+    if (isPt && p.price_brl) {
+      return `R$ ${p.price_brl.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    }
+    return `€ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  };
+  const cartPrice = (p: Product) => (isPt && p.price_brl ? p.price_brl : p.price);
 
   if (products.length === 0) {
     return (
@@ -121,7 +129,7 @@ export default function ProfumiGrid({ products }: { products: Product[] }) {
                     </p>
                   )}
                   <p className="font-sans-premium text-[#C8A97E] font-semibold text-sm tracking-wide">
-                    € {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    {formatPrice(product)}
                   </p>
                 </div>
               </Link>
@@ -133,7 +141,7 @@ export default function ProfumiGrid({ products }: { products: Product[] }) {
                     addToCart({
                       id: product.id,
                       name: label(product),
-                      price: product.price,
+                      price: cartPrice(product),
                       weight_kg: product.weight_kg ?? 0,
                       image: product.image,
                       category: product.category,

@@ -75,6 +75,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                 categoryLabelPt: category.label,
                 categoryLabelIt: category.label_it,
                 price: product.price || 0,
+                price_brl: product.price_brl || 0,
                 weight_kg: product.weight_kg ?? 0.5,
                 image: imageUrl,
                 video: videoUrl,

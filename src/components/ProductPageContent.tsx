@@ -24,6 +24,7 @@ export interface ProductPageProduct {
   categoryLabelPt: string;
   categoryLabelIt: string;
   price: number;
+  price_brl?: number;
   weight_kg: number;
   image: string;
   video?: string;
@@ -141,7 +142,7 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
   const buildCartItem = () => ({
     id: product.id,
     name: productName,
-    price: product.price,
+    price: (isPt && product.price_brl) ? product.price_brl : product.price,
     weight_kg: product.weight_kg,
     image: product.image,
     category: product.category,
@@ -299,7 +300,9 @@ export default function ProductPageContent({ product }: { product: ProductPagePr
           </div>
 
           <p className="font-sans-premium text-2xl font-semibold tracking-widest text-neutral-900 mb-5 border-b border-neutral-100 pb-5">
-            € {product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            {isPt && product.price_brl
+              ? `R$ ${product.price_brl.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+              : `€ ${product.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
           </p>
 
           {/* Delivery badge */}

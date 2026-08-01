@@ -29,6 +29,7 @@ interface Product {
   description_pt: string;
   description_it: string;
   price: number;
+  price_brl: number;
   weight_kg: number;
   category: string;
   image_id?: string;
@@ -52,6 +53,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   description_pt: "",
   description_it: "",
   price: 0,
+  price_brl: 0,
   weight_kg: 0.5,
   category: "perfumes",
   image_id: "",
@@ -82,8 +84,9 @@ export default function AdminProdutosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
-  type FormState = Omit<Product, "$id" | "price" | "weight_kg" | "cost_price"> & {
+  type FormState = Omit<Product, "$id" | "price" | "price_brl" | "weight_kg" | "cost_price"> & {
     price: string | number;
+    price_brl: string | number;
     weight_kg: string | number;
     cost_price: string | number;
   };
@@ -159,6 +162,7 @@ export default function AdminProdutosPage() {
       description_pt: product.description_pt,
       description_it: product.description_it,
       price: product.price,
+      price_brl: product.price_brl || 0,
       weight_kg: product.weight_kg ?? 0.5,
       category: product.category,
       image_id: product.image_id,
@@ -239,6 +243,7 @@ export default function AdminProdutosPage() {
 
       const parseVal = (v: string | number) => typeof v === 'string' ? Number(v.replace(',', '.')) : Number(v);
       const parsedPrice = parseVal(form.price);
+      const parsedPriceBrl = parseVal(form.price_brl);
       const parsedWeight = parseVal(form.weight_kg);
       const parsedCost = parseVal(form.cost_price);
       const parsedStock = parseInt(form.stock_quantity as any, 10) || 0;
@@ -248,6 +253,7 @@ export default function AdminProdutosPage() {
         image_id: imageId,
         video_id: videoId,
         price: isNaN(parsedPrice) ? 0 : parsedPrice,
+        price_brl: isNaN(parsedPriceBrl) ? 0 : parsedPriceBrl,
         weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
         cost_price: isNaN(parsedCost) ? 0 : parsedCost,
         stock_quantity: parsedStock,
@@ -682,8 +688,8 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
               </div>
 
 
-              {/* Price, Weight, Category, Delivery */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {/* Price EUR, Price BRL, Weight, Category, Delivery */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
                     Preço (€) *
@@ -694,6 +700,19 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                     inputMode="decimal"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^0-9.,]/g, '') })}
+                    className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
+                    placeholder="0,00"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                    Preço (R$)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={form.price_brl}
+                    onChange={(e) => setForm({ ...form, price_brl: e.target.value.replace(/[^0-9.,]/g, '') })}
                     className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors"
                     placeholder="0,00"
                   />
