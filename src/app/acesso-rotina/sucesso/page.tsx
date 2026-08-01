@@ -15,9 +15,10 @@ const APP_URL = "https://www.viscare.app.br/";
 export default async function AcessoSucessoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ session_id?: string; plan?: string }>;
 }) {
-  const { session_id } = await searchParams;
+  const { session_id, plan } = await searchParams;
+  const isMonthly = plan === "mensal";
   const lang = (await cookies()).get("viscaree_lang")?.value ?? "it";
   const isPt = lang === "pt";
 
@@ -28,7 +29,7 @@ export default async function AcessoSucessoPage({
   if (session_id) {
     try {
       const session = await stripe.checkout.sessions.retrieve(session_id);
-      if (session.payment_status === "paid") {
+      if (session.payment_status === "paid" || session.status === "complete") {
         valid = true;
         customerName = session.customer_details?.name || "";
         customerEmail = session.customer_details?.email || "";
@@ -66,9 +67,13 @@ export default async function AcessoSucessoPage({
                   )}
 
                   <p className="font-sans-premium text-sm text-neutral-500 leading-relaxed mb-8">
-                    {isPt
-                      ? "Seu acesso de 30 dias à Rotina Skincare VisCaree está ativo. Clique abaixo para começar."
-                      : "Il tuo accesso di 30 giorni alla Routine Skincare VisCaree è attivo. Clicca qui sotto per iniziare."}
+                    {isMonthly
+                      ? (isPt
+                          ? "Sua assinatura mensal da Rotina Skincare VisCaree está ativa. Você será cobrada automaticamente todo mês."
+                          : "Il tuo abbonamento mensile alla Routine Skincare VisCaree è attivo. Verrai addebitata automaticamente ogni mese.")
+                      : (isPt
+                          ? "Seu acesso de 30 dias à Rotina Skincare VisCaree está ativo. Clique abaixo para começar."
+                          : "Il tuo accesso di 30 giorni alla Routine Skincare VisCaree è attivo. Clicca qui sotto per iniziare.")}
                     {customerEmail && (
                       <>
                         {" "}
@@ -89,7 +94,9 @@ export default async function AcessoSucessoPage({
                   </a>
 
                   <p className="font-sans-premium text-[9px] text-neutral-400 mt-6 tracking-wide">
-                    {isPt ? "Acesso válido por 30 dias a partir de hoje." : "Accesso valido per 30 giorni da oggi."}
+                    {isMonthly
+                      ? (isPt ? "Assinatura mensal · Cancele quando quiser." : "Abbonamento mensile · Cancella quando vuoi.")
+                      : (isPt ? "Acesso válido por 30 dias a partir de hoje." : "Accesso valido per 30 giorni da oggi.")}
                   </p>
                 </>
               ) : (

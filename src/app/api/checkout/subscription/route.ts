@@ -3,7 +3,16 @@ import stripe from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
-const PRICE_ID = "price_1TzdKSRzJU0fF3wE3um54He8";
+const PLANS = {
+  "30dias": {
+    priceId: "price_1TzdKSRzJU0fF3wE3um54He8",
+    mode: "payment" as const,
+  },
+  mensal: {
+    priceId: "price_1TzdPWRzJU0fF3wEalljEhK1",
+    mode: "subscription" as const,
+  },
+};
 
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -11,16 +20,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { customerEmail, language } = await req.json();
+    const { customerEmail, language, plan = "30dias" } = await req.json();
     const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://viscaree.com.br";
 
+    const { priceId, mode } = PLANS[plan as keyof typeof PLANS] ?? PLANS["30dias"];
+
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [{ price: PRICE_ID, quantity: 1 }],
-      success_url: `${origin}/acesso-rotina/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+      mode,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/acesso-rotina/sucesso?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url:  `${origin}/acesso-rotina`,
       customer_email: customerEmail || undefined,
-      metadata: { language: language || "it", plan: "rotina-30dias" },
+      metadata: { language: language || "it", plan },
     });
 
     return NextResponse.json({ url: session.url });
