@@ -36,6 +36,7 @@ function ContaContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
 
   React.useEffect(() => {
     if (isLoggedIn) router.replace("/conta/perfil");
@@ -73,8 +74,7 @@ function ContaContent() {
     setIsLoading(true);
     try {
       await register(regName, regEmail, regPassword);
-      setSuccess("Conta criada com sucesso! Bem-vinda à VisCaree.");
-      setTimeout(() => router.replace("/conta/perfil"), 1500);
+      setConfirmEmail(regEmail);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       if (msg.includes("already exists") || msg.includes("conflict")) {
@@ -116,7 +116,37 @@ function ContaContent() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
 
-          <AnimatePresence mode="wait">
+          {/* Tela de confirmação de e-mail */}
+          {confirmEmail && (
+            <div className="bg-white rounded-3xl shadow-sm border border-neutral-100 p-10 text-center space-y-5">
+              <div className="w-16 h-16 bg-[#F1E7E2] rounded-full flex items-center justify-center mx-auto">
+                <Mail size={28} className="text-[#C8A97E]" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-neutral-800 mb-2">Confirme seu e-mail</h2>
+                <p className="text-neutral-500 text-sm leading-relaxed">
+                  Enviamos um link de confirmação para{" "}
+                  <strong className="text-neutral-700">{confirmEmail}</strong>.
+                </p>
+                <p className="text-neutral-500 text-sm leading-relaxed mt-2">
+                  Abra o e-mail e clique no link para ativar sua conta. Verifique também a pasta de spam.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-neutral-100 space-y-3">
+                <p className="text-[10px] text-neutral-400 tracking-wide">
+                  Após confirmar, volte aqui para entrar.
+                </p>
+                <button
+                  onClick={() => { setConfirmEmail(""); setTab("login"); }}
+                  className="w-full py-3.5 bg-neutral-900 hover:bg-[#C8A97E] text-white text-xs tracking-widest uppercase font-semibold rounded-xl transition-colors duration-300"
+                >
+                  Ir para o login
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!confirmEmail && <AnimatePresence mode="wait">
             {view === "recuperar" ? (
               /* ---- RECUPERAR SENHA ---- */
               <motion.div key="recuperar" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -337,7 +367,7 @@ function ContaContent() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence>}
         </div>
       </div>
     </div>
