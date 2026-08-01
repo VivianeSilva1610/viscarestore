@@ -128,8 +128,14 @@ function PlanPage() {
               <h2 className="font-serif-premium text-2xl text-neutral-900 font-light mb-1">
                 30 {isPt ? "dias" : "giorni"}
               </h2>
-              <p className="font-sans-premium text-xs text-neutral-500 mb-6 leading-relaxed">
+              <p className="font-sans-premium text-3xl font-semibold text-neutral-900 tracking-tight my-3">
+                {isPt ? "R$ 34,90" : "€ 3,99"}
+              </p>
+              <p className="font-sans-premium text-xs text-neutral-500 mb-1 leading-relaxed">
                 {isPt ? "Pagamento único · Sem renovação automática." : "Pagamento unico · Nessun rinnovo automatico."}
+              </p>
+              <p className="font-sans-premium text-[10px] text-neutral-400 mb-6 leading-relaxed">
+                {isPt ? "+ ICMS conforme sua localização" : "+ IVA secondo la tua posizione"}
               </p>
               <button
                 onClick={() => handleCheckout("30dias")}
@@ -159,8 +165,15 @@ function PlanPage() {
               <h2 className="font-serif-premium text-2xl text-white font-light mb-1">
                 {isPt ? "Mensal" : "Mensile"}
               </h2>
-              <p className="font-sans-premium text-xs text-white/50 mb-6 leading-relaxed">
+              <p className="font-sans-premium text-3xl font-semibold text-[#C8A97E] tracking-tight my-3">
+                {isPt ? "R$ 24,90" : "€ 9,99"}
+                <span className="text-sm text-white/40 font-normal">/{isPt ? "mês" : "mese"}</span>
+              </p>
+              <p className="font-sans-premium text-xs text-white/50 mb-1 leading-relaxed">
                 {isPt ? "Renova automaticamente todo mês. Cancele quando quiser." : "Si rinnova automaticamente ogni mese. Cancella quando vuoi."}
+              </p>
+              <p className="font-sans-premium text-[10px] text-white/30 mb-6 leading-relaxed">
+                {isPt ? "+ ICMS conforme sua localização" : "+ IVA secondo la tua posizione"}
               </p>
               <button
                 onClick={() => handleCheckout("mensal")}
@@ -176,11 +189,18 @@ function PlanPage() {
 
           </div>
 
-          <p className="font-sans-premium text-[9px] text-neutral-400 mt-8 text-center tracking-wide">
-            {isPt
-              ? "Pagamento seguro via Stripe. Após a confirmação você receberá acesso imediato."
-              : "Pagamento sicuro tramite Stripe. Dopo la conferma riceverai accesso immediato."}
-          </p>
+          <div className="mt-8 text-center space-y-1">
+            <p className="font-sans-premium text-[9px] text-neutral-400 tracking-wide">
+              {isPt
+                ? "Pagamento seguro via Stripe. Após a confirmação você receberá acesso imediato."
+                : "Pagamento sicuro tramite Stripe. Dopo la conferma riceverai accesso immediato."}
+            </p>
+            <p className="font-sans-premium text-[9px] text-neutral-400 tracking-wide">
+              {isPt
+                ? "Os valores exibidos não incluem ICMS, que será calculado e cobrado pelo Stripe conforme sua localização."
+                : "I prezzi mostrati non includono l'IVA, che verrà calcolata e addebitata da Stripe in base alla tua posizione."}
+            </p>
+          </div>
 
         </div>
       </main>
