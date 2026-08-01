@@ -58,7 +58,7 @@ export default function Navbar() {
     { name: t.vestidos, href: "/abiti" },
     { name: t.acessorios, href: "/acessori" },
     { name: language === "pt" ? "VÍDEOS" : "VIDEO", href: "/videos" },
-    { name: t.rotina_skincare, href: "https://viscare.vercel.app/", external: true },
+    { name: t.rotina_skincare, href: "https://www.viscare.app.br/", external: true },
   ];
 
   const handleSearchOpen = () => {
