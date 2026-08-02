@@ -38,6 +38,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (data: Partial<Omit<CustomerProfile, "$id" | "user_id" | "email">>) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  sendVerificationEmail: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -187,11 +188,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const sendVerificationEmail = async () => {
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://viscarestore.vercel.app";
+    await account.createVerification(`${origin}/conta/confirmar-email`);
+  };
+
   const register = async (name: string, email: string, password: string) => {
     const newUser = await account.create(ID.unique(), email, password, name);
     await account.createEmailPasswordSession(email, password);
     const currentUser = await account.get();
     setUser(currentUser);
+
+    // Try sending verification email immediately after session creation
+    try {
+      const origin =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://viscarestore.vercel.app";
+      await account.createVerification(`${origin}/conta/confirmar-email`);
+    } catch (e) {
+      console.error("Erro ao enviar email de verificação automático:", e);
+    }
 
     // Create customer profile document
     const profileDoc = await databases.createDocument(
@@ -255,6 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         updateProfile,
         refreshProfile,
+        sendVerificationEmail,
       }}
     >
       {children}

@@ -12,7 +12,7 @@ import {
 type Section = "dados" | "endereco" | "seguranca";
 
 export default function PerfilContent() {
-  const { user, profile, isLoggedIn, isLoading, updateProfile, logout } = useAuth();
+  const { user, profile, isLoggedIn, isLoading, updateProfile, logout, sendVerificationEmail } = useAuth();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<Section>("dados");
 
@@ -33,6 +33,24 @@ export default function PerfilContent() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [verificationMsg, setVerificationMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleResendVerification = async () => {
+    setIsSendingVerification(true);
+    setVerificationMsg(null);
+    try {
+      await sendVerificationEmail();
+      setVerificationMsg({ type: "success", text: "E-mail de confirmação enviado com sucesso!" });
+    } catch (e) {
+      console.error(e);
+      setVerificationMsg({ type: "error", text: "Erro ao enviar o e-mail. Tente novamente mais tarde." });
+    } finally {
+      setIsSendingVerification(false);
+      setTimeout(() => setVerificationMsg(null), 5000);
+    }
+  };
 
   React.useEffect(() => {
     if (profile) {
@@ -119,6 +137,43 @@ export default function PerfilContent() {
           </h1>
           <p className="text-neutral-400 text-sm mt-1">{user?.email}</p>
         </div>
+
+        {user && !user.emailVerification && (
+          <div className="mb-8 p-5 bg-[#C8A97E]/10 border border-[#C8A97E]/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-[#C8A97E] flex-shrink-0 mt-0.5" size={20} strokeWidth={2} />
+              <div>
+                <p className="font-semibold text-neutral-800 text-sm">Confirme seu e-mail</p>
+                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
+                  Para garantir a segurança da sua conta, por favor confirme seu endereço de e-mail. 
+                  Enviamos um link para <strong className="text-neutral-800">{user.email}</strong>.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-stretch sm:items-end gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={isSendingVerification}
+                className="px-4 py-2.5 bg-neutral-900 hover:bg-[#C8A97E] disabled:opacity-60 text-white text-[11px] tracking-wider uppercase font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {isSendingVerification ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    <span>Enviando...</span>
+                  </>
+                ) : (
+                  <span>Reenviar e-mail</span>
+                )}
+              </button>
+              {verificationMsg && (
+                <span className={`text-[10px] text-right font-medium ${verificationMsg.type === "success" ? "text-emerald-600" : "text-red-500"}`}>
+                  {verificationMsg.text}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <aside className="md:col-span-1">
