@@ -13,6 +13,7 @@ function CheckoutSuccessContent() {
   const [isProcessing, setIsProcessing] = useState(true);
   const [trackingCode, setTrackingCode] = useState<string | null>(null);
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState<string | null>(null);
+  const [isPaymentPending, setIsPaymentPending] = useState(false);
 
   useEffect(() => {
     const session = searchParams.get("session_id");
@@ -29,6 +30,11 @@ function CheckoutSuccessContent() {
         });
         if (!res.ok) throw new Error("Failed to complete order");
         const data = await res.json();
+
+        if (data.pending) {
+          setIsPaymentPending(true);
+          return;
+        }
 
         setTrackingCode(data.trackingCode || null);
         setEstimatedDeliveryDate(data.estimatedDeliveryDate || null);
@@ -51,6 +57,35 @@ function CheckoutSuccessContent() {
         <button onClick={() => router.push("/")} className="text-dourado-suave hover:underline text-sm">
           Voltar para a loja
         </button>
+      </div>
+    );
+  }
+
+  if (isPaymentPending) {
+    return (
+      <div className="min-h-screen bg-[#F1E7E2] flex flex-col">
+        <header className="py-6 text-center border-b border-[#C8A97E]/15 bg-white/50">
+          <a href="/" className="font-serif italic text-3xl tracking-widest text-neutral-900 hover:text-[#C8A97E] transition-colors">
+            VisCaree
+          </a>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4 py-12">
+          <div className="bg-white rounded-3xl shadow-sm border border-neutral-100 p-8 md:p-12 max-w-lg w-full text-center">
+            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Package size={40} className="text-amber-500" strokeWidth={1.5} />
+            </div>
+            <h1 className="text-2xl font-serif-premium text-neutral-900 mb-3">Pagamento em processamento</h1>
+            <p className="text-neutral-500 text-sm leading-relaxed mb-8">
+              Recebemos o seu pedido, mas ainda estamos aguardando a confirmação do pagamento (ex.: boleto ou Pix). Assim que o pagamento for confirmado, você receberá um e-mail com os detalhes e o código de rastreio.
+            </p>
+            <button
+              onClick={() => router.push("/")}
+              className="w-full py-4 bg-neutral-900 text-white font-sans-premium text-xs tracking-widest uppercase hover:bg-dourado-suave font-semibold transition-colors duration-300 rounded-xl shadow-lg flex items-center justify-center gap-2"
+            >
+              Continuar <ArrowRight size={14} />
+            </button>
+          </div>
+        </main>
       </div>
     );
   }

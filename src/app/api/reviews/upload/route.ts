@@ -8,6 +8,9 @@ const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "viscareelojav
 const BUCKET_ID  = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID  || "6a391020001d02651b57";
 const API_KEY    = process.env.APPWRITE_API_KEY as string;
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -20,6 +23,11 @@ export async function POST(req: NextRequest) {
     const urls: string[] = [];
 
     for (const file of files.slice(0, 5)) {
+      if (!ALLOWED_TYPES.includes(file.type) || file.size > MAX_FILE_SIZE) {
+        console.error("[reviews/upload] arquivo rejeitado:", file.type, file.size);
+        continue;
+      }
+
       const fileId = ID.unique();
 
       // Build multipart body for the Appwrite REST API

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import stripe from "@/lib/stripe";
+import { adminDatabases, DB_ID, PRODUCTS_COL_ID } from "@/lib/appwrite-admin";
 
 export async function POST(req: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -13,32 +14,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Carrinho está vazio." }, { status: 400 });
     }
 
-    // Map cart items to Stripe line_items format
-    const line_items = items.map((item: any) => {
-      let validImages: string[] = [];
-      if (item.image && item.image.startsWith("http")) {
-        // Stripe will reject localhost URLs with url_invalid error
-        if (!item.image.includes("localhost")) {
-          validImages = [item.image];
-        }
-      }
+    // Map cart items to Stripe line_items format.
+    // O preço nunca vem do cliente: é sempre buscado no Appwrite pelo id do produto,
+    // para impedir que o valor cobrado seja manipulado na requisição.
+    const resolvedItems = await Promise.all(
+      items.map(async (item: any) => {
+        const quantity = Math.max(1, Math.round(Number(item.quantity) || 1));
 
-      return {
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: item.name,
-            ...(validImages.length > 0 && { images: validImages }),
-            metadata: {
-              id: item.id,
-              size: item.size || "N/A",
+        const product: any = await adminDatabases.getDocument(DB_ID, PRODUCTS_COL_ID, item.id);
+        const price = Number(product.price) || 0;
+        if (price <= 0) {
+          throw new Error(`Produto ${item.id} sem preço válido.`);
+        }
+
+        let validImages: string[] = [];
+        if (item.image && item.image.startsWith("http")) {
+          // Stripe will reject localhost URLs with url_invalid error
+          if (!item.image.includes("localhost")) {
+            validImages = [item.image];
+          }
+        }
+
+        return {
+          id: item.id,
+          quantity,
+          line_item: {
+            price_data: {
+              currency: "eur",
+              product_data: {
+                name: product.name_it || product.name_pt || item.name,
+                ...(validImages.length > 0 && { images: validImages }),
+                metadata: {
+                  id: item.id,
+                  size: item.size || "N/A",
+                },
+              },
+              unit_amount: Math.round(price * 100), // Stripe expects cents
             },
+            quantity,
           },
-          unit_amount: Math.round(item.price * 100), // Stripe expects cents
-        },
-        quantity: item.quantity,
-      };
-    });
+        };
+      })
+    );
+
+    const line_items = resolvedItems.map((r) => r.line_item);
 
     const ipCountry = req.headers.get("x-vercel-ip-country");
     // Se tiver perfil e tiver preenchido endereço, checa se é do Brasil (adicionando address_country caso exista, ou assumindo pelo IP)
@@ -77,7 +96,7 @@ export async function POST(req: Request) {
       },
       metadata: {
         customerName: customerName || "Guest",
-        cartItems: JSON.stringify(items.map((i: any) => ({ id: i.id, qty: i.quantity }))),
+        cartItems: JSON.stringify(resolvedItems.map((r) => ({ id: r.id, qty: r.quantity }))),
       },
     });
 

@@ -28,6 +28,13 @@ export async function POST(req: Request) {
     // 2. Busca detalhes da sessão no Stripe
     const session = await getStripeSessionDetails(sessionId);
 
+    // Nunca confirmar/criar pedido sem pagamento efetivamente concluído.
+    // Métodos assíncronos (ex.: boleto, pix) redirecionam para success_url
+    // antes da confirmação do pagamento, então isso precisa ser checado aqui.
+    if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+      return NextResponse.json({ pending: true });
+    }
+
     const address = session.shipping_details?.address
       ? `${session.shipping_details.address.line1 || ""}, ${session.shipping_details.address.city || ""} - ${session.shipping_details.address.state || ""}, ${session.shipping_details.address.postal_code || ""}, ${session.shipping_details.address.country || ""}`
       : "Não informado";
