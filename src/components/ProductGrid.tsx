@@ -15,6 +15,13 @@ const COLLECTION_ID = "products";
 const BUCKET_ID = "6a391020001d02651b57";
 const CATEGORIES_COL_ID = "categories";
 
+// Categorias no Appwrite às vezes são salvas com grafias diferentes
+// (ex.: "perfumes" vs "Perfumes"), então toda comparação de categoria
+// ignora maiúsculas/minúsculas para não perder produtos nem traduções.
+function sameCategory(a?: string, b?: string) {
+  return (a || "").trim().toLowerCase() === (b || "").trim().toLowerCase();
+}
+
 interface Product {
   id: string;
   name_pt: string;
@@ -80,7 +87,7 @@ export default function ProductGrid() {
         const { databases, isAppwriteConfigured } = await import("../lib/appwrite");
         const { Query } = await import("appwrite");
         if (!isAppwriteConfigured()) return;
-        
+
         const DB_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID || "6a390e430024feb8df57";
         const PAGES_COL_ID = process.env.NEXT_PUBLIC_APPWRITE_PAGES_COLLECTION_ID || "pages";
         const res = await databases.listDocuments(DB_ID, PAGES_COL_ID, [Query.equal("slug", "global-settings")]);
@@ -200,7 +207,7 @@ export default function ProductGrid() {
   };
 
   const filteredProducts = products
-    .filter(p => activeTab === "todos" || p.category === activeTab)
+    .filter(p => activeTab === "todos" || sameCategory(p.category, activeTab))
     .filter(p => {
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
@@ -365,7 +372,7 @@ export default function ProductGrid() {
               <div className="text-center px-1">
                 <span className="font-sans-premium text-[10px] tracking-widest text-neutral-500 uppercase block mb-1">
                   {(() => {
-                    const cat = categories.find((c) => c.value === product.category);
+                    const cat = categories.find((c) => sameCategory(c.value, product.category));
                     return (language === "it" && cat?.label_it) ? cat.label_it : (cat?.label || product.category);
                   })()}
                 </span>
