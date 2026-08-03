@@ -16,6 +16,15 @@ function imageUrl(imageId: string) {
   return `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${imageId}/view?project=${PROJECT_ID}`;
 }
 
+// Categorias no Appwrite às vezes são salvas com grafias diferentes
+// (ex.: "perfumes" vs "Perfumes"), então a comparação e a normalização
+// abaixo ignoram maiúsculas/minúsculas para não perder produtos.
+function matchCategory(category: string) {
+  return PERFUME_CATEGORIES.find(
+    (c) => c.toLowerCase() === (category || "").trim().toLowerCase()
+  );
+}
+
 export default async function ProfumiPage() {
   let products: any[] = [];
   try {
@@ -24,12 +33,12 @@ export default async function ProfumiPage() {
       Query.limit(200),
     ]);
     products = res.documents
-      .filter((doc: any) => PERFUME_CATEGORIES.includes(doc.category))
+      .filter((doc: any) => !!matchCategory(doc.category))
       .map((doc: any) => ({
         id: doc.$id,
         name_pt: doc.name_pt || "",
         name_it: doc.name_it || "",
-        category: doc.category || "",
+        category: matchCategory(doc.category) || doc.category || "",
         price: doc.price || 0,
         image: doc.image_id ? imageUrl(doc.image_id) : "",
         price_brl: doc.price_brl || 0,
