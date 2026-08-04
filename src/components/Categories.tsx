@@ -19,7 +19,7 @@ export default function Categories() {
       details: t.items.perfumes.details,
       image: "/images/cat-perfumes.png",
       link: "/profumi",
-      gridClass: "lg:col-span-8 lg:row-span-1 h-[450px] lg:h-[500px]",
+      gridClass: "lg:col-span-6 h-[450px] lg:h-[550px]",
     },
     {
       id: "skincare",
@@ -29,17 +29,7 @@ export default function Categories() {
       details: t.items.skincare.details,
       image: "/images/cat-skincare.png",
       link: "#skincare",
-      gridClass: "lg:col-span-4 lg:row-span-2 h-[450px] lg:h-[770px]",
-    },
-    {
-      id: "fashion",
-      title: t.items.fashion.title,
-      subtitle: t.items.fashion.subtitle,
-      description: t.items.fashion.description,
-      details: t.items.fashion.details,
-      image: "/images/cat-fashion.png",
-      link: "#dresses",
-      gridClass: "lg:col-span-8 lg:row-span-1 h-[450px] lg:h-[500px] lg:-mt-[230px]",
+      gridClass: "lg:col-span-6 h-[450px] lg:h-[550px]",
     },
   ];
 
