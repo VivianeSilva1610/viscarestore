@@ -44,11 +44,11 @@ export const dictionary = {
           description: "Produtos com ativos comprovados — ácido hialurônico, retinol, vitamina C — escolhidos com base em eficácia real e avaliações de quem usou, não em jargão técnico.",
           details: "Ativos: Hidratação, Firmeza & Uniformização"
         },
-        fashion: {
-          title: "Moda & Joias",
-          subtitle: "Materiais verificados",
-          description: "Peças avaliadas pela qualidade do tecido, acabamento e caimento real — sem inflacionar o preço com nome de grife. O que entra no catálogo passa pelo nosso critério de durabilidade.",
-          details: "Qualidade de material & Acabamento verificado"
+        vegano: {
+          title: "Beleza que cuida de você e do mundo",
+          subtitle: "Skincare & Perfumaria Vegana",
+          description: "Todo o nosso catálogo é vegano e cruelty free — ingredientes naturais, escolhas conscientes e sustentabilidade em cada produto, do skincare à perfumaria.",
+          details: "Vegano · Cruelty Free · Ingredientes Naturais · Sustentável"
         }
       }
     },
@@ -144,11 +144,11 @@ export const dictionary = {
           description: "Prodotti con attivi comprovati — acido ialuronico, retinolo, vitamina C — scelti in base all'efficacia reale e alle recensioni di chi li ha usati, non al gergo tecnico.",
           details: "Attivi: Idratazione, Compattezza & Uniformazione"
         },
-        fashion: {
-          title: "Moda & Gioielli",
-          subtitle: "Materiali verificati",
-          description: "Capi valutati per la qualità del tessuto, la rifinitura e la vestibilità reale — senza gonfiare il prezzo con il nome del brand. Tutto ciò che è nel catalogo supera il nostro criterio di durabilità.",
-          details: "Qualità del materiale & Rifinitura verificata"
+        vegano: {
+          title: "Bellezza che prende cura di te e del mondo",
+          subtitle: "Skincare & Profumeria Vegana",
+          description: "Tutto il nostro catalogo è vegano e cruelty free — ingredienti naturali, scelte consapevoli e sostenibilità in ogni prodotto, dallo skincare alla profumeria.",
+          details: "Vegano · Cruelty Free · Ingredienti Naturali · Sostenibile"
         }
       }
     },

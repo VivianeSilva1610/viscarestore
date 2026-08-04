@@ -19,7 +19,7 @@ export default function Categories() {
       details: t.items.perfumes.details,
       image: "/images/cat-perfumes.png",
       link: "/profumi",
-      gridClass: "lg:col-span-6 h-[450px] lg:h-[550px]",
+      gridClass: "lg:col-span-4 h-[450px] lg:h-[550px]",
     },
     {
       id: "skincare",
@@ -29,7 +29,17 @@ export default function Categories() {
       details: t.items.skincare.details,
       image: "/images/cat-skincare.png",
       link: "#skincare",
-      gridClass: "lg:col-span-6 h-[450px] lg:h-[550px]",
+      gridClass: "lg:col-span-4 h-[450px] lg:h-[550px]",
+    },
+    {
+      id: "todos",
+      title: t.items.vegano.title,
+      subtitle: t.items.vegano.subtitle,
+      description: t.items.vegano.description,
+      details: t.items.vegano.details,
+      image: language === "it" ? "/images/cat-vegano-it.png" : "/images/cat-vegano-pt.png",
+      link: "#todos",
+      gridClass: "lg:col-span-4 h-[450px] lg:h-[550px]",
     },
   ];
 
