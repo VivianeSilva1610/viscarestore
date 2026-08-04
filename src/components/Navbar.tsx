@@ -54,9 +54,7 @@ export default function Navbar() {
   const navLinks = [
     { name: t.novidades, href: "/#products-section", categoryId: "todos" },
     { name: t.perfumes, href: "/profumi" },
-    { name: t.skincare, href: "/collezione" },
-    { name: t.vestidos, href: "/abiti" },
-    { name: t.acessorios, href: "/acessori" },
+    { name: t.skincare, href: "/?category=Skincare#products-section", categoryId: "Skincare" },
     { name: language === "pt" ? "VÍDEOS" : "VIDEO", href: "/videos" },
     { name: t.rotina_skincare, href: "/acesso-rotina", external: false },
   ];
