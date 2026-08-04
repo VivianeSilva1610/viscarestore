@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Eye, Plus, Loader2 } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { Query } from "appwrite";
+import { SKINCARE_SUBCATEGORIES, isSkincareCategory } from "../lib/skincareSubcategories";
 
 const DB_ID = "6a390e430024feb8df57";
 const COLLECTION_ID = "products";
@@ -38,6 +39,7 @@ interface Product {
   ingredients_pt?: string;
   ingredients_it?: string;
   delivery_days?: number;
+  subcategory?: string;
 }
 
 export default function ProductGrid() {
@@ -49,6 +51,7 @@ export default function ProductGrid() {
     prod_dress: "M", // Default size for the dress
   });
   const [activeTab, setActiveTab] = useState<string>("todos");
+  const [activeSubcategory, setActiveSubcategory] = useState<string>("todas");
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{label: string, label_it?: string, value: string}[]>([]);
@@ -59,6 +62,11 @@ export default function ProductGrid() {
   const [customSubtitle, setCustomSubtitle] = useState("");
   const [customSubtitleIt, setCustomSubtitleIt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Reset subcategory filter whenever the main category tab changes
+  React.useEffect(() => {
+    setActiveSubcategory("todas");
+  }, [activeTab]);
 
   // Listen for category change events from other components (like Categories.tsx)
   React.useEffect(() => {
@@ -160,6 +168,7 @@ export default function ProductGrid() {
             ingredients_pt: doc.ingredients_pt || "",
             ingredients_it: doc.ingredients_it || "",
             delivery_days: doc.delivery_days ?? 5,
+            subcategory: doc.subcategory || "",
           };
         });
         
@@ -206,8 +215,14 @@ export default function ProductGrid() {
     });
   };
 
+  const isSkincareTabActive = activeTab !== "todos" && isSkincareCategory(activeTab);
+
   const filteredProducts = products
     .filter(p => activeTab === "todos" || sameCategory(p.category, activeTab))
+    .filter(p => {
+      if (!isSkincareTabActive || activeSubcategory === "todas") return true;
+      return (p.subcategory || "") === activeSubcategory;
+    })
     .filter(p => {
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
@@ -270,6 +285,42 @@ export default function ProductGrid() {
             ))}
           </div>
         </div>
+
+        {/* Skincare subcategory filter */}
+        {isSkincareTabActive && (() => {
+          const productsInCategory = products.filter((p) => sameCategory(p.category, activeTab));
+          const availableSubcategories = SKINCARE_SUBCATEGORIES.filter((s) =>
+            productsInCategory.some((p) => (p.subcategory || "") === s.value)
+          );
+          if (availableSubcategories.length === 0) return null;
+          return (
+            <div className="flex flex-wrap gap-2 sm:gap-3 -mt-10 mb-10">
+              <button
+                onClick={() => setActiveSubcategory("todas")}
+                className={`font-sans-premium text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full border transition-colors duration-300 ${
+                  activeSubcategory === "todas"
+                    ? "border-dourado-suave text-dourado-suave bg-dourado-suave/5"
+                    : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+                }`}
+              >
+                {t.todos}
+              </button>
+              {availableSubcategories.map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => setActiveSubcategory(s.value)}
+                  className={`font-sans-premium text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full border transition-colors duration-300 ${
+                    activeSubcategory === s.value
+                      ? "border-dourado-suave text-dourado-suave bg-dourado-suave/5"
+                      : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+                  }`}
+                >
+                  {language === "it" ? s.label_it : s.label_pt}
+                </button>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Products Grid */}
         {isLoading ? (

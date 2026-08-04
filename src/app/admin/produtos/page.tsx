@@ -16,6 +16,7 @@ import {
   Loader2,
   Image as ImageIcon,
 } from "lucide-react";
+import { SKINCARE_SUBCATEGORIES, isSkincareCategory } from "../../../lib/skincareSubcategories";
 
 const DB_ID = "6a390e430024feb8df57";
 const COLLECTION_ID = "products";
@@ -45,6 +46,7 @@ interface Product {
   additional_costs: number;
   productCode?: string;
   delivery_days: number;
+  subcategory?: string;
 }
 
 const emptyProduct: Omit<Product, "$id"> = {
@@ -68,6 +70,7 @@ const emptyProduct: Omit<Product, "$id"> = {
   cost_price: 0,
   additional_costs: 0,
   delivery_days: 5,
+  subcategory: "",
 };
 
 // Categories will be fetched from Appwrite
@@ -178,6 +181,7 @@ export default function AdminProdutosPage() {
       additional_costs: product.additional_costs || 0,
       productCode: product.productCode,
       delivery_days: product.delivery_days ?? 5,
+      subcategory: product.subcategory || "",
     });
     setImageFile(null);
     setImagePreview(product.image_id ? getImageUrl(product.image_id) : null);
@@ -257,7 +261,8 @@ export default function AdminProdutosPage() {
         weight_kg: isNaN(parsedWeight) ? 0.5 : parsedWeight,
         cost_price: isNaN(parsedCost) ? 0 : parsedCost,
         stock_quantity: parsedStock,
-        in_stock: parsedStock > 0
+        in_stock: parsedStock > 0,
+        subcategory: isSkincareCategory(form.category) ? (form.subcategory || "") : "",
       };
 
       if (editingProduct) {
@@ -746,6 +751,23 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                     ))}
                   </select>
                 </div>
+                {isSkincareCategory(form.category) && (
+                  <div>
+                    <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
+                      Subcategoria
+                    </label>
+                    <select
+                      value={form.subcategory || ""}
+                      onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+                      className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
+                    >
+                      <option value="">Nenhuma</option>
+                      {SKINCARE_SUBCATEGORIES.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label_pt} / {s.label_it}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
                     Prazo de Entrega (dias úteis) *
