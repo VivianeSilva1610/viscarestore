@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { Eye, Plus, Loader2 } from "lucide-react";
 import { databases, storage, isAppwriteConfigured } from "../lib/appwrite";
 import { Query } from "appwrite";
-import { SKINCARE_SUBCATEGORIES, isSkincareCategory } from "../lib/skincareSubcategories";
+import { getSubcategoryOptions } from "../lib/productSubcategories";
 
 const DB_ID = "6a390e430024feb8df57";
 const COLLECTION_ID = "products";
@@ -215,12 +215,12 @@ export default function ProductGrid() {
     });
   };
 
-  const isSkincareTabActive = activeTab !== "todos" && isSkincareCategory(activeTab);
+  const activeSubcategoryOptions = activeTab !== "todos" ? getSubcategoryOptions(activeTab) : null;
 
   const filteredProducts = products
     .filter(p => activeTab === "todos" || sameCategory(p.category, activeTab))
     .filter(p => {
-      if (!isSkincareTabActive || activeSubcategory === "todas") return true;
+      if (!activeSubcategoryOptions || activeSubcategory === "todas") return true;
       return (p.subcategory || "") === activeSubcategory;
     })
     .filter(p => {
@@ -286,10 +286,10 @@ export default function ProductGrid() {
           </div>
         </div>
 
-        {/* Skincare subcategory filter */}
-        {isSkincareTabActive && (() => {
+        {/* Subcategory filter (Skincare: Rosto/Corpo/Mãos · Perfumes/Alta Perfumaria: Feminino/Masculino/Unissex) */}
+        {activeSubcategoryOptions && (() => {
           const productsInCategory = products.filter((p) => sameCategory(p.category, activeTab));
-          const availableSubcategories = SKINCARE_SUBCATEGORIES.filter((s) =>
+          const availableSubcategories = activeSubcategoryOptions.filter((s) =>
             productsInCategory.some((p) => (p.subcategory || "") === s.value)
           );
           if (availableSubcategories.length === 0) return null;

@@ -48,6 +48,7 @@ export default async function ProfumiPage() {
         inStock: doc.inStock !== false,
         delivery_days: doc.delivery_days ?? 5,
         weight_kg: doc.weight_kg ?? 0,
+        subcategory: doc.subcategory || "",
       }));
   } catch { /* returns empty list on error */ }
 

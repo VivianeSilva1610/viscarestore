@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
+import { PERFUME_SUBCATEGORIES } from "@/lib/productSubcategories";
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ interface Product {
   inStock?: boolean;
   delivery_days?: number;
   weight_kg?: number;
+  subcategory?: string;
 }
 
 const TABS = [
@@ -35,8 +37,21 @@ export default function ProfumiGrid({ products }: { products: Product[] }) {
   const isPt = language === "pt";
 
   const [active, setActive] = useState<string>("all");
+  const [activeSubcategory, setActiveSubcategory] = useState<string>("todas");
 
-  const filtered = active === "all" ? products : products.filter((p) => p.category === active);
+  React.useEffect(() => {
+    setActiveSubcategory("todas");
+  }, [active]);
+
+  const productsInTab = active === "all" ? products : products.filter((p) => p.category === active);
+  const filtered =
+    activeSubcategory === "todas"
+      ? productsInTab
+      : productsInTab.filter((p) => (p.subcategory || "") === activeSubcategory);
+
+  const availableSubcategories = PERFUME_SUBCATEGORIES.filter((s) =>
+    productsInTab.some((p) => (p.subcategory || "") === s.value)
+  );
 
   const label = (p: Product) => (isPt ? p.name_pt : p.name_it) || p.name_pt;
   const desc  = (p: Product) => (isPt ? p.description_pt : p.description_it) || p.description_pt;
@@ -84,6 +99,35 @@ export default function ProfumiGrid({ products }: { products: Product[] }) {
           );
         })}
       </div>
+
+      {/* Subcategory filter (Feminino/Masculino/Unissex) */}
+      {availableSubcategories.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10">
+          <button
+            onClick={() => setActiveSubcategory("todas")}
+            className={`font-sans-premium text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full border transition-colors duration-300 ${
+              activeSubcategory === "todas"
+                ? "border-[#C8A97E] text-[#C8A97E] bg-[#C8A97E]/5"
+                : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+            }`}
+          >
+            {isPt ? "Todos" : "Tutti"}
+          </button>
+          {availableSubcategories.map((s) => (
+            <button
+              key={s.value}
+              onClick={() => setActiveSubcategory(s.value)}
+              className={`font-sans-premium text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full border transition-colors duration-300 ${
+                activeSubcategory === s.value
+                  ? "border-[#C8A97E] text-[#C8A97E] bg-[#C8A97E]/5"
+                  : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+              }`}
+            >
+              {isPt ? s.label_pt : s.label_it}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">

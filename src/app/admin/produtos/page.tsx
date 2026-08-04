@@ -16,7 +16,7 @@ import {
   Loader2,
   Image as ImageIcon,
 } from "lucide-react";
-import { SKINCARE_SUBCATEGORIES, isSkincareCategory } from "../../../lib/skincareSubcategories";
+import { getSubcategoryOptions } from "../../../lib/productSubcategories";
 
 const DB_ID = "6a390e430024feb8df57";
 const COLLECTION_ID = "products";
@@ -262,7 +262,7 @@ export default function AdminProdutosPage() {
         cost_price: isNaN(parsedCost) ? 0 : parsedCost,
         stock_quantity: parsedStock,
         in_stock: parsedStock > 0,
-        subcategory: isSkincareCategory(form.category) ? (form.subcategory || "") : "",
+        subcategory: getSubcategoryOptions(form.category) ? (form.subcategory || "") : "",
       };
 
       if (editingProduct) {
@@ -751,7 +751,7 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                     ))}
                   </select>
                 </div>
-                {isSkincareCategory(form.category) && (
+                {getSubcategoryOptions(form.category) && (
                   <div>
                     <label className="text-[10px] tracking-widest uppercase text-neutral-500 font-semibold block mb-2">
                       Subcategoria
@@ -762,7 +762,7 @@ NEXT_PUBLIC_APPWRITE_BUCKET_ID=seu_bucket_id_aqui`}
                       className="w-full border border-neutral-200 focus:border-[#C8A97E] focus:outline-none px-4 py-3 text-sm text-neutral-800 rounded-xl transition-colors bg-white"
                     >
                       <option value="">Nenhuma</option>
-                      {SKINCARE_SUBCATEGORIES.map((s) => (
+                      {getSubcategoryOptions(form.category)!.map((s) => (
                         <option key={s.value} value={s.value}>{s.label_pt} / {s.label_it}</option>
                       ))}
                     </select>
