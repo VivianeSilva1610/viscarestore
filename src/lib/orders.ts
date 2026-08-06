@@ -4,6 +4,7 @@ import { adminDatabases, DB_ID, ORDERS_COL_ID, PRODUCTS_COL_ID } from "@/lib/app
 import { generateTrackingCode, type StatusHistoryEntry } from "@/lib/tracking";
 import { getEstimatedDeliveryDate } from "@/lib/delivery";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
+import { notifyAdminsOfNewSale } from "@/lib/push";
 
 export type FinalizeOrderResult =
   | { pending: true }
@@ -110,6 +111,16 @@ export async function finalizeOrderFromSession(
       console.error("Falha ao enviar email de confirmação", err);
     }
   }
+
+  const amountLabel = ((session.amount_total || 0) / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "EUR",
+  });
+  notifyAdminsOfNewSale({
+    title: "Nova venda! 🎉",
+    body: `${session.customer_name || "Cliente"} — ${amountLabel}`,
+    url: "/admin/rastreamento",
+  }).catch((err) => console.error("Falha ao enviar push notification de venda", err));
 
   return {
     trackingCode,
